@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>「通じるけど変」誤り診断辞典 — カテゴリと重さで引く</title>
+<style>
+  :root{
+    --ink:#2b2f3a; --sub:#87909f; --line:#eceef5;
+    --indigo:#6d5efc; --indigo2:#9166ff; --indigo-ink:#5b4ae8; --indigo-bg:#f1eefe;
+    --rose:#f8577d; --rose-ink:#e23f6d; --rose-bg:#ffe6ee;
+    --teal:#12c7b0; --teal-ink:#0d9986; --teal-bg:#c9f2e9;
+    --amber:#fbbf24;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#edf4ff 0%,#ffffff 54%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(20px,3vw,30px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--indigo-ink);background:var(--indigo-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";font-size:13px;}
+  h1{font-size:clamp(25px,5vw,44px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--rose),#ff7aa0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:640px;}
+  .sub b{color:var(--ink);}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:390px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(93,74,232,.09);}
+
+  .base{font-size:clamp(13px,1.7vw,14.5px);color:var(--sub);margin:0 0 18px;padding-bottom:15px;
+    border-bottom:1px dashed #e7e3f6;}
+  .base b{color:var(--ink);font-weight:700;}
+
+  .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(94px,1fr));gap:10px;}
+  @media(min-width:860px){ .btns{grid-template-columns:1fr;} }
+  .btns button{display:flex;flex-direction:column;justify-content:center;min-height:60px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:16.5px;font-weight:800;border-radius:15px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;padding:8px 6px;}
+  .btns button small{font-weight:600;color:var(--sub);font-size:12px;margin-top:2px;}
+  .btns button:hover{border-color:#d9d2fb;}
+  .btns button:active{transform:scale(.97);}
+  .btns button.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.34);}
+  .btns button.on small{color:#e9e4ff;}
+
+  .stage{display:flex;flex-direction:column;}
+  .sentence{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:600;
+    font-size:clamp(23px,4.4vw,50px);line-height:1.4;text-align:center;letter-spacing:.004em;
+    padding:clamp(24px,4.5vw,52px) clamp(14px,2.5vw,30px);
+    background:linear-gradient(160deg,#f2f8ff,#ebf3ff);border-radius:18px;color:#333846;
+    display:grid;place-items:center;flex:1;min-height:clamp(120px,20vw,240px);}
+  .sline{width:100%;overflow-wrap:break-word;}
+  .sentence .only{color:var(--rose-ink);background:var(--rose-bg);border-radius:10px;
+    padding:2px 12px;font-weight:700;}
+  .sentence .focus{color:var(--teal-ink);font-weight:700;
+    box-shadow:inset 0 -0.4em 0 var(--teal-bg);border-radius:3px;padding:0 2px;}
+
+  .answer{margin-top:clamp(16px,2.4vw,22px);}
+  .scopechip{display:inline-flex;align-items:center;gap:9px;background:var(--teal-bg);
+    color:var(--teal-ink);font-weight:800;font-size:clamp(14px,1.8vw,16px);
+    padding:9px 16px;border-radius:999px;margin:0 0 13px;}
+  .scopechip span{color:var(--sub);font-weight:600;}
+  .gloss{font-size:clamp(16px,2.1vw,20px);line-height:1.72;font-weight:500;}
+  .gloss b{color:var(--rose-ink);font-weight:700;}
+  .note{font-size:clamp(12px,1.5vw,13.5px);color:var(--sub);margin-top:11px;line-height:1.62;}
+
+  .insight{grid-column:1/-1;background:linear-gradient(135deg,#eef5ff,#f6faff);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.74;color:#4a4560;font-weight:500;}
+  .insight b{color:var(--indigo-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#a9afbe;text-align:center;line-height:1.6;}
+</style>
+<style>
+  /* --- 追加分（上のロック済みブロックはVERBATIM・以下は本ツール専用の加筆のみ）--- */
+  .base b.warm{color:var(--rose-ink);}
+
+  /* カテゴリ・フィルタ（チップ） */
+  .cats{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px;}
+  .cat{appearance:none;border:1.6px solid var(--line);background:#fff;color:#5b6472;
+    font-family:inherit;font-weight:800;font-size:13.5px;line-height:1;padding:9px 13px;
+    border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+    transition:transform .12s,box-shadow .14s,border-color .14s,background .14s,color .14s;}
+  .cat .ci{font-size:14px;}
+  .cat:hover{border-color:#d9d2fb;}
+  .cat:active{transform:scale(.97);}
+  .cat.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));border-color:transparent;
+    color:#fff;box-shadow:0 7px 16px rgba(109,94,252,.3);}
+
+  /* 学習者の英文リスト */
+  .slist{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+  .srow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:11px;width:100%;
+    border:1.6px solid var(--line);background:#fff;border-radius:14px;padding:11px 13px;
+    cursor:pointer;text-align:left;font-family:inherit;
+    transition:transform .12s,box-shadow .14s,border-color .14s,background .14s;}
+  .srow:hover{border-color:#d9d2fb;}
+  .srow:active{transform:scale(.985);}
+  .srow.on{border-color:transparent;background:#faf9ff;box-shadow:0 6px 16px rgba(93,74,232,.13);}
+  .srow .sdot{width:11px;height:11px;border-radius:50%;flex:none;}
+  .srow.lv1 .sdot{background:#f43f6e;}
+  .srow.lv2 .sdot{background:#f59e0b;}
+  .srow.lv3 .sdot{background:#6366f1;}
+  .srow.lv4 .sdot{background:#94a3b8;}
+  .srow .stxt{min-width:0;}
+  .srow .slab{display:block;font-weight:800;font-size:14px;color:var(--ink);line-height:1.35;}
+  .srow .sprev{display:block;font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;
+    font-size:12px;color:var(--sub);font-weight:600;font-style:italic;line-height:1.3;margin-top:2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .srow .snum{font-size:14.5px;font-weight:800;flex:none;}
+  .srow.lv1 .snum{color:#e11d5c;}
+  .srow.lv2 .snum{color:#c2740a;}
+  .srow.lv3 .snum{color:#4f46e5;}
+  .srow.lv4 .snum{color:#8b93a3;}
+
+  /* ステージ上のカテゴリ表示 */
+  .catflag{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font-weight:800;
+    font-size:clamp(12.5px,1.6vw,14px);color:var(--indigo-ink);background:var(--indigo-bg);
+    padding:7px 15px;border-radius:999px;margin:0 0 clamp(12px,2vw,16px);}
+  .catflag .cfi{font-size:15px;}
+
+  /* 大きく出す「学習者の英文」= rose */
+  .sentence .wrongline{color:var(--rose-ink);font-weight:700;}
+  .sentence .xmark{display:block;font-size:.42em;font-weight:800;color:var(--rose);
+    letter-spacing:.08em;margin-bottom:.35em;}
+  .sentence .hlx{color:var(--rose-ink);background:var(--rose-bg);border-radius:9px;padding:1px 9px;
+    font-weight:800;-webkit-box-decoration-break:clone;box-decoration-break:clone;}
+
+  /* 重さバッジ（レベルで色が変わる） */
+  .badge{display:inline-flex;align-items:center;gap:10px;line-height:1.2;font-weight:800;
+    font-size:clamp(13.5px,1.8vw,15.5px);padding:9px 17px 9px 13px;border-radius:999px;margin:0 0 15px;}
+  .badge .lv{font-size:clamp(21px,2.7vw,27px);line-height:1;}
+  .badge.lv1{background:#ffe1e7;color:#d81b60;}
+  .badge.lv2{background:#fff0d4;color:#b45309;}
+  .badge.lv3{background:#e6e9ff;color:#4f46e5;}
+  .badge.lv4{background:#eef1f6;color:#5b6472;}
+
+  /* ✓ 直し = teal */
+  .fix{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;
+    font-size:clamp(16px,2.2vw,21px);font-weight:700;color:var(--teal-ink);
+    background:var(--teal-bg);border-radius:14px;padding:14px 17px;line-height:1.55;
+    overflow-wrap:break-word;}
+  .fix .lead{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    display:inline-flex;align-items:center;font-weight:800;font-size:.72em;color:#fff;
+    background:var(--teal);border-radius:8px;padding:3px 10px;margin-right:9px;
+    vertical-align:2px;white-space:nowrap;}
+
+  /* JP解説 */
+  .jpnote{margin-top:15px;color:#4a4560;}
+  .reqchk{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:800;
+    color:#b45309;background:#fff0d4;border-radius:999px;padding:3px 10px;margin-left:6px;
+    vertical-align:1px;white-space:nowrap;}
+  .reqchk::before{content:"※";}
+
+  /* 重さのめやす（凡例） */
+  .legend{margin-top:18px;padding-top:16px;border-top:1px dashed #e7e3f6;}
+  .legend-h{font-size:12.5px;font-weight:800;color:var(--sub);margin-bottom:9px;letter-spacing:.02em;}
+  .lg{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:700;color:#5b6472;
+    padding:8px 11px;border-radius:11px;border:1.5px solid transparent;transition:.14s;}
+  .lg + .lg{margin-top:4px;}
+  .lg .dot{width:12px;height:12px;border-radius:50%;flex:none;}
+  .lg.lv1 .dot{background:#f43f6e;}
+  .lg.lv2 .dot{background:#f59e0b;}
+  .lg.lv3 .dot{background:#6366f1;}
+  .lg.lv4 .dot{background:#94a3b8;}
+  .lg.active{background:#fbfaff;border-color:#e7e3f6;color:var(--ink);
+    box-shadow:0 3px 10px rgba(93,74,232,.08);}
+
+  .caveat{margin-top:13px;font-size:12.5px;line-height:1.6;color:#8a86a0;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">「通じるけど変」誤り診断辞典</span>
+    <h1>その間違い、<span class="em">軽い？　重い？</span></h1>
+    <p class="sub">受験英語で出やすい「通じるけど変」を、<b>8カテゴリ</b>に整理しました。カテゴリを選び、学習者の英文をタップ。<b>直し</b>と<b>重さ（①〜④）</b>を確かめてみてください。</p>
+  </header>
+
+  <div class="app">
+    <section class="panel">
+      <p class="base">まず<b class="warm">カテゴリ</b>を選び、次に<b>学習者の英文</b>をタップ。<br>重さ（①ほど重い）で、直す順番を考えてみてください。</p>
+
+      <div class="cats" id="cats"></div>
+      <div class="slist" id="slist"></div>
+
+      <div class="legend" id="legend">
+        <div class="legend-h">重さのめやす（①ほど重い）</div>
+        <div class="lg lv1" data-lv="1"><span class="dot"></span>① 意味が逆になる</div>
+        <div class="lg lv2" data-lv="2"><span class="dot"></span>② 意味が曖昧</div>
+        <div class="lg lv3" data-lv="3"><span class="dot"></span>③ 文法的に不自然</div>
+        <div class="lg lv4" data-lv="4"><span class="dot"></span>④ 文法はOKだが不自然</div>
+      </div>
+    </section>
+
+    <section class="stage">
+      <div class="catflag" id="catflag"></div>
+      <div class="sentence"><div class="sline" id="sent"></div></div>
+      <div class="answer">
+        <div class="badge" id="badge"></div>
+        <div class="fix" id="fix"></div>
+        <div class="gloss jpnote" id="note"></div>
+      </div>
+    </section>
+
+    <div class="insight">
+      <span class="h">気づき</span>
+      <div>間違いには<b>軽い・重い</b>があります。まず<b>①意味が逆・②曖昧・③文法が壊れる</b>という重いミスから直すのが、点にも会話にも効く。頻出は <b>語順（almost）</b>・<b>時制（完了＋yesterday／時・条件の when）</b>・<b>語法（explain／discuss／want that）</b>・<b>コロケーション</b>。</div>
+      <div class="caveat">※ 重さの判定は編集上のめやすです（要監修）。例文・分類・レジスターの線引きは ※要確認、著者が最終確認します。</div>
+    </div>
+  </div>
+
+  <p class="foot">9月号「AIで動く教材を作る」試作 ／ 「通じるけど変」な英語を、カテゴリと重さで引く誤り診断辞典</p>
+</div>
+
+<script>
+  const LVNAME = {1:'意味が逆になる', 2:'意味が曖昧', 3:'文法的に不自然', 4:'文法はOKだが不自然'};
+  const CIRC = {1:'①', 2:'②', 3:'③', 4:'④'};
+
+  const CATS = [
+    { id:'語順', icon:'🔀', items:[
+      { label:'almost の位置', lv:2,
+        wrong:"I almost studied every day.", hl:"almost",
+        fix:"I studied almost every day.",
+        note:"almost は直後の語を打ち消す副詞。studied の前だと「勉強しかけた」に寄り、「ほぼ毎日」の意味がぼやける。頻度なら almost every day とまとめて置く。" },
+      { label:'間接疑問の語順', lv:3,
+        wrong:"I don't know where is the station.", hl:"where is the station",
+        fix:"I don't know where the station is.",
+        note:"文中に埋め込まれた疑問（間接疑問）は〈疑問詞＋主語＋動詞〉の平叙語順。where the station is が正しい。" },
+      { label:'副詞で目的語を割らない', lv:3,
+        wrong:"She speaks very well English.", hl:"very well",
+        fix:"She speaks English very well.",
+        note:"〈他動詞＋目的語〉の間に様態の副詞を挟まない。very well は目的語 English の後ろへ回す。" },
+      { label:'only ＋ 倒置', lv:3, caveat:true,
+        wrong:"Only she can he trust.", hl:"Only she",
+        fix:"She is the only one he can trust.",
+        note:"only＋語句を文頭に出すと倒置が起き、格も目的格 her になる（Only her can he trust.）。受験では the only one (that) he can trust の形が安全。" }
+    ]},
+
+    { id:'時制', icon:'⏱', items:[
+      { label:'完了形 ＋ yesterday', lv:3,
+        wrong:"I have visited Kyoto yesterday.", hl:"have visited",
+        fix:"I visited Kyoto yesterday.",
+        note:"現在完了は「今とのつながり」を表す形。yesterday など過去の一点を指す語とは同居できない。過去形 visited に。" },
+      { label:'時・条件の when', lv:3,
+        wrong:"When I will arrive, I'll call you.", hl:"will arrive",
+        fix:"When I arrive, I'll call you.",
+        note:"時・条件を表す副詞節（when／if など）の中では、未来のことでも現在形。主節の I'll call は未来のままでよい。" },
+      { label:'状態動詞の進行形', lv:3,
+        wrong:"I am knowing him very well.", hl:"am knowing",
+        fix:"I know him very well.",
+        note:"know／have（所有）／believe など状態を表す動詞は、原則として進行形にしない。" },
+      { label:'時制の一致', lv:3,
+        wrong:"He said he will come to the party.", hl:"will come",
+        fix:"He said he would come to the party.",
+        note:"主節が過去（said）なら、従属節の動詞も過去にそろえる。will → would。" }
+    ]},
+
+    { id:'冠詞', icon:'🅰', items:[
+      { label:'go to school（無冠詞）', lv:4,
+        wrong:"I go to the school by bus every day.", hl:"the school",
+        fix:"I go to school by bus every day.",
+        note:"「通学する」という本来の目的で使うときは無冠詞の go to school。the school は「その校舎（建物）へ行く」の意になる。" },
+      { label:'play the piano', lv:4, caveat:true,
+        wrong:"She plays piano very well.", hl:"piano",
+        fix:"She plays the piano very well.",
+        note:"楽器を演奏するは play the piano。米口語では the を省くこともあるが、受験では the をつけるのが無難。" },
+      { label:'不可算名詞に a は不可', lv:3,
+        wrong:"I need an information about the tour.", hl:"an information",
+        fix:"I need some information about the tour.",
+        note:"information は数えられない名詞。a／an をつけず、1件なら a piece of information とする。" },
+      { label:'固有名詞に the は不要', lv:3,
+        wrong:"I climbed the Mt. Fuji last summer.", hl:"the Mt. Fuji",
+        fix:"I climbed Mt. Fuji last summer.",
+        note:"山・湖など多くの固有名詞は無冠詞。ただし the Alps（山脈）のように the をとるものもある。" }
+    ]},
+
+    { id:'前置詞', icon:'🧭', items:[
+      { label:'discuss（他動詞）', lv:3,
+        wrong:"Let's discuss about the plan now.", hl:"about",
+        fix:"Let's discuss the plan now.",
+        note:"discuss は他動詞。about は不要で、目的語を直接とる。同じ型に mention／attend など。" },
+      { label:'marry（他動詞）', lv:3,
+        wrong:"He married with her last year.", hl:"with",
+        fix:"He married her last year.",
+        note:"marry は他動詞で with をとらない。「結婚している状態」は be married to ～。" },
+      { label:'enter（他動詞）', lv:3, caveat:true,
+        wrong:"She entered into the room quietly.", hl:"into",
+        fix:"She entered the room quietly.",
+        note:"「部屋に入る」は enter the room。enter into は「（契約・議論）を始める」という別の意味で使う。" },
+      { label:'曜日は on', lv:3,
+        wrong:"See you in Sunday afternoon.", hl:"in Sunday",
+        fix:"See you on Sunday afternoon.",
+        note:"曜日・日付には on。年・月・季節には in、時刻には at を使う。" }
+    ]},
+
+    { id:'語法', icon:'🧩', items:[
+      { label:'want ＋人＋to do', lv:3,
+        wrong:"I want that you come to the meeting.", hl:"want that",
+        fix:"I want you to come to the meeting.",
+        note:"want は that 節をとらない。〈want ＋人＋to do〉で「人に〜してほしい」。" },
+      { label:'tell me the way', lv:4,
+        wrong:"Please teach me the way to the station.", hl:"teach",
+        fix:"Please tell me the way to the station.",
+        note:"teach は「学問・技能を教える」。道順など情報を伝えるは tell。" },
+      { label:'explain の語順', lv:3,
+        wrong:"He explained me the rule of the game.", hl:"explained me",
+        fix:"He explained the rule of the game to me.",
+        note:"explain は〈explain ＋ 事 ＋ to ＋ 人〉。explain me … のように〈人＋事〉の語順はとれない。suggest／propose も同型。" },
+      { label:'hard と hardly', lv:1,
+        wrong:"I hardly studied, so I got a good score.", hl:"hardly",
+        fix:"I studied hard, so I got a good score.",
+        note:"hardly は「ほとんど〜ない」を表す準否定。「しっかり勉強した」のつもりが、hardly だと「ほとんど勉強しなかった」と正反対の意味になる。" }
+    ]},
+
+    { id:'コロケーション', icon:'🔗', items:[
+      { label:'make a mistake', lv:4,
+        wrong:"I did a mistake on the test.", hl:"did",
+        fix:"I made a mistake on the test.",
+        note:"「間違いをする」は make a mistake。do a mistake とは言わない（一方で宿題は do one's homework）。" },
+      { label:'take medicine', lv:4,
+        wrong:"You should drink this medicine.", hl:"drink",
+        fix:"You should take this medicine.",
+        note:"「薬を飲む」は take medicine。液体でも drink は使わない。" },
+      { label:'heavy rain', lv:4,
+        wrong:"We had a strong rain last night.", hl:"strong",
+        fix:"We had heavy rain last night.",
+        note:"雨・雪の「強い」は heavy。strong rain とは言わない（風なら strong wind）。" },
+      { label:'tell a lie', lv:4,
+        wrong:"He said a lie to his teacher.", hl:"said",
+        fix:"He told a lie to his teacher.",
+        note:"「うそをつく」は tell a lie。say a lie とは言わない。" }
+    ]},
+
+    { id:'数・一致', icon:'🔢', items:[
+      { label:'every ＋ 単数', lv:3,
+        wrong:"Every students are in the classroom.", hl:"Every students",
+        fix:"Every student is in the classroom.",
+        note:"every の後ろは単数名詞、動詞も単数。every student is が正しい。" },
+      { label:'the number of ～ は単数', lv:3,
+        wrong:"The number of students are increasing.", hl:"are increasing",
+        fix:"The number of students is increasing.",
+        note:"the number of ～ は「～の数」で、主語の中心は number（単数）。動詞は is。" },
+      { label:'a number of ～ は複数', lv:3,
+        wrong:"A number of students is waiting outside.", hl:"is waiting",
+        fix:"A number of students are waiting outside.",
+        note:"a number of ～ は「多くの～」。主語の中心は複数名詞なので動詞は are。the number of ～ と対で覚える。" },
+      { label:'each of ～ は単数', lv:3,
+        wrong:"Each of the boys have a bike.", hl:"have",
+        fix:"Each of the boys has a bike.",
+        note:"each／either／neither は単数扱い。each of the boys has が正しい。" }
+    ]},
+
+    { id:'代名詞', icon:'🧑', items:[
+      { label:'everyone と they', lv:4, caveat:true,
+        wrong:"Everyone must do their best.", hl:"their",
+        fix:"Everyone must do his or her best.",
+        note:"everyone は単数。口語では their で受けるのが普通だが、硬い文章では his or her とする。" },
+      { label:'前置詞の後は目的格', lv:3,
+        wrong:"This is a secret between you and I.", hl:"you and I",
+        fix:"This is a secret between you and me.",
+        note:"between は前置詞。後ろの代名詞は目的格。you and me が正しい。" },
+      { label:'比較の than', lv:4, caveat:true,
+        wrong:"She is much taller than me.", hl:"than me",
+        fix:"She is much taller than I (am).",
+        note:"接続詞の than の後ろは主格 I (am) が原則。ただし口語では than me も広く使われる。" },
+      { label:'再帰代名詞の乱用', lv:4,
+        wrong:"My brother and myself will attend.", hl:"myself",
+        fix:"My brother and I will attend.",
+        note:"myself は主語の繰り返しや強調に使う語。主語そのものには I を使う。" }
+    ]}
+  ];
+
+  const $cats = document.getElementById('cats');
+  const $slist = document.getElementById('slist');
+  const $legend = document.getElementById('legend');
+  const $cf = document.getElementById('catflag');
+  const $s = document.getElementById('sent');
+  const $b = document.getElementById('badge');
+  const $f = document.getElementById('fix');
+  const $n = document.getElementById('note');
+
+  let ci = 0, ii = 0;
+
+  function esc(t){ return t.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+  function hlWrong(w, hl){
+    const safe = esc(w);
+    if(!hl) return safe;
+    const sh = esc(hl);
+    const idx = safe.indexOf(sh);
+    if(idx < 0) return safe;
+    return safe.slice(0, idx) + '<span class="hlx">' + sh + '</span>' + safe.slice(idx + sh.length);
+  }
+
+  function paintStage(scroll){
+    const cat = CATS[ci], d = cat.items[ii];
+    $cf.innerHTML = '<span class="cfi">' + cat.icon + '</span>' + cat.id;
+    $s.innerHTML = '<span class="wrongline"><span class="xmark">✗ 学習者の英文</span>' + hlWrong(d.wrong, d.hl) + '</span>';
+    $b.className = 'badge lv' + d.lv;
+    $b.innerHTML = '<span class="lv">' + CIRC[d.lv] + '</span>' + LVNAME[d.lv];
+    $f.innerHTML = '<span class="lead">✓ 直し</span>' + esc(d.fix);
+    $n.innerHTML = esc(d.note) + (d.caveat ? ' <span class="reqchk">要確認</span>' : '');
+    [...$legend.querySelectorAll('.lg')].forEach(li=>li.classList.toggle('active', +li.dataset.lv === d.lv));
+    [...$slist.children].forEach((r,j)=>r.classList.toggle('on', j === ii));
+    if(scroll && window.innerWidth < 860){
+      document.querySelector('.stage').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  }
+
+  function paintList(){
+    $slist.innerHTML = '';
+    CATS[ci].items.forEach((d,j)=>{
+      const r = document.createElement('button');
+      r.className = 'srow lv' + d.lv;
+      r.innerHTML =
+        '<span class="sdot"></span>' +
+        '<span class="stxt"><span class="slab">' + esc(d.label) + '</span>' +
+        '<span class="sprev">' + esc(d.wrong) + '</span></span>' +
+        '<span class="snum">' + CIRC[d.lv] + '</span>';
+      r.onclick = ()=>{ ii = j; paintStage(true); };
+      $slist.appendChild(r);
+    });
+  }
+
+  function selectCat(k){
+    ci = k; ii = 0;
+    [...$cats.children].forEach((c,j)=>c.classList.toggle('on', j === k));
+    paintList();
+    paintStage(false);
+  }
+
+  CATS.forEach((cat,k)=>{
+    const c = document.createElement('button');
+    c.className = 'cat';
+    c.innerHTML = '<span class="ci">' + cat.icon + '</span>' + cat.id;
+    c.onclick = ()=>selectCat(k);
+    $cats.appendChild(c);
+  });
+
+  selectCat(0);
+</script>
+</body>
+</html>

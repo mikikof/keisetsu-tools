@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>語順ムーバー — 置く位置が、意味と構造を決める</title>
+<style>
+  :root{
+    --ink:#2b2f3a; --sub:#87909f; --line:#eceef5;
+    --indigo:#6d5efc; --indigo2:#9166ff; --indigo-ink:#5b4ae8; --indigo-bg:#f1eefe;
+    --rose:#f8577d; --rose-ink:#e23f6d; --rose-bg:#ffe6ee;
+    --teal:#12c7b0; --teal-ink:#0d9986; --teal-bg:#c9f2e9;
+    --amber:#fbbf24;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#edf4ff 0%,#ffffff 54%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(16px,2.6vw,24px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--indigo-ink);background:var(--indigo-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";font-size:13px;}
+  h1{font-size:clamp(24px,4.8vw,42px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--rose),#ff7aa0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:660px;}
+  .sub b{color:var(--ink);}
+
+  /* ---- mode tabs ---- */
+  .modetabs{display:flex;gap:8px;width:100%;max-width:540px;margin:0 0 clamp(16px,2.4vw,24px);}
+  .modetab{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;align-items:flex-start;
+    border:1.7px solid var(--line);background:#fff;color:var(--sub);font-family:inherit;
+    padding:11px 15px;border-radius:15px;cursor:pointer;text-align:left;
+    transition:transform .12s,border-color .14s,color .14s,box-shadow .14s;}
+  .modetab .t{font-size:clamp(14px,2.2vw,16px);font-weight:800;color:var(--ink);line-height:1.25;}
+  .modetab small{font-size:11.5px;font-weight:700;color:#b4bac6;letter-spacing:.02em;}
+  .modetab:hover{border-color:#d9d2fb;}
+  .modetab:active{transform:scale(.98);}
+  .modetab.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));border-color:transparent;
+    box-shadow:0 8px 20px rgba(109,94,252,.32);}
+  .modetab.on .t{color:#fff;}
+  .modetab.on small{color:#e9e4ff;}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:390px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(93,74,232,.09);}
+
+  .sellabel{font-size:11px;font-weight:800;color:var(--sub);letter-spacing:.05em;margin:0 0 8px;}
+  .selrow{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;}
+  .chip{display:inline-flex;flex-direction:column;align-items:center;line-height:1.2;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+    font-weight:800;font-size:14.5px;border-radius:12px;padding:8px 15px;cursor:pointer;
+    transition:transform .12s,border-color .14s,box-shadow .14s;}
+  .chip small{font-weight:600;color:var(--sub);font-size:11px;margin-top:1px;}
+  .chip:hover{border-color:#d9d2fb;}
+  .chip:active{transform:scale(.97);}
+  .chip.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));border-color:transparent;
+    color:#fff;box-shadow:0 6px 16px rgba(109,94,252,.28);}
+  .chip.on small{color:#e9e4ff;}
+
+  .base{font-size:clamp(13px,1.7vw,14.5px);color:var(--sub);margin:0 0 16px;padding-bottom:15px;
+    border-bottom:1px dashed #e7e3f6;}
+  .base b{color:var(--ink);font-weight:700;}
+
+  .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(94px,1fr));gap:10px;}
+  @media(min-width:860px){ .btns{grid-template-columns:1fr;} }
+  .btns button{display:flex;flex-direction:column;justify-content:center;min-height:58px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:16px;font-weight:800;border-radius:15px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;padding:8px 6px;}
+  .btns button small{font-weight:600;color:var(--sub);font-size:12px;margin-top:2px;}
+  .btns button:hover{border-color:#d9d2fb;}
+  .btns button:active{transform:scale(.97);}
+  .btns button.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.34);}
+  .btns button.on small{color:#e9e4ff;}
+
+  .stage{display:flex;flex-direction:column;}
+
+  /* focus highlights, shared by both modes */
+  .front{color:var(--rose-ink);background:var(--rose-bg);border-radius:10px;
+    padding:2px 11px;font-weight:700;white-space:nowrap;}
+  .vs{color:var(--teal-ink);font-weight:700;
+    box-shadow:inset 0 -0.4em 0 var(--teal-bg);border-radius:3px;padding:0 3px;white-space:nowrap;}
+
+  /* mode 1 sentence */
+  .sentence{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:600;
+    font-size:clamp(22px,4.2vw,48px);line-height:1.42;text-align:center;letter-spacing:.004em;
+    padding:clamp(24px,4.5vw,52px) clamp(14px,2.5vw,30px);
+    background:linear-gradient(160deg,#f2f8ff,#ebf3ff);border-radius:18px;color:#333846;
+    display:grid;place-items:center;flex:1;min-height:clamp(120px,20vw,236px);}
+  .sline{width:100%;overflow-wrap:break-word;}
+
+  /* mode 2 inversion pair */
+  .invpair{display:flex;flex-direction:column;gap:11px;}
+  .invcard{background:linear-gradient(160deg,#f2f8ff,#ebf3ff);border-radius:16px;
+    padding:clamp(15px,2.8vw,24px) clamp(14px,2.4vw,26px);}
+  .invcard.hot{background:linear-gradient(160deg,#eef1ff,#e9edff);box-shadow:inset 0 0 0 1.6px #dfe1ff;}
+  .invtag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--sub);
+    background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 12px;margin:0 0 9px;}
+  .invtag.hot{color:#fff;background:linear-gradient(135deg,var(--indigo),var(--indigo2));border-color:transparent;}
+  .invsent{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:600;
+    font-size:clamp(18px,3.2vw,30px);line-height:1.5;text-align:center;color:#333846;
+    overflow-wrap:break-word;}
+  .invconn{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800;
+    color:var(--rose-ink);margin:1px 2px;}
+  .invconn::before,.invconn::after{content:"";height:1px;flex:1;
+    background:linear-gradient(90deg,transparent,#f3c9d6,transparent);}
+
+  .answer{margin-top:clamp(16px,2.4vw,22px);}
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 13px;}
+  .scopechip,.frontchip{display:inline-flex;align-items:center;gap:9px;font-weight:800;
+    font-size:clamp(13.5px,1.8vw,16px);padding:9px 16px;border-radius:999px;}
+  .scopechip{background:var(--teal-bg);color:var(--teal-ink);}
+  .frontchip{background:var(--rose-bg);color:var(--rose-ink);}
+  .scopechip span{color:var(--sub);font-weight:600;}
+  .frontchip span{color:var(--rose-ink);opacity:.72;font-weight:700;}
+  .gloss{font-size:clamp(16px,2.1vw,20px);line-height:1.72;font-weight:500;}
+  .gloss b{color:var(--rose-ink);font-weight:700;}
+  .note{font-size:clamp(12px,1.5vw,13.5px);color:var(--sub);margin-top:11px;line-height:1.62;}
+
+  .insight{background:linear-gradient(135deg,#eef5ff,#f6faff);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    margin-top:clamp(16px,2.4vw,26px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.74;color:#4a4560;font-weight:500;}
+  .insight b{color:var(--indigo-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#a9afbe;text-align:center;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">語順ムーバー</span>
+    <h1>英語は、<span class="em">置く位置</span>で意味も構造も決まる</h1>
+    <p class="sub">助詞（「が・を・に」）がない英語では、語を<b>どこに置くか</b>が働きを決めます。焦点語を動かすと「何を限定するか」が変わり、否定・限定を前に出すと語順（<b>倒置</b>）まで変わります。2つのモードで指で確かめてください。</p>
+  </header>
+
+  <div class="modetabs">
+    <button class="modetab on" id="tab1" onclick="setMode('m1')">
+      <span class="t">① 焦点語を動かす</span><small>only・even・just・also</small>
+    </button>
+    <button class="modetab" id="tab2" onclick="setMode('m2')">
+      <span class="t">② 前に出すと倒置</span><small>否定・限定の前置 → V–S</small>
+    </button>
+  </div>
+
+  <!-- ============ MODE 1 ============ -->
+  <div class="app" id="mode1">
+    <section class="panel">
+      <p class="sellabel">① 例文を選ぶ</p>
+      <div class="selrow" id="sentsel"></div>
+      <p class="base" id="m1base"></p>
+      <p class="sellabel">② 焦点語を選ぶ</p>
+      <div class="selrow" id="advsel"></div>
+      <p class="sellabel">③ 置く位置を選ぶ</p>
+      <div class="btns" id="posbtns"></div>
+    </section>
+
+    <section class="stage">
+      <div class="sentence"><div class="sline" id="m1sent"></div></div>
+      <div class="answer">
+        <div class="chips">
+          <div class="scopechip"><span id="m1scopepre"></span> <b id="m1scope"></b></div>
+        </div>
+        <div class="gloss" id="m1gloss"></div>
+        <div class="note" id="m1note"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ MODE 2 ============ -->
+  <div class="app" id="mode2" style="display:none">
+    <section class="panel">
+      <p class="sellabel">前に出す語を選ぶ</p>
+      <div class="btns" id="m2btns"></div>
+      <p class="note" style="margin-top:16px">否定・限定を表す語を文頭に出すと、そのあとが<b style="color:var(--ink)">疑問文と同じ語順（助動詞＋主語）</b>にひっくり返ります。これを倒置といいます。</p>
+    </section>
+
+    <section class="stage">
+      <div class="invpair">
+        <div class="invcard">
+          <span class="invtag">通常の語順</span>
+          <div class="invsent" id="m2normal"></div>
+        </div>
+        <div class="invconn" id="m2conn">否定・限定を前に出す ↓</div>
+        <div class="invcard hot">
+          <span class="invtag hot">倒置</span>
+          <div class="invsent" id="m2inv"></div>
+        </div>
+      </div>
+      <div class="answer">
+        <div class="chips">
+          <div class="frontchip"><span>前に出す →</span> <b id="m2front"></b></div>
+          <div class="scopechip"><span>V–S に倒置 →</span> <b id="m2vs"></b></div>
+        </div>
+        <div class="gloss" id="m2why"></div>
+        <div class="note" id="m2note"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="insight">
+    <span class="h">気づき</span>
+    <div>英語には助詞（「が・を・に」）がありません。その代わり、語を<b>どこに置くか</b>が意味と構造を決めます。<b>焦点語（only・even・just・also）の位置</b>で「何を限定・強調するか」が変わり、<b>否定・限定の語を前に出す</b>と、語順そのもの（<b>倒置</b>）まで変わります。位置＝意味、位置＝構造。参考書は完成形を並べるだけですが、ここでは自分で動かせます。</div>
+  </div>
+
+  <p class="foot">9月号「AIで動く教材を作る」試作 ／ 一文の指示で、この種の教材ツールが生成できます</p>
+</div>
+
+<script>
+  /* ================= MODE 1 data ================= */
+  const M1 = {
+    ken:{
+      label:'例文①', hint:'Ken & Mary',
+      base:'Ken gave Mary a book yesterday.', jp:'ケンは昨日メアリーに本をあげた。',
+      advs:{
+        only:{ items:[
+          {pos:'主語', hint:'誰が', sent:'<span class="front">Only</span> <span class="vs">Ken</span> gave Mary a book yesterday.',
+            scope:'Ken（主語）', gloss:'昨日メアリーに本をあげたのは、<b>ケンだけ</b>。（他の人はあげていない）', note:''},
+          {pos:'動詞', hint:'どうした', sent:'Ken <span class="front">only</span> <span class="vs">gave</span> Mary a book yesterday.',
+            scope:'gave（動詞）', gloss:'ケンがしたのは、本を<b>「あげた」ことだけ</b>。（貸す・売るはしていない）', note:''},
+          {pos:'相手', hint:'誰に', sent:'Ken gave <span class="front">only</span> <span class="vs">Mary</span> a book yesterday.',
+            scope:'Mary（相手）', gloss:'ケンが本をあげたのは、<b>メアリーだけ</b>。（他の人にはあげていない）', note:''},
+          {pos:'もの', hint:'何を', sent:'Ken gave Mary <span class="front">only</span> <span class="vs">a book</span> yesterday.',
+            scope:'a book（もの）', gloss:'ケンがあげたのは、<b>本だけ</b>。（他の物はあげていない）', note:''},
+          {pos:'とき', hint:'いつ', sent:'Ken gave Mary a book <span class="front">only</span> <span class="vs">yesterday</span>.',
+            scope:'yesterday（とき）', gloss:'あげたのは、<b>昨日だけ</b>。（いつもではない）',
+            note:'※ 強めて言うと「つい昨日（ほんの昨日のこと）」の意にもなります。位置と読み方で決まります。'}
+        ]},
+        even:{ items:[
+          {pos:'主語', hint:'誰が', sent:'<span class="front">Even</span> <span class="vs">Ken</span> gave Mary a book yesterday.',
+            scope:'Ken（主語）', gloss:'<b>ケンさえも</b>メアリーに本をあげた。（あげそうにないケンまで＝意外）',
+            note:'even は「予想外のもの」を焦点にします。'},
+          {pos:'動詞', hint:'どうした', sent:'Ken <span class="front">even</span> <span class="vs">gave</span> Mary a book yesterday.',
+            scope:'gave（動詞）', gloss:'ケンはメアリーに本を<b>あげることさえした</b>。（そこまでするとは＝意外な行為）', note:''},
+          {pos:'相手', hint:'誰に', sent:'Ken gave <span class="front">even</span> <span class="vs">Mary</span> a book yesterday.',
+            scope:'Mary（相手）', gloss:'ケンは<b>メアリーにさえ</b>本をあげた。（あげそうにない相手にまで）', note:''},
+          {pos:'もの', hint:'何を', sent:'Ken gave Mary <span class="front">even</span> <span class="vs">a book</span> yesterday.',
+            scope:'a book（もの）', gloss:'ケンはメアリーに<b>本さえも</b>あげた。（本まで＝意外なもの）', note:''}
+        ]},
+        just:{ items:[
+          {pos:'動詞', hint:'どうした', sent:'Ken <span class="front">just</span> <span class="vs">gave</span> Mary a book yesterday.',
+            scope:'gave（動詞）', gloss:'ケンはメアリーに本を<b>ただあげただけ</b>。（それ以上のことはしていない＝only のくだけた言い方）',
+            note:'※ 会話では just＝「つい今しがた」の意にもなり、文脈で決まります。'},
+          {pos:'もの', hint:'何を', sent:'Ken gave Mary <span class="front">just</span> <span class="vs">a book</span> yesterday.',
+            scope:'a book（もの）', gloss:'ケンがあげたのは<b>ほんの本一冊</b>。（たいした物ではない、というニュアンス）', note:''},
+          {pos:'とき', hint:'いつ', sent:'Ken gave Mary a book <span class="front">just</span> <span class="vs">yesterday</span>.',
+            scope:'yesterday（とき）', gloss:'本をあげたのは<b>つい昨日／ちょうど昨日</b>。（just＝「ちょうど・ついこの間」）', note:''}
+        ]},
+        also:{ items:[
+          {pos:'基本位置', hint:'動詞の前', sent:'Ken <span class="front">also</span> <span class="vs">gave</span> Mary a book yesterday.',
+            scope:'動詞の前（基本位置）', gloss:'ケンは（他のことに加えて）本を<b>あげもした</b>。<b>Ken</b> を強めて言えば「ケン<b>も</b>」の意にもなる。',
+            note:'also は動詞の前が基本位置。どれを「〜も」とするかは、位置より強勢（言い方）で決まりやすい。'},
+          {pos:'文末 too', hint:'文の末尾', sent:'Ken gave Mary a book, <span class="front">too</span>.',
+            scope:'文末の too', gloss:'書き言葉で焦点をはっきりさせたいときは、also を動かすより文末の <b>too ／ as well</b> を使うのがふつう。',
+            note:'※ only・even ほど「位置」で焦点を動かせないのが also の特徴。ここが対比のポイントです。'}
+        ]}
+      }
+    },
+    she:{
+      label:'例文②', hint:'She & him',
+      base:'She told him she loved him.', jp:'彼女は彼に、愛していると言った。',
+      advs:{
+        only:{ items:[
+          {pos:'主語', hint:'誰が', sent:'<span class="front">Only</span> <span class="vs">she</span> told him she loved him.',
+            scope:'she（主語）', gloss:'「愛している」と彼に言ったのは、<b>彼女だけ</b>。', note:''},
+          {pos:'動詞', hint:'どうした', sent:'She <span class="front">only</span> <span class="vs">told</span> him she loved him.',
+            scope:'told（動詞）', gloss:'彼女は愛していると<b>言っただけ</b>。（口で言っただけで、態度では示していない、という含み）',
+            note:'「動詞を only で限定」＝「〜しただけで、それ以上はしない」。頻出の含みです。'},
+          {pos:'相手', hint:'誰に', sent:'She told <span class="front">only</span> <span class="vs">him</span> she loved him.',
+            scope:'him（相手）', gloss:'彼女がそう打ち明けた相手は、<b>彼だけ</b>。（他の人には言っていない）', note:''}
+        ]},
+        even:{ items:[
+          {pos:'主語', hint:'誰が', sent:'<span class="front">Even</span> <span class="vs">she</span> told him she loved him.',
+            scope:'she（主語）', gloss:'<b>彼女さえも</b>、愛していると打ち明けた。（言いそうにない彼女までも）', note:''},
+          {pos:'動詞', hint:'どうした', sent:'She <span class="front">even</span> <span class="vs">told</span> him she loved him.',
+            scope:'told（動詞）', gloss:'彼女は愛していると<b>口に出しさえした</b>。（そこまでした＝意外）', note:''},
+          {pos:'相手', hint:'誰に', sent:'She told <span class="front">even</span> <span class="vs">him</span> she loved him.',
+            scope:'him（相手）', gloss:'<b>彼にさえ</b>打ち明けた。（打ち明けそうにない相手にまで）', note:''}
+        ]}
+      }
+    }
+  };
+  const ADV_ORDER = ['only','even','just','also'];
+  const ADV_META = {
+    only:{sub:'〜だけ',  tag:'「〜だけ」（限定）'},
+    even:{sub:'〜さえ',  tag:'「〜さえ」（強調）'},
+    just:{sub:'ただ/ちょうど', tag:'「ただ・ちょうど」'},
+    also:{sub:'〜も',    tag:'「〜も」（添加）'}
+  };
+  let st = {sent:'ken', adv:'only', pos:0};
+  const el = id => document.getElementById(id);
+
+  function renderSentSel(){
+    const w = el('sentsel'); w.innerHTML='';
+    Object.keys(M1).forEach(k=>{
+      const b=document.createElement('button');
+      b.className='chip'+(k===st.sent?' on':'');
+      b.innerHTML=M1[k].label+'<small>'+M1[k].hint+'</small>';
+      b.onclick=()=>{ st.sent=k; if(!M1[k].advs[st.adv]) st.adv='only'; st.pos=0; renderM1(); };
+      w.appendChild(b);
+    });
+  }
+  function renderAdvSel(){
+    const w = el('advsel'); w.innerHTML='';
+    ADV_ORDER.forEach(a=>{
+      if(!M1[st.sent].advs[a]) return;
+      const b=document.createElement('button');
+      b.className='chip'+(a===st.adv?' on':'');
+      b.innerHTML=a+'<small>'+ADV_META[a].sub+'</small>';
+      b.onclick=()=>{ st.adv=a; st.pos=0; renderM1(); };
+      w.appendChild(b);
+    });
+  }
+  function renderPosBtns(){
+    const w = el('posbtns'); w.innerHTML='';
+    M1[st.sent].advs[st.adv].items.forEach((it,i)=>{
+      const b=document.createElement('button');
+      b.className=(i===st.pos?'on':'');
+      b.innerHTML=it.pos+'<small>'+it.hint+'</small>';
+      b.onclick=()=>{ st.pos=i; renderStageM1(); [...w.children].forEach((x,j)=>x.classList.toggle('on',j===i)); };
+      w.appendChild(b);
+    });
+  }
+  function renderStageM1(){
+    const it = M1[st.sent].advs[st.adv].items[st.pos];
+    el('m1sent').innerHTML = it.sent;
+    el('m1scopepre').textContent = ADV_META[st.adv].tag+' が効くのは →';
+    el('m1scope').textContent = it.scope;
+    el('m1gloss').innerHTML = it.gloss;
+    el('m1note').innerHTML = it.note||'';
+    el('m1note').style.display = it.note ? 'block':'none';
+  }
+  function renderM1(){
+    el('m1base').innerHTML = '骨組み：<b>'+M1[st.sent].base+'</b><br>'+M1[st.sent].jp;
+    renderSentSel(); renderAdvSel(); renderPosBtns(); renderStageM1();
+  }
+
+  /* ================= MODE 2 data ================= */
+  const M2 = [
+    { btn:'Never …', hint:'否定の副詞',
+      normal:'I had <span class="front">never</span> seen such a mess.',
+      inv:'<span class="front">Never</span> <span class="vs">had I</span> seen such a mess.',
+      front:'never（否定の副詞）', vs:'had I（助動詞＋主語）',
+      why:'否定の副詞 <b>never</b> を文頭に出すと、<b>疑問文と同じ語順</b>（助動詞 had ＋ 主語 I）になる。否定を強く押し出す言い方。',
+      note:'never のほか no, little, hardly, seldom, rarely, at no time なども同じ。' },
+    { btn:'Only then …', hint:'限定の副詞',
+      normal:'I realized the truth <span class="front">only then</span>.',
+      inv:'<span class="front">Only then</span> <span class="vs">did I</span> realize the truth.',
+      front:'only then（限定の副詞句）', vs:'did I（do 助動詞＋主語）',
+      why:'限定の <b>only ＋ 副詞</b> を前に出すと倒置。一般動詞の文なので <b>do／does／did</b> を補って疑問文語順にし、あとの動詞は原形（realize）に戻す。',
+      note:'Only after …, Only by …, Not until … も同じ形になる。' },
+    { btn:'Not only …', hint:'否定・限定',
+      normal:'He is <span class="front">not only</span> smart; he is also kind.',
+      inv:'<span class="front">Not only</span> <span class="vs">is he</span> smart, but he is also kind.',
+      front:'not only（否定・限定）', vs:'is he（be動詞＋主語）',
+      why:'<b>Not only</b> を文頭に出すと倒置（be動詞 is ＋ 主語 he）。後半は <b>but … also</b> が呼応して「〜だけでなく…も」。',
+      note:'be動詞なら do を補わず、そのまま be を前に出す。' },
+    { btn:'Had I …', hint:'if の省略',
+      normal:'<span class="front">If</span> I had known, I would have told you.',
+      inv:'<span class="vs">Had I</span> known, I would have told you.',
+      front:'if の省略', vs:'Had I（助動詞＋主語）',
+      why:'仮定法で <b>if を省略</b>すると、<b>had ＋ 主語</b> の倒置が起こる（If I had → Had I）。硬い書き言葉の響き。',
+      note:'Were I …／Should you … も同じ（If I were →, If you should → の倒置）。' }
+  ];
+  let st2 = 0;
+  function renderM2(){
+    const w = el('m2btns'); w.innerHTML='';
+    M2.forEach((c,i)=>{
+      const b=document.createElement('button');
+      b.className=(i===st2?'on':'');
+      b.innerHTML=c.btn+'<small>'+c.hint+'</small>';
+      b.onclick=()=>{ st2=i; renderStageM2(); [...w.children].forEach((x,j)=>x.classList.toggle('on',j===i)); };
+      w.appendChild(b);
+    });
+    renderStageM2();
+  }
+  function renderStageM2(){
+    const c=M2[st2];
+    el('m2normal').innerHTML=c.normal;
+    el('m2inv').innerHTML=c.inv;
+    el('m2front').textContent=c.front;
+    el('m2vs').textContent=c.vs;
+    el('m2why').innerHTML=c.why;
+    el('m2note').innerHTML=c.note||'';
+  }
+
+  /* ================= tabs ================= */
+  function setMode(m){
+    el('mode1').style.display = (m==='m1') ? '' : 'none';
+    el('mode2').style.display = (m==='m2') ? '' : 'none';
+    el('tab1').classList.toggle('on', m==='m1');
+    el('tab2').classList.toggle('on', m==='m2');
+  }
+
+  renderM1();
+  renderM2();
+  setMode(location.hash==='#m2' ? 'm2' : 'm1');
+  window.addEventListener('hashchange',()=>setMode(location.hash==='#m2'?'m2':'m1'));
+</script>
+</body>
+</html>

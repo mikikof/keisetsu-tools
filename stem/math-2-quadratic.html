@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>二次関数モーフ — a・b・c を動かすと、放物線が変わる</title>
+<style>
+  :root{
+    --ink:#233b34; --sub:#6a807a; --line:#e3eeea;
+    --pri:#10b981; --pri-ink:#059669; --pri-bg:#e7f8f1;
+    --acc:#f59e0b; --acc-ink:#b45309; --acc-bg:#fdf0d5;
+    --cool:#0ea5e9; --cool-ink:#0369a1; --cool-bg:#e0f2fe;
+    --neg:#ef4444; --neg-ink:#dc2626; --neg-bg:#fdecec;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#eafaf3 0%,#ffffff 52%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(16px,2.6vw,24px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--pri-ink);background:var(--pri-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"📐";font-size:13px;}
+  h1{font-size:clamp(23px,4.6vw,40px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--pri-ink),#34d399);-webkit-background-clip:text;background-clip:text;color:transparent;
+    font-family:Georgia,"Times New Roman",serif;font-style:italic;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,16.5px);margin:0;max-width:680px;}
+  .sub b{color:var(--ink);}
+  .sub .fx{font-family:Georgia,"Times New Roman",serif;font-style:italic;color:var(--pri-ink);font-weight:700;}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:392px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(5,150,105,.09);}
+
+  /* ---- equation ---- */
+  .eq{font-family:Georgia,"Times New Roman",serif;font-size:clamp(22px,3.4vw,29px);font-weight:700;
+    text-align:center;letter-spacing:.01em;color:#33443f;line-height:1.35;
+    background:linear-gradient(160deg,#f2fbf7,#eafaf3);border-radius:16px;
+    padding:clamp(14px,2.2vw,20px) 10px;margin:0 0 clamp(16px,2.2vw,20px);}
+  .eq .ca{color:var(--pri-ink);} .eq .cb{color:var(--acc-ink);} .eq .cc{color:var(--cool-ink);}
+  .eq .op{color:#9fb0aa;font-weight:600;padding:0 .12em;}
+
+  /* ---- sliders ---- */
+  .sl{margin:0 0 clamp(14px,2vw,18px);}
+  .slhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 3px;}
+  .slname{display:flex;align-items:baseline;gap:8px;font-weight:800;font-size:13.5px;color:var(--ink);}
+  .slname .k{font-family:Georgia,serif;font-style:italic;font-size:20px;line-height:1;}
+  .slname .desc{font-weight:700;font-size:12px;color:var(--sub);}
+  .sl.a .k{color:var(--pri-ink);} .sl.b .k{color:var(--acc-ink);} .sl.c .k{color:var(--cool-ink);}
+  .slval{font-variant-numeric:tabular-nums;font-weight:800;font-size:19px;line-height:1;
+    min-width:2.6em;text-align:right;font-family:Georgia,serif;}
+  .sl.a .slval{color:var(--pri-ink);} .sl.b .slval{color:var(--acc-ink);} .sl.c .slval{color:var(--cool-ink);}
+  .dir{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;
+    background:var(--pri-bg);color:var(--pri-ink);letter-spacing:.02em;vertical-align:middle;}
+  .dir.up{background:var(--acc-bg);color:var(--acc-ink);}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:999px;
+    background:var(--line);outline:none;margin:6px 0 2px;cursor:pointer;}
+  input[type=range].a{accent-color:var(--pri);}
+  input[type=range].b{accent-color:var(--acc);}
+  input[type=range].c{accent-color:var(--cool);}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:24px;height:24px;border-radius:50%;background:#fff;border:3.5px solid var(--pri);
+    box-shadow:0 2px 7px rgba(0,0,0,.18);cursor:pointer;}
+  input[type=range].a::-webkit-slider-thumb{border-color:var(--pri);}
+  input[type=range].b::-webkit-slider-thumb{border-color:var(--acc);}
+  input[type=range].c::-webkit-slider-thumb{border-color:var(--cool);}
+  .slscale{display:flex;justify-content:space-between;font-size:10.5px;color:#a7b7b1;font-weight:700;
+    font-variant-numeric:tabular-nums;margin-top:-1px;}
+
+  .hintbox{font-size:12.5px;color:var(--sub);line-height:1.6;margin:clamp(12px,2vw,16px) 0 0;
+    padding-top:13px;border-top:1px dashed #dbeae4;}
+  .hintbox b{color:var(--pri-ink);font-weight:800;}
+
+  .sellabel{font-size:11px;font-weight:800;color:var(--sub);letter-spacing:.05em;margin:clamp(14px,2vw,18px) 0 8px;}
+  .selrow{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{display:inline-flex;flex-direction:column;align-items:center;line-height:1.2;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+    font-weight:800;font-size:13px;border-radius:12px;padding:7px 12px;cursor:pointer;
+    transition:transform .12s,border-color .14s,box-shadow .14s;}
+  .chip small{font-weight:600;color:var(--sub);font-size:10.5px;margin-top:2px;font-family:Georgia,serif;letter-spacing:.01em;}
+  .chip:hover{border-color:#bfe7d6;}
+  .chip:active{transform:scale(.97);}
+  .chip.on{background:linear-gradient(135deg,var(--pri),#34d399);border-color:transparent;
+    color:#fff;box-shadow:0 6px 16px rgba(16,185,129,.32);}
+  .chip.on small{color:#e4fbf1;}
+
+  /* ---- stage / graph ---- */
+  .stage{display:flex;flex-direction:column;}
+  .plane{width:100%;max-width:470px;margin:0 auto;}
+  svg{width:100%;height:auto;display:block;}
+  .pbg{fill:#f7fdfb;}
+  .gl{stroke:var(--line);stroke-width:1;}
+  .ax{stroke:#b3c7c0;stroke-width:1.7;}
+  .tick{fill:#8fa39c;font-size:10px;font-family:Georgia,serif;}
+  .tick.tx{text-anchor:middle;} .tick.ty{text-anchor:end;}
+  .axlab{fill:#8fa39c;font-size:14px;font-style:italic;font-family:Georgia,serif;}
+  .curve{fill:none;stroke:var(--pri);stroke-width:3.4;stroke-linejoin:round;stroke-linecap:round;}
+  .sym{stroke:#8aa39b;stroke-width:1.7;stroke-dasharray:5 5;}
+  .symlab{fill:#6f8781;font-size:11.5px;font-weight:700;font-family:Georgia,serif;text-anchor:middle;}
+  .d-yint{fill:var(--cool);stroke:#fff;stroke-width:1.6;}
+  .ylab{fill:var(--cool-ink);font-size:10.5px;font-weight:700;font-family:Georgia,serif;}
+  .d-root{fill:var(--acc);stroke:#fff;stroke-width:1.8;}
+  .d-vtx{fill:var(--acc);stroke:#fff;stroke-width:2.4;}
+  .vlab{fill:var(--acc-ink);font-size:12.5px;font-weight:800;font-family:Georgia,serif;text-anchor:middle;}
+
+  /* ---- discriminant card ---- */
+  .dcard{border-radius:16px;padding:14px 18px;margin:clamp(14px,2.2vw,18px) 0 12px;border:1.6px solid;}
+  .dcard .drow{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 10px;}
+  .dtag{font-size:11px;font-weight:800;letter-spacing:.05em;padding:2px 9px;border-radius:999px;background:#fff;}
+  .dexp{font-family:Georgia,serif;font-size:clamp(16px,2.4vw,20px);font-weight:700;}
+  .dexp b{font-size:1.18em;font-variant-numeric:tabular-nums;}
+  .dmsg{font-size:clamp(13.5px,1.9vw,15.5px);font-weight:800;margin-top:5px;}
+  .dmsg .sgn{font-family:Georgia,serif;}
+  .dcard.d-pos{background:var(--pri-bg);border-color:#bfead9;color:var(--pri-ink);}
+  .dcard.d-pos .dtag{color:var(--pri-ink);}
+  .dcard.d-zero{background:var(--acc-bg);border-color:#f0dcaa;color:var(--acc-ink);}
+  .dcard.d-zero .dtag{color:var(--acc-ink);}
+  .dcard.d-neg{background:var(--neg-bg);border-color:#f6cccc;color:var(--neg-ink);}
+  .dcard.d-neg .dtag{color:var(--neg-ink);}
+
+  .rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;}
+  .rc{background:#f6faf8;border:1px solid var(--line);border-radius:14px;padding:10px 13px;}
+  .rc .rl{display:block;font-size:11px;font-weight:800;color:var(--sub);letter-spacing:.03em;margin-bottom:3px;}
+  .rc .rv{font-size:clamp(15px,2vw,18px);font-weight:800;font-variant-numeric:tabular-nums;
+    font-family:Georgia,serif;line-height:1.25;word-break:break-word;}
+  .rc.acc{background:var(--acc-bg);border-color:#f0dcaa;}
+  .rc.acc .rl{color:var(--acc-ink);} .rc.acc .rv{color:var(--acc-ink);}
+
+  .insight{background:linear-gradient(135deg,#e9f8f1,#f4fdf9);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    margin-top:clamp(16px,2.4vw,26px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.76;color:#3f4f4a;font-weight:500;}
+  .insight b{color:var(--pri-ink);font-weight:700;}
+  .insight .fx{font-family:Georgia,serif;font-style:italic;color:var(--pri-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+  .insight .g{color:var(--pri-ink);font-weight:800;} .insight .am{color:var(--acc-ink);font-weight:800;} .insight .rd{color:var(--neg-ink);font-weight:800;}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#a3b3ad;text-align:center;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">二次関数モーフ</span>
+    <h1>係数 <span class="em">a・b・c</span> を動かすと、放物線が変わる</h1>
+    <p class="sub"><span class="fx">y = ax² + bx + c</span> の3つの係数をスライダーで変えると、<b>放物線・頂点・軸・x軸との交点</b>がその場で動きます。とくに判別式 <span class="fx">D = b²−4ac</span> の符号が、<b>x軸と交わる点の数</b>を決めます。</p>
+  </header>
+
+  <div class="app">
+    <!-- ===== controls ===== -->
+    <section class="panel">
+      <div class="eq" id="eq"></div>
+
+      <div class="sl a">
+        <div class="slhead">
+          <span class="slname"><span class="k">a</span><span class="desc">開きと向き</span></span>
+          <span><span class="dir" id="dir"></span> <span class="slval" id="va"></span></span>
+        </div>
+        <input type="range" class="a" id="sa" min="-3" max="3" step="0.1" value="1">
+        <div class="slscale"><span>−3</span><span>0</span><span>3</span></div>
+      </div>
+
+      <div class="sl b">
+        <div class="slhead">
+          <span class="slname"><span class="k">b</span><span class="desc">軸を左右にずらす</span></span>
+          <span class="slval" id="vb"></span>
+        </div>
+        <input type="range" class="b" id="sb" min="-6" max="6" step="0.1" value="0">
+        <div class="slscale"><span>−6</span><span>0</span><span>6</span></div>
+      </div>
+
+      <div class="sl c">
+        <div class="slhead">
+          <span class="slname"><span class="k">c</span><span class="desc">上下・y切片</span></span>
+          <span class="slval" id="vc"></span>
+        </div>
+        <input type="range" class="c" id="sc" min="-6" max="6" step="0.1" value="-1">
+        <div class="slscale"><span>−6</span><span>0</span><span>6</span></div>
+      </div>
+
+      <p class="hintbox">スライダーを動かすと放物線がその場で変わります。まずは <b>c をゆっくり動かして</b>、判別式 D が 0 をまたぐ瞬間を見てください。2つの交点が近づいて重なり（重解）、やがて消えます。</p>
+
+      <p class="sellabel">教科書の例で試す</p>
+      <div class="selrow" id="presets"></div>
+    </section>
+
+    <!-- ===== graph + readout ===== -->
+    <section class="stage">
+      <div class="plane">
+        <svg id="svg" viewBox="0 0 440 440" role="img" aria-label="二次関数のグラフ">
+          <defs>
+            <clipPath id="clip"><rect x="24" y="24" width="392" height="392"/></clipPath>
+            <marker id="arw" markerWidth="9" markerHeight="9" refX="6.4" refY="4" orient="auto">
+              <path d="M0,1 L7,4 L0,7 Z" fill="#9fb3ac"/>
+            </marker>
+          </defs>
+          <g id="grid"></g>
+          <g id="dyn" clip-path="url(#clip)"></g>
+          <g id="pts"></g>
+        </svg>
+      </div>
+
+      <div class="dcard" id="dcard">
+        <div class="drow">
+          <span class="dtag">判別式</span>
+          <span class="dexp">D = b²−4ac = <b id="dval"></b></span>
+        </div>
+        <div class="dmsg" id="dmsg"></div>
+      </div>
+
+      <div class="rgrid">
+        <div class="rc acc"><span class="rl">頂点</span><span class="rv" id="rvVertex"></span></div>
+        <div class="rc"><span class="rl">軸</span><span class="rv" id="rvAxis"></span></div>
+        <div class="rc acc"><span class="rl">x軸との交点</span><span class="rv" id="rvRoots"></span></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="insight">
+    <span class="h">気づき</span>
+    <div><b class="fx">a</b> は放物線の<b>開きと向き</b>（<span class="g">+ で下に凸</span>／<span class="am">− で上に凸</span>）。頂点は必ず <b class="fx">( −b/2a , c−b²/4a )</b> にあり、その真上を通る縦線が<b>軸</b> <span class="fx">x = −b/2a</span>。そして判別式 <b class="fx">D = b²−4ac</b> の符号が、x軸と交わる点の数を決めます — <span class="g">D&gt;0 なら2点</span>、<span class="am">D=0 なら接して1点（重解）</span>、<span class="rd">D&lt;0 なら交わらない</span>。動かすと「<b>D が 0 をまたぐ瞬間に、交点が生まれる／消える</b>」のが目で見えます。</div>
+  </div>
+
+  <p class="foot">9月号「AIで動く教材を作る」試作 ／ 一文の指示で、この種の教材ツールが生成できます</p>
+</div>
+
+<script>
+  /* ===== coordinate system ===== */
+  const R = 7, VB = 440, M = 24;
+  const O = VB/2, U = (VB/2 - M) / R;         // U = 28 px per unit
+  const SX = x => O + x*U;
+  const SY = y => O - y*U;
+  const el = id => document.getElementById(id);
+
+  /* ===== number format (uses U+2212 minus) ===== */
+  function fmt(v){
+    if(!isFinite(v)) return '—';
+    let r = Math.round(v*100)/100; if(Object.is(r,-0)) r = 0;
+    let s = r.toFixed(2).replace(/\.?0+$/,''); if(s==='-0') s='0';
+    return s.replace('-','−');
+  }
+  const clean = v => Math.round(v*10)/10;
+
+  /* ===== static grid ===== */
+  (function buildGrid(){
+    let s = `<rect class="pbg" x="24" y="24" width="392" height="392"/>`;
+    for(let i=-R;i<=R;i++){
+      if(i===0) continue;
+      s += `<line class="gl" x1="${SX(i)}" y1="${SY(-R)}" x2="${SX(i)}" y2="${SY(R)}"/>`;
+      s += `<line class="gl" x1="${SX(-R)}" y1="${SY(i)}" x2="${SX(R)}" y2="${SY(i)}"/>`;
+    }
+    s += `<line class="ax" x1="${SX(-R)}" y1="${SY(0)}" x2="${SX(R)}" y2="${SY(0)}" marker-end="url(#arw)"/>`;
+    s += `<line class="ax" x1="${SX(0)}" y1="${SY(-R)}" x2="${SX(0)}" y2="${SY(R)}" marker-end="url(#arw)"/>`;
+    for(const i of [-6,-4,-2,2,4,6]){
+      s += `<text class="tick tx" x="${SX(i)}" y="${SY(0)+15}">${fmt(i)}</text>`;
+      s += `<text class="tick ty" x="${SX(0)-7}" y="${SY(i)+4}">${fmt(i)}</text>`;
+    }
+    s += `<text class="tick ty" x="${SX(0)-7}" y="${SY(0)+15}">O</text>`;
+    s += `<text class="axlab" x="${SX(R)+3}" y="${SY(0)+17}">x</text>`;
+    s += `<text class="axlab" x="${SX(0)+7}" y="${SY(R)-3}">y</text>`;
+    el('grid').innerHTML = s;
+  })();
+
+  /* ===== state ===== */
+  let A=1, B=0, C=-1;
+  const sa=el('sa'), sb=el('sb'), sc=el('sc');
+
+  const PRE=[
+    {t:'2交点',  s:'a=1,b=0,c=−1', a:1,b:0,c:-1},
+    {t:'重解',   s:'a=1,b=2,c=1',  a:1,b:2,c:1},
+    {t:'交点なし',s:'a=1,b=0,c=1',  a:1,b:0,c:1},
+    {t:'上に凸', s:'a=−1,b=0,c=1', a:-1,b:0,c:1},
+    {t:'一般形', s:'a=1,b=−2,c=−3',a:1,b:-2,c:-3}
+  ];
+  (function buildPresets(){
+    const w = el('presets');
+    PRE.forEach((p,i)=>{
+      const b=document.createElement('button');
+      b.className='chip'; b.dataset.i=i;
+      b.innerHTML=`${p.t}<small>${p.s}</small>`;
+      b.onclick=()=>{ sa.value=p.a; sb.value=p.b; sc.value=p.c; read(); draw(); };
+      w.appendChild(b);
+    });
+  })();
+
+  function read(){
+    A = clean(+sa.value);
+    if(A===0){ A = 0.1; sa.value = '0.1'; }   // guard a≠0 (0 だと直線になる)
+    B = clean(+sb.value);
+    C = clean(+sc.value);
+  }
+
+  function circ(x,y,cls,r){ return `<circle class="${cls}" cx="${SX(x).toFixed(1)}" cy="${SY(y).toFixed(1)}" r="${r}"/>`; }
+  const inView = t => Math.abs(t) <= R + 0.02;
+  const clamp = (v,lo,hi) => Math.max(lo, Math.min(hi, v));
+
+  function draw(){
+    /* equation */
+    el('eq').innerHTML =
+      `y <span class="op">=</span> <span class="ca">${fmt(A)}</span>x²`+
+      ` <span class="op">${B>=0?'+':'−'}</span> <span class="cb">${fmt(Math.abs(B))}</span>x`+
+      ` <span class="op">${C>=0?'+':'−'}</span> <span class="cc">${fmt(Math.abs(C))}</span>`;
+
+    /* slider readouts */
+    el('va').textContent = fmt(A);
+    el('vb').textContent = fmt(B);
+    el('vc').textContent = fmt(C);
+    const dir = el('dir');
+    dir.textContent = A>0 ? '下に凸' : '上に凸';
+    dir.className = 'dir' + (A>0 ? '' : ' up');
+
+    /* geometry */
+    const vx = -B/(2*A), vy = C - B*B/(4*A), D = B*B - 4*A*C;
+
+    /* parabola path + axis of symmetry (clipped) */
+    let d='', N=280;
+    for(let i=0;i<=N;i++){
+      const x = -R + 2*R*i/N, y = A*x*x + B*x + C;
+      d += (i?'L':'M') + SX(x).toFixed(1) + ' ' + SY(y).toFixed(1) + ' ';
+    }
+    let dyn = `<path class="curve" d="${d}"/>`;
+    if(inView(vx)){
+      dyn += `<line class="sym" x1="${SX(vx)}" y1="${SY(-R)}" x2="${SX(vx)}" y2="${SY(R)}"/>`;
+    }
+    el('dyn').innerHTML = dyn;
+
+    /* dots + labels (unclipped) */
+    let pts='';
+    if(inView(C)) pts += circ(0, C, 'd-yint', 5);            // y-intercept (0,c)
+    if(D>=0){                                                 // roots on x-axis
+      const s = Math.sqrt(D);
+      const roots = D===0 ? [(-B)/(2*A)] : [(-B-s)/(2*A), (-B+s)/(2*A)];
+      roots.forEach(x=>{ if(inView(x)) pts += circ(x, 0, 'd-root', 6); });
+    }
+    if(inView(vx) && inView(vy)){                            // vertex + coords
+      pts += circ(vx, vy, 'd-vtx', 6.5);
+      const ly = clamp(A>0 ? SY(vy)+19 : SY(vy)-11, 34, 412);
+      const lx = clamp(SX(vx), 42, VB-42);
+      pts += `<text class="vlab" x="${lx}" y="${ly}">(${fmt(vx)}, ${fmt(vy)})</text>`;
+      if(Math.abs(B)>0.05 && inView(vx)){
+        pts += `<text class="symlab" x="${clamp(SX(vx),20,VB-20)}" y="30">x=${fmt(vx)}</text>`;
+      }
+    }
+    if(inView(C) && Math.abs(B)>0.05){                        // y-int label (skip when it merges with vertex at b=0)
+      pts += `<text class="ylab" x="${clamp(SX(0)+9,9,VB-46)}" y="${clamp(SY(C)-6,14,VB-6)}">(0, ${fmt(C)})</text>`;
+    }
+    el('pts').innerHTML = pts;
+
+    /* discriminant card */
+    el('dval').textContent = fmt(D);
+    const card = el('dcard'), msg = el('dmsg');
+    if(D>0){
+      card.className='dcard d-pos';
+      msg.innerHTML='<span class="sgn">D &gt; 0</span> → x軸と <b>2点で交わる</b>';
+    }else if(D===0){
+      card.className='dcard d-zero';
+      msg.innerHTML='<span class="sgn">D = 0</span> → x軸に <b>1点で接する（重解）</b>';
+    }else{
+      card.className='dcard d-neg';
+      msg.innerHTML='<span class="sgn">D &lt; 0</span> → x軸と <b>交わらない</b>';
+    }
+
+    /* readout grid */
+    el('rvVertex').textContent = `( ${fmt(vx)} , ${fmt(vy)} )`;
+    el('rvAxis').textContent   = `x = ${fmt(vx)}`;
+    if(D>0){
+      const s=Math.sqrt(D), r1=(-B-s)/(2*A), r2=(-B+s)/(2*A);
+      const lo=Math.min(r1,r2), hi=Math.max(r1,r2);
+      el('rvRoots').textContent = `x = ${fmt(lo)} , ${fmt(hi)}`;
+    }else if(D===0){
+      el('rvRoots').textContent = `x = ${fmt(-B/(2*A))}（重解）`;
+    }else{
+      el('rvRoots').textContent = 'なし';
+    }
+
+    /* preset highlight */
+    document.querySelectorAll('#presets .chip').forEach(ch=>{
+      const p=PRE[+ch.dataset.i];
+      ch.classList.toggle('on', p.a===A && p.b===B && p.c===C);
+    });
+  }
+
+  [sa,sb,sc].forEach(s=> s.addEventListener('input', ()=>{ read(); draw(); }));
+  read(); draw();
+</script>
+</body>
+</html>

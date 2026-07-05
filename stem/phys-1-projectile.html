@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>斜方投射シミュレーター — 45°で、いちばん遠くへ</title>
+<style>
+  :root{
+    --ink:#3a2a20; --sub:#8a7566; --line:#f0e7df;
+    --pri:#f97316; --pri-ink:#ea580c; --pri-bg:#fff0e6;
+    --acc:#ef4444; --acc-ink:#dc2626; --acc-bg:#fde4e4;
+    --cool:#3b82f6; --cool-ink:#2563eb; --cool-bg:#e4eeff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#fff3ea 0%,#ffffff 52%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(16px,2.6vw,24px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--pri-ink);background:var(--pri-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"🎯";font-size:13px;}
+  h1{font-size:clamp(24px,4.8vw,42px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--pri),#fb923c);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:680px;}
+  .sub b{color:var(--ink);}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:360px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(234,88,12,.09);}
+
+  .sellabel{font-size:11px;font-weight:800;color:var(--sub);letter-spacing:.05em;margin:0 0 8px;}
+
+  .slabel{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+  .slabel span{font-size:clamp(14px,1.9vw,15.5px);font-weight:800;color:var(--ink);}
+  .slabel b{font-size:clamp(19px,2.6vw,23px);font-weight:800;color:var(--pri-ink);
+    font-variant-numeric:tabular-nums;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:9px;border-radius:999px;
+    background:var(--pri-bg);outline:none;margin:9px 0 3px;cursor:pointer;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;
+    border-radius:50%;background:linear-gradient(135deg,var(--pri),#fb923c);border:3px solid #fff;
+    box-shadow:0 3px 10px rgba(249,115,22,.45);cursor:pointer;}
+  input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;
+    background:var(--pri);border:3px solid #fff;box-shadow:0 3px 10px rgba(249,115,22,.45);cursor:pointer;}
+  .srange{display:flex;justify-content:space-between;}
+  .srange small{font-size:11.5px;font-weight:700;color:#c4b3a6;}
+
+  .pchips{display:flex;flex-wrap:wrap;gap:8px;}
+  .pchip{border:1.7px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+    font-weight:800;font-size:14.5px;border-radius:12px;padding:8px 13px;cursor:pointer;
+    transition:transform .12s,border-color .14s,box-shadow .14s;font-variant-numeric:tabular-nums;}
+  .pchip:hover{border-color:#f6cba7;}
+  .pchip:active{transform:scale(.96);}
+  .pchip.on{background:linear-gradient(135deg,var(--pri),#fb923c);border-color:transparent;
+    color:#fff;box-shadow:0 6px 16px rgba(249,115,22,.30);}
+
+  .toggle{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+    font-weight:800;font-size:15px;border-radius:14px;padding:11px 15px;cursor:pointer;margin-top:18px;
+    transition:transform .12s,border-color .14s,box-shadow .14s;text-align:left;}
+  .toggle small{font-weight:700;color:var(--sub);font-size:11.5px;}
+  .toggle:active{transform:scale(.99);}
+  .toggle.on{background:linear-gradient(135deg,var(--acc),#f87171);border-color:transparent;
+    color:#fff;box-shadow:0 7px 18px rgba(239,68,68,.28);}
+  .toggle.on small{color:#ffe1e1;}
+
+  .play{width:100%;margin-top:12px;border:none;cursor:pointer;font-family:inherit;
+    font-size:18px;font-weight:800;color:#fff;border-radius:15px;padding:15px 10px;letter-spacing:.02em;
+    background:linear-gradient(135deg,var(--pri),#fb923c);box-shadow:0 10px 24px rgba(249,115,22,.34);
+    transition:transform .12s,box-shadow .14s,filter .14s;}
+  .play:hover{filter:brightness(1.03);}
+  .play:active{transform:scale(.98);}
+
+  .stage{display:flex;flex-direction:column;}
+  .canvas{background:linear-gradient(180deg,#fff5ec 0%,#fffcf9 72%);border:1px solid var(--line);
+    border-radius:16px;padding:6px;}
+  .canvas svg{width:100%;height:auto;display:block;}
+
+  .reads{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;
+    margin-top:clamp(14px,2vw,18px);}
+  .rc{border:1px solid var(--line);border-radius:14px;padding:12px 13px;background:#fff;}
+  .rc span{display:block;font-size:12px;font-weight:800;color:var(--sub);}
+  .rc b{display:block;font-size:clamp(20px,3vw,26px);font-weight:800;line-height:1.15;margin:3px 0 1px;
+    font-variant-numeric:tabular-nums;}
+  .rc small{font-size:11px;font-weight:700;color:#c4b3a6;font-variant-numeric:tabular-nums;}
+  .rc.r b{color:var(--pri-ink);} .rc.r{background:var(--pri-bg);border-color:#fbdcc2;}
+  .rc.h b{color:var(--acc-ink);}
+  .rc.t b{color:var(--cool-ink);}
+
+  .decomp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px;}
+  .dc{border:1px solid var(--line);border-radius:14px;padding:11px 13px;background:#fff;}
+  .dc span{display:block;font-size:12.5px;font-weight:800;color:var(--ink);}
+  .dc b{display:block;font-size:clamp(18px,2.5vw,22px);font-weight:800;margin:2px 0 3px;
+    font-variant-numeric:tabular-nums;}
+  .dc small{font-size:11px;font-weight:700;color:var(--sub);line-height:1.5;display:block;}
+  .dc.cool{border-left:5px solid var(--cool);} .dc.cool b{color:var(--cool-ink);}
+  .dc.acc{border-left:5px solid var(--acc);} .dc.acc b{color:var(--acc-ink);}
+
+  .gnote{font-size:11.5px;font-weight:700;color:#b7a698;margin:12px 2px 0;text-align:center;}
+
+  .insight{background:linear-gradient(135deg,#fff2e8,#fff9f4);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    margin-top:clamp(16px,2.4vw,26px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.78;color:#5a4636;font-weight:500;}
+  .insight b{color:var(--pri-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#c1b1a3;text-align:center;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">放物運動シミュレーター</span>
+    <h1>斜方投射は、<span class="em">45°</span>でいちばん遠くへ飛ぶ</h1>
+    <p class="sub">初速 v₀ と 角度 θ を動かすと、放物線・速度の分解・飛距離が<b>その場で</b>変わります。運動は「水平＝等速」と「鉛直＝重力で加速」の合成。<b>45°を境に飛距離が対称</b>になる（30°と60°は同じ）ことを、指で確かめてください。</p>
+  </header>
+
+  <div class="app">
+    <!-- ======= CONTROLS ======= -->
+    <section class="panel">
+      <div class="slabel"><span>① 初速 v₀</span><b id="v0val">20 m/s</b></div>
+      <input type="range" id="v0" min="5" max="30" step="1" value="20" aria-label="初速 v0">
+      <div class="srange"><small>5</small><small>30 m/s</small></div>
+
+      <div class="slabel" style="margin-top:17px"><span>② 角度 θ</span><b id="thval">45°</b></div>
+      <input type="range" id="th" min="0" max="90" step="1" value="45" aria-label="角度 theta">
+      <div class="srange"><small>0°</small><small>90°</small></div>
+
+      <p class="sellabel" style="margin-top:18px">角度をすぐ切りかえる</p>
+      <div class="pchips">
+        <button class="pchip" data-a="15">15°</button>
+        <button class="pchip" data-a="30">30°</button>
+        <button class="pchip" data-a="45">45°</button>
+        <button class="pchip" data-a="60">60°</button>
+        <button class="pchip" data-a="75">75°</button>
+        <button class="pchip" data-a="90">90°</button>
+      </div>
+
+      <button class="toggle" id="compBtn">補角（90°−θ）の弧を重ねる<small>30°↔60° が同じ飛距離になるのを見る</small></button>
+      <button class="play" id="playBtn">▷ 打ち出す</button>
+    </section>
+
+    <!-- ======= STAGE ======= -->
+    <section class="stage">
+      <div class="canvas">
+        <svg viewBox="0 0 620 400" role="img" aria-label="斜方投射の放物線と速度ベクトル">
+          <defs>
+            <marker id="ah-pri" markerWidth="8" markerHeight="8" refX="6.2" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#ea580c"/></marker>
+            <marker id="ah-cool" markerWidth="8" markerHeight="8" refX="6.2" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#3b82f6"/></marker>
+            <marker id="ah-acc" markerWidth="8" markerHeight="8" refX="6.2" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#ef4444"/></marker>
+          </defs>
+          <g id="scene"></g>
+          <circle id="ball" r="8" fill="#ea580c" stroke="#fff" stroke-width="2.5" cx="58" cy="336" style="visibility:hidden"/>
+        </svg>
+      </div>
+
+      <div class="reads">
+        <div class="rc r"><span>飛距離 R</span><b id="Rval">40.8 m</b><small>v₀²sin2θ ⁄ g</small></div>
+        <div class="rc h"><span>最高点 H</span><b id="Hval">10.2 m</b><small>v₀²sin²θ ⁄ 2g</small></div>
+        <div class="rc t"><span>滞空時間 T</span><b id="Tval">2.89 s</b><small>2v₀sinθ ⁄ g</small></div>
+      </div>
+      <div class="decomp">
+        <div class="dc cool"><span>水平 v<sub>x</sub> ＝ v₀cosθ</span><b id="vxval">14.1 m/s</b><small>ずっと等速（重力は横に効かない）</small></div>
+        <div class="dc acc"><span>鉛直 v<sub>y</sub> ＝ v₀sinθ</span><b id="vyval">14.1 m/s</b><small>上がるほど減速→0→落ちて加速</small></div>
+      </div>
+      <p class="gnote">g ＝ 9.8 m/s²・空気抵抗は無視した理想化モデル</p>
+    </section>
+  </div>
+
+  <div class="insight">
+    <span class="h">気づき</span>
+    <div>斜方投射は<b>「水平＝等速」</b>と<b>「鉛直＝重力で加速」</b>の合成です。だから速度を v<sub>x</sub>＝v₀cosθ と v<sub>y</sub>＝v₀sinθ に分けて考えます。飛距離は <b>R＝v₀²sin2θ ⁄ g</b> なので、sin2θ が最大になる <b>θ＝45°で最大</b>。さらに sin2θ は45°を挟んで対称だから、<b>30°と60°は同じ飛距離</b>（15°と75°も同じ）。参考書は完成した式を並べるだけですが、ここでは自分で動かして確かめられます。</div>
+  </div>
+
+  <p class="foot">9月号「AIで動く教材を作る」試作 ／ 一文の指示で、この種の物理シミュレーターが生成できます</p>
+</div>
+
+<script>
+  const g = 9.8;
+  const launchX = 58, groundY = 336, plotW = 520, V0MAX = 30;
+  const maxReachX = launchX + plotW;            // θ=45°, v0=30 の到達点＝プロット右端
+  const SCALE = plotW * g / (V0MAX * V0MAX);    // 位置の固定スケール[px/m] … v0で弧が伸縮する
+  const AS = 2.6;                               // 速度ベクトルのスケール[px/(m/s)]
+  const el = id => document.getElementById(id);
+
+  let v0 = 20, theta = 45, showComp = true;
+  let raf = null, playing = false;
+  const ball = el('ball');
+
+  function metrics(V, thDeg){
+    const th = thDeg * Math.PI / 180;
+    const vx = V * Math.cos(th), vy = V * Math.sin(th);
+    return { th, vx, vy,
+      T: 2 * vy / g,
+      R: V * V * Math.sin(2 * th) / g,
+      H: V * V * Math.sin(th) * Math.sin(th) / (2 * g) };
+  }
+  function trajPath(V, thDeg){
+    const m = metrics(V, thDeg);
+    if (m.T <= 1e-6) return '';
+    const N = 84; let d = '';
+    for (let i = 0; i <= N; i++){
+      const t = m.T * i / N;
+      const x = m.vx * t, y = m.vy * t - 0.5 * g * t * t;
+      d += (i ? 'L' : 'M') + (launchX + x * SCALE).toFixed(1) + ' ' + (groundY - y * SCALE).toFixed(1) + ' ';
+    }
+    return d.trim();
+  }
+
+  function buildScene(){
+    const m = metrics(v0, theta);
+    const landingX = launchX + m.R * SCALE;
+    const peakX = launchX + (m.R / 2) * SCALE;
+    const peakY = groundY - m.H * SCALE;
+    const curMaxX = launchX + (v0 * v0 / g) * SCALE;   // このv0で45°のときの到達点
+    const vxTipX = launchX + m.vx * AS;
+    const vyTipY = groundY - m.vy * AS;
+    let s = '';
+
+    // ground
+    s += `<rect x="0" y="${groundY}" width="620" height="${400 - groundY}" fill="#f7e7d8"/>`;
+    s += `<line x1="18" y1="${groundY}" x2="606" y2="${groundY}" stroke="#e2ccb8" stroke-width="2.5"/>`;
+
+    // max-reach reference (this v0)
+    if (v0 > 0){
+      const topY = Math.max(150, peakY - 30);
+      s += `<line x1="${curMaxX.toFixed(1)}" y1="${groundY}" x2="${curMaxX.toFixed(1)}" y2="${topY}" stroke="#f8b98a" stroke-width="2" stroke-dasharray="2 6"/>`;
+      s += `<text x="${(curMaxX - 6).toFixed(1)}" y="${(topY - 6).toFixed(1)}" text-anchor="end" font-size="14.5" font-weight="800" fill="#ea580c">45°で最大</text>`;
+    }
+
+    // complement (90-θ) ghost
+    const comp = 90 - theta;
+    if (showComp && theta > 0 && theta < 90 && Math.abs(theta - 45) >= 2){
+      const gp = trajPath(v0, comp);
+      const gm = metrics(v0, comp);
+      s += `<path d="${gp}" fill="none" stroke="#caa78c" stroke-width="2.6" stroke-dasharray="7 6" stroke-linecap="round" opacity=".9"/>`;
+      const gpx = launchX + (gm.R / 2) * SCALE, gpy = groundY - gm.H * SCALE;
+      s += `<text x="${gpx.toFixed(1)}" y="${(gpy - 9).toFixed(1)}" text-anchor="middle" font-size="13.5" font-weight="800" fill="#a5866c">補角 ${comp}°</text>`;
+    }
+
+    // main arc
+    const mp = trajPath(v0, theta);
+    if (mp) s += `<path d="${mp}" fill="none" stroke="#f97316" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+    // peak marker
+    if (m.H > 0.05){
+      s += `<line x1="${peakX.toFixed(1)}" y1="${peakY.toFixed(1)}" x2="${peakX.toFixed(1)}" y2="${groundY}" stroke="#f2b4b4" stroke-width="1.6" stroke-dasharray="3 4"/>`;
+      s += `<circle cx="${peakX.toFixed(1)}" cy="${peakY.toFixed(1)}" r="5.5" fill="#ef4444"/>`;
+      s += `<text x="${peakX.toFixed(1)}" y="${(peakY - 11).toFixed(1)}" text-anchor="middle" font-size="14.5" font-weight="800" fill="#dc2626">最高点 H</text>`;
+    }
+
+    // range baseline
+    if (m.R > 0.05){
+      s += `<line x1="${launchX}" y1="${groundY + 13}" x2="${landingX.toFixed(1)}" y2="${groundY + 13}" stroke="#ea580c" stroke-width="2" stroke-dasharray="2 5"/>`;
+      s += `<circle cx="${landingX.toFixed(1)}" cy="${groundY}" r="5" fill="#ea580c"/>`;
+      s += `<text x="${((launchX + landingX) / 2).toFixed(1)}" y="${groundY + 31}" text-anchor="middle" font-size="15" font-weight="800" fill="#ea580c">飛距離 R</text>`;
+    }
+
+    // launch-angle arc
+    if (theta > 0.5){
+      const rA = 42; let ap = '';
+      for (let k = 0; k <= 16; k++){
+        const a = m.th * k / 16;
+        ap += (k ? 'L' : 'M') + (launchX + rA * Math.cos(a)).toFixed(1) + ' ' + (groundY - rA * Math.sin(a)).toFixed(1) + ' ';
+      }
+      s += `<path d="${ap.trim()}" fill="none" stroke="#a08a78" stroke-width="2"/>`;
+      const tx = launchX + (rA + 15) * Math.cos(m.th / 2), ty = groundY - (rA + 15) * Math.sin(m.th / 2);
+      s += `<text x="${(tx + 3).toFixed(1)}" y="${(ty + 5).toFixed(1)}" font-size="15" font-weight="800" fill="#3a2a20">θ</text>`;
+    }
+
+    // velocity decomposition (rectangle + vectors)
+    if (m.vx > 0.05 && m.vy > 0.05){
+      s += `<line x1="${vxTipX.toFixed(1)}" y1="${groundY}" x2="${vxTipX.toFixed(1)}" y2="${vyTipY.toFixed(1)}" stroke="#cdbaa9" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+      s += `<line x1="${launchX}" y1="${vyTipY.toFixed(1)}" x2="${vxTipX.toFixed(1)}" y2="${vyTipY.toFixed(1)}" stroke="#cdbaa9" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+      s += `<line x1="${launchX}" y1="${groundY}" x2="${vxTipX.toFixed(1)}" y2="${vyTipY.toFixed(1)}" stroke="#ea580c" stroke-width="2.6" marker-end="url(#ah-pri)"/>`;
+      s += `<text x="${(vxTipX + 7).toFixed(1)}" y="${(vyTipY - 4).toFixed(1)}" font-size="13.5" font-weight="800" fill="#ea580c">v₀</text>`;
+    }
+    if (m.vx > 0.05)
+      s += `<line x1="${launchX}" y1="${groundY}" x2="${vxTipX.toFixed(1)}" y2="${groundY}" stroke="#3b82f6" stroke-width="4" marker-end="url(#ah-cool)"/>`;
+    if (m.vy > 0.05)
+      s += `<line x1="${launchX}" y1="${groundY}" x2="${launchX}" y2="${vyTipY.toFixed(1)}" stroke="#ef4444" stroke-width="4" marker-end="url(#ah-acc)"/>`;
+
+    // launch point
+    s += `<circle cx="${launchX}" cy="${groundY}" r="4.2" fill="#3a2a20"/>`;
+    return s;
+  }
+
+  function fill(elm){
+    const min = +elm.min, max = +elm.max, p = (+elm.value - min) / (max - min) * 100;
+    elm.style.background = `linear-gradient(90deg, var(--pri) ${p}%, var(--pri-bg) ${p}%)`;
+  }
+
+  function render(){
+    if (raf) cancelAnimationFrame(raf);
+    playing = false;
+    const m = metrics(v0, theta);
+    el('scene').innerHTML = buildScene();
+    ball.setAttribute('cx', launchX); ball.setAttribute('cy', groundY);
+    ball.style.visibility = 'hidden';
+    el('v0val').textContent = v0 + ' m/s';
+    el('thval').textContent = theta + '°';
+    el('Rval').textContent = m.R.toFixed(1) + ' m';
+    el('Hval').textContent = m.H.toFixed(1) + ' m';
+    el('Tval').textContent = m.T.toFixed(2) + ' s';
+    el('vxval').textContent = m.vx.toFixed(1) + ' m/s';
+    el('vyval').textContent = m.vy.toFixed(1) + ' m/s';
+    fill(el('v0')); fill(el('th'));
+    document.querySelectorAll('.pchip').forEach(c => c.classList.toggle('on', +c.dataset.a === theta));
+    el('compBtn').classList.toggle('on', showComp);
+  }
+
+  function play(){
+    const m = metrics(v0, theta);
+    if (m.T <= 1e-6) return;
+    if (raf) cancelAnimationFrame(raf);
+    playing = true;
+    ball.style.visibility = 'visible';
+    const dur = Math.min(2.2, Math.max(0.65, m.T * 0.45)) * 1000;
+    const t0 = performance.now();
+    function step(now){
+      let u = (now - t0) / dur; if (u > 1) u = 1;
+      const t = m.T * u;
+      const x = m.vx * t, y = m.vy * t - 0.5 * g * t * t;
+      ball.setAttribute('cx', (launchX + x * SCALE).toFixed(1));
+      ball.setAttribute('cy', (groundY - Math.max(0, y) * SCALE).toFixed(1));
+      if (u < 1) raf = requestAnimationFrame(step); else playing = false;
+    }
+    raf = requestAnimationFrame(step);
+  }
+
+  el('v0').addEventListener('input', e => { v0 = +e.target.value; render(); });
+  el('th').addEventListener('input', e => { theta = +e.target.value; render(); });
+  document.querySelectorAll('.pchip').forEach(c =>
+    c.addEventListener('click', () => { theta = +c.dataset.a; el('th').value = theta; render(); }));
+  el('compBtn').addEventListener('click', () => { showComp = !showComp; render(); });
+  el('playBtn').addEventListener('click', play);
+
+  render();
+</script>
+</body>
+</html>

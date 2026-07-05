@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>関係詞ビューア — 種類・カンマ・かかり先</title>
+<style>
+  :root{
+    --ink:#2b2f3a; --sub:#87909f; --line:#eceef5;
+    --indigo:#6d5efc; --indigo2:#9166ff; --indigo-ink:#5b4ae8; --indigo-bg:#f1eefe;
+    --rose:#f8577d; --rose-ink:#e23f6d; --rose-bg:#ffe6ee;
+    --teal:#12c7b0; --teal-ink:#0d9986; --teal-bg:#c9f2e9;
+    --amber:#fbbf24;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#edf4ff 0%,#ffffff 54%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(16px,2.4vw,24px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--indigo-ink);background:var(--indigo-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";font-size:13px;}
+  h1{font-size:clamp(24px,5vw,42px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--rose),#ff7aa0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:680px;}
+  .sub b{color:var(--ink);}
+
+  /* tab bar (group switcher) */
+  .tabs{display:flex;flex-wrap:wrap;gap:9px;margin:clamp(14px,2.2vw,22px) 0 clamp(16px,2.4vw,24px);}
+  .tab{display:flex;flex-direction:column;gap:1px;border:1.7px solid var(--line);background:#fff;
+    color:var(--ink);font-family:inherit;font-weight:800;font-size:clamp(13.5px,1.9vw,15.5px);
+    padding:9px 16px;border-radius:14px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;}
+  .tab small{font-weight:600;font-size:11px;color:var(--sub);}
+  .tab:hover{border-color:#d9d2fb;}
+  .tab:active{transform:scale(.98);}
+  .tab.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));border-color:transparent;
+    color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.30);}
+  .tab.on small{color:#e9e4ff;}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:390px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(93,74,232,.09);}
+
+  .base{font-size:clamp(13px,1.7vw,14.5px);color:var(--sub);margin:0 0 18px;padding-bottom:15px;
+    border-bottom:1px dashed #e7e3f6;line-height:1.66;}
+  .base b{color:var(--ink);font-weight:700;}
+
+  .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:10px;}
+  .btns button{display:flex;flex-direction:column;justify-content:center;min-height:60px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:16px;font-weight:800;border-radius:15px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;padding:8px 6px;text-align:center;}
+  .btns button small{font-weight:600;color:var(--sub);font-size:11.5px;margin-top:2px;}
+  .btns button:hover{border-color:#d9d2fb;}
+  .btns button:active{transform:scale(.97);}
+  .btns button.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.34);}
+  .btns button.on small{color:#e9e4ff;}
+
+  /* group-1 segmented controls (noun × comma) */
+  .segrow{display:flex;align-items:center;gap:11px;margin-bottom:12px;}
+  .seglab{flex:0 0 42px;font-size:12.5px;font-weight:800;color:var(--sub);}
+  .seg{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .seg button{display:flex;flex-direction:column;justify-content:center;min-height:52px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:14.5px;font-weight:800;border-radius:13px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;padding:6px 4px;text-align:center;}
+  .seg button small{font-weight:600;color:var(--sub);font-size:11px;margin-top:2px;}
+  .seg button:active{transform:scale(.97);}
+  .seg button.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.34);}
+  .seg button.on small{color:#e9e4ff;}
+
+  .stage{display:flex;flex-direction:column;}
+  .sentence{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:600;
+    font-size:clamp(22px,4.2vw,44px);line-height:1.42;text-align:center;letter-spacing:.004em;
+    padding:clamp(24px,4.5vw,50px) clamp(14px,2.5vw,30px);
+    background:linear-gradient(160deg,#f2f8ff,#ebf3ff);border-radius:18px;color:#333846;
+    display:grid;place-items:center;flex:1;min-height:clamp(120px,20vw,232px);}
+  .sentence.long{font-size:clamp(18px,3vw,31px);}
+  .sentence.xlong{font-size:clamp(16px,2.5vw,25px);}
+  .sline{width:100%;overflow-wrap:break-word;}
+  .sentence .only{color:var(--rose-ink);background:var(--rose-bg);border-radius:10px;
+    padding:2px 12px;font-weight:700;}
+  .sentence .focus{color:var(--teal-ink);font-weight:700;
+    box-shadow:inset 0 -0.4em 0 var(--teal-bg);border-radius:3px;padding:0 2px;}
+  .sentence .focus2{color:var(--rose-ink);font-weight:700;
+    box-shadow:inset 0 -0.4em 0 var(--rose-bg);border-radius:3px;padding:0 2px;}
+  .sentence .comma{color:var(--rose-ink);font-weight:800;}
+
+  .answer{margin-top:clamp(16px,2.4vw,22px);}
+  .scopechip{display:inline-flex;align-items:center;gap:9px;background:var(--teal-bg);
+    color:var(--teal-ink);font-weight:800;font-size:clamp(14px,1.8vw,16px);
+    padding:9px 16px;border-radius:999px;margin:0 0 13px;max-width:100%;}
+  .scopechip span{color:var(--sub);font-weight:600;flex:0 0 auto;}
+  .scopechip b{min-width:0;overflow-wrap:break-word;}
+  .gloss{font-size:clamp(15.5px,2.1vw,20px);line-height:1.72;font-weight:500;}
+  .gloss b{color:var(--rose-ink);font-weight:700;}
+  .gloss .tt{color:var(--teal-ink);font-weight:700;}
+  .gloss .rr{color:var(--rose-ink);font-weight:700;}
+  .note{font-size:clamp(12px,1.5vw,13.5px);color:var(--sub);margin-top:11px;line-height:1.64;}
+
+  /* dynamic 骨組み / 言い換え box */
+  .extra{margin-top:clamp(14px,2.1vw,20px);padding:clamp(13px,2vw,17px) clamp(14px,2.2vw,20px);
+    border:1px dashed #e7e3f6;border-radius:16px;background:#fbfaff;}
+  .extra-label{font-size:clamp(11.5px,1.5vw,13px);font-weight:800;color:var(--indigo-ink);margin:0 0 8px;}
+  .extra-body{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:600;
+    font-size:clamp(14px,2vw,18px);line-height:1.56;color:#333846;overflow-wrap:break-word;}
+  .extra-body b{color:var(--teal-ink);font-weight:700;}
+
+  .insight{grid-column:1/-1;background:linear-gradient(135deg,#eef5ff,#f6faff);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.74;color:#4a4560;font-weight:500;}
+  .insight b{color:var(--indigo-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#a9afbe;text-align:center;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">関係詞＆かかり先ビューア</span>
+    <h1>関係詞は、名詞を<span class="em">後ろから</span>説明する</h1>
+    <p class="sub">who・which・where… の使い分け、<b>カンマ</b>の有無で変わる意味、そして長文の<b>かかり先</b>。3つのタブで、名詞にかかる“飾り”の見抜き方を確かめてください。</p>
+  </header>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="app">
+    <section class="panel">
+      <p class="base" id="base"></p>
+      <div id="g1ctrl" style="display:none">
+        <div class="segrow"><span class="seglab">名詞</span><div class="seg" id="segNoun"></div></div>
+        <div class="segrow"><span class="seglab">カンマ</span><div class="seg" id="segComma"></div></div>
+      </div>
+      <div class="btns" id="btns"></div>
+    </section>
+
+    <section class="stage">
+      <div class="sentence" id="sbox"><div class="sline" id="sent"></div></div>
+      <div class="answer">
+        <div class="scopechip"><span id="chipLabel"></span> <b id="chip"></b></div>
+        <div class="gloss" id="gloss"></div>
+        <div class="extra" id="extra" style="display:none">
+          <p class="extra-label" id="extraLabel"></p>
+          <div class="extra-body" id="extraBody"></div>
+        </div>
+        <div class="note" id="note"></div>
+      </div>
+    </section>
+
+    <div class="insight">
+      <span class="h">気づき</span>
+      <div>関係詞は「<b>名詞を後ろから説明する</b>」装置。カンマの有無で〈絞り込み〉か〈補足〉かが変わり、数の解釈まで動くことも。長文では<b>“どの名詞にかかるか”</b>を見抜けるかで意味が決まります。飾りを外して骨組み（S＋V）を先に掴む。</div>
+    </div>
+  </div>
+
+  <p class="foot">螢雪時代「小船幹生のStudy Hack」試作 ／ 固定の説明を、動かせる実験装置に</p>
+</div>
+
+<script>
+  const GROUPS = [
+    {
+      id:'restr', tab:'制限 vs 非制限', tabsub:'カンマで意味が変わる',
+      base:'同じ who 節でも、<b>カンマの有無</b>で意味が変わります。なし＝<b>絞り込み</b>、あり＝<b>補足</b>。名詞と数の解釈まで動くことも。',
+      segNoun:['兄（brother）','息子（two sons）'],
+      matrix:[
+        [ // 兄
+          { chipLabel:'who 節の働き →', chip:'絞り込み（制限）',
+            sent:'My brother <span class="focus">who lives in Osaka</span> is a doctor.',
+            gloss:'兄が何人かいて、「大阪に住んでいるほうの」兄。<b>who 節が兄を絞り込む</b>。',
+            note:'カンマなしの who 節は、複数いる兄から一人を特定する働き。外すと、どの兄の話か分からなくなる。' },
+          { chipLabel:'who 節の働き →', chip:'補足（非制限）',
+            sent:'My brother<span class="comma">,</span> <span class="focus">who lives in Osaka</span><span class="comma">,</span> is a doctor.',
+            gloss:'兄は（一人）。「医者だ」と述べつつ、<b>ついでに「大阪在住」と補足</b>している。',
+            note:'カンマありの who 節は、取り除いても文が成り立つ「おまけ情報」。〈, who …〉＝「―、その人は…」と足していくイメージ。' }
+        ],
+        [ // 息子
+          { chipLabel:'who 節の働き →', chip:'絞り込み（制限）',
+            sent:'He has two sons <span class="focus">who became doctors</span>.',
+            gloss:'息子は<b>3人以上</b>いて、そのうち「医者になった2人」を指す含み。who 節が「どの2人か」を絞り込む。',
+            note:'制限用法。ほかにも息子がいる可能性を残す（＝医者にならなかった息子もいる）。「医者になった息子がちょうど2人」。',
+            extraLabel:'骨組み（S＋V＋O）', extra:'<b>He has two sons.</b>　＋「医者になった」で絞り込み' },
+          { chipLabel:'who 節の働き →', chip:'補足（非制限）',
+            sent:'He has two sons<span class="comma">,</span> <span class="focus">who became doctors</span>.',
+            gloss:'息子は<b>2人だけ</b>。その<b>二人とも</b>医者になった、と補足している。',
+            note:'非制限用法。カンマがあると「息子は2人」で確定し、who 以下は「その2人について」の追加説明。数の解釈まで変わる好例。' }
+        ]
+      ]
+    },
+    {
+      id:'kinds', tab:'関係詞の種類', tabsub:'who / which / where…',
+      base:'関係詞は<b>名詞を後ろから説明する</b>装置。どの語を受け（人・物・場所…）、節の中で何の働きか（主語・目的語・所有格…）で使い分けます。',
+      items:[
+        { btn:'who', hint:'主格・人', chipLabel:'種類 →', chip:'主格・人',
+          sent:'the boy <span class="focus">who broke the window</span>',
+          gloss:'「窓を割った男の子」。who は<b>人</b>を受け、節の中で<b>主語</b>（who broke …）。',
+          note:'who＝先行詞（人）＋主語。節の中で「〜が」にあたる働きをする。' },
+        { btn:'whom', hint:'目的格・人', chipLabel:'種類 →', chip:'目的格・人',
+          sent:'the woman <span class="focus">whom I met yesterday</span>',
+          gloss:'「昨日会った女性」。whom は<b>人</b>を受け、節の中で<b>目的語</b>（met の O）。',
+          note:'口語では who / that / 省略も可。ただし〈前置詞＋whom〉のときは whom が残る（例 to whom）。' },
+        { btn:'whose', hint:'所有格', chipLabel:'種類 →', chip:'所有格（人・物）',
+          sent:'the man <span class="focus">whose car was stolen</span>',
+          gloss:'「車を盗まれた男性」。whose は<b>所有格</b>で「その人の車（＝his car）」の his にあたる。',
+          note:'〈whose＋名詞〉で「〜の…」。人にも物にも使える（例 a house whose roof is red）。' },
+        { btn:'which', hint:'主格/目的格・物', chipLabel:'種類 →', chip:'物・事（主格/目的格）',
+          sent:'the book <span class="focus">which changed my life</span>',
+          gloss:'「私の人生を変えた本」。which は<b>物・事</b>を受ける。ここでは節の主語。',
+          note:'目的格でも使う（the book which I bought）。制限用法なら that も可、口語では省略も。' },
+        { btn:'that', hint:'人・物 両用', chipLabel:'種類 →', chip:'人・物 両用（制限のみ）',
+          sent:'the fastest runner <span class="focus">that I know</span>',
+          gloss:'「私が知る中で最も速い走者」。最上級・the only・all などの後では<b>that が好まれる</b>。',
+          note:'that は制限用法専用。カンマ付き（非制限）や〈前置詞＋関係詞〉では使えない（×, that ／ ×in that）。' },
+        { btn:'where', hint:'関係副詞・場所', chipLabel:'種類 →', chip:'関係副詞・場所',
+          sent:'the town <span class="focus">where I was born</span>',
+          gloss:'「私が生まれた町」。where は「その町<b>で</b>（＝in the town）」の意味を含む。',
+          note:'関係副詞は〈前置詞＋関係代名詞〉に相当。だから関係代名詞 which とは違い、後ろが完全な文になる。',
+          extraLabel:'言い換え', extra:'the town where I was born ＝ the town <b>in which</b> I was born' },
+        { btn:'when', hint:'関係副詞・時', chipLabel:'種類 →', chip:'関係副詞・時',
+          sent:'the day <span class="focus">when we met</span>',
+          gloss:'「私たちが出会った日」。when は「その日<b>に</b>（＝on the day）」を含む。',
+          note:'時を表す先行詞（day / time / year …）＋ when。〈on / in which〉で言い換え可。',
+          extraLabel:'言い換え', extra:'the day when we met ＝ the day <b>on which</b> we met' },
+        { btn:'why', hint:'関係副詞・理由', chipLabel:'種類 →', chip:'関係副詞・理由',
+          sent:'the reason <span class="focus">why he left</span>',
+          gloss:'「彼が去った理由」。why の先行詞は the reason に限られる。',
+          note:'why は省略や that での代用も可（the reason he left）。',
+          extraLabel:'言い換え', extra:'the reason why he left ＝ the reason <b>for which</b> he left' },
+        { btn:'in which', hint:'前置詞＋関代', chipLabel:'種類 →', chip:'前置詞＋関係代名詞',
+          sent:'the house <span class="focus">in which he lives</span>',
+          gloss:'「彼が住んでいる家」。前置詞 in が関係代名詞 which の前に出た形。in which ＝ where。',
+          note:'前置詞は節末に残すこともできる。〈前置詞＋that〉は不可（×in that）、〈前置詞＋whom/which〉のみ。',
+          extraLabel:'言い換え', extra:'the house in which he lives ＝ the house <b>where</b> he lives ＝ the house (which) he lives <b>in</b>' },
+        { btn:', which', hint:'継続用法', chipLabel:'種類 →', chip:'継続用法・前文を受ける',
+          sent:'He said he was tired<span class="comma">,</span> <span class="focus">which was a lie</span>.',
+          gloss:'「彼は疲れたと言った。<b>だがそれは嘘だった</b>」。which は前の<b>文全体</b>を受けている。',
+          note:'〈, which〉は直前の名詞だけでなく、前の節・文全体を先行詞にできる。「そしてそれは／するとそれが」と足す。' },
+        { btn:'what', hint:'先行詞を含む', chipLabel:'種類 →', chip:'関係代名詞 what（先行詞込み）',
+          sent:'<span class="focus">What matters</span> is effort.',
+          gloss:'「<b>大切なこと</b>は努力だ」。what ＝ the thing(s) that。what 自体に先行詞が含まれる。',
+          note:'what 節は名詞のかたまり（主語・目的語・補語になる）。先行詞は前に置かない。',
+          extraLabel:'言い換え', extra:'What matters ＝ <b>The thing that</b> matters' }
+      ]
+    },
+    {
+      id:'scope', tab:'かかり先（長文）', tabsub:'何がどれを飾るか',
+      base:'長文では<b>“どの名詞にかかるか”</b>で意味が決まる。関係節・分詞句という「飾り」を外し、<b>骨組み（S＋V）</b>を先に掴む。',
+      items:[
+        { btn:'The report…', hint:'that＝目的格', chipLabel:'かかり先 →', chip:'The report',
+          sent:'The report <span class="focus">that the committee submitted last week</span> contains several errors.',
+          gloss:'主語は <b>The report</b>、動詞は <b>contains</b>。that 節（先週委員会が提出した）は The report を後ろから説明する“飾り”。',
+          note:'節の中は the committee（S）submitted（V）で、that＝submitted の目的語（＝the report）。飾りを外すと S＋V＋O が見える。',
+          extraLabel:'骨組み（S＋V＋O）', extra:'<b>The report contains several errors.</b>' },
+        { btn:'The scientist…', hint:'whose', chipLabel:'かかり先 →', chip:'The scientist',
+          sent:'The scientist <span class="focus">whose theory the professor criticized</span> won the prize.',
+          gloss:'主語は <b>The scientist</b>、動詞は <b>won</b>。whose theory 〜 が The scientist を修飾している。',
+          note:'whose theory ＝「その科学者の理論」。節内は the professor（S）criticized（V）whose theory（O）。所有格関係詞の難所。',
+          extraLabel:'骨組み（S＋V＋O）', extra:'<b>The scientist won the prize.</b>' },
+        { btn:'the man…', hint:'現在分詞', chipLabel:'修飾 →', chip:'現在分詞（〜している）',
+          sent:'the man <span class="focus">standing by the door</span>',
+          gloss:'「ドアのそばに<b>立っている</b>男性」。standing（現在分詞）が the man を後ろから修飾＝「〜している」。',
+          note:'現在分詞は「能動・進行（〜している）」。名詞の直後に置く後置修飾で、関係代名詞＋be の省略と同じ働き。',
+          extraLabel:'言い換え', extra:'the man standing by the door ＝ the man <b>who is</b> standing by the door' },
+        { btn:'the letter…', hint:'過去分詞', chipLabel:'修飾 →', chip:'過去分詞（〜された）',
+          sent:'the letter <span class="focus">written in French</span>',
+          gloss:'「フランス語で<b>書かれた</b>手紙」。written（過去分詞）が the letter を修飾＝「〜された」。',
+          note:'過去分詞は「受動・完了（〜された）」。手紙は「書く」側でなく「書かれる」側。現在分詞との違いに注意。',
+          extraLabel:'言い換え', extra:'the letter written in French ＝ the letter <b>which was</b> written in French' },
+        { btn:'Students…', hint:'関係節が2つ', chipLabel:'かかり先 →', chip:'2つの名詞へ',
+          sent:'Students <span class="focus">who study abroad</span> often develop skills <span class="focus2">that employers value</span>.',
+          gloss:'<span class="tt">who study abroad</span> は Students を、<span class="rr">that employers value</span> は skills を修飾。文の動詞は develop。',
+          note:'1文に関係詞節が複数。各節が「直前のどの名詞にかかるか」を見極める（teal＝Students の飾り、rose＝skills の飾り）。',
+          extraLabel:'骨組み（S＋V＋O）', extra:'<b>Students develop skills.</b>' }
+      ]
+    }
+  ];
+
+  const tabs = document.getElementById('tabs');
+  const $base = document.getElementById('base');
+  const $g1 = document.getElementById('g1ctrl');
+  const segNoun = document.getElementById('segNoun');
+  const segComma = document.getElementById('segComma');
+  const $btns = document.getElementById('btns');
+  const $sbox = document.getElementById('sbox');
+  const $sent = document.getElementById('sent');
+  const $chipLabel = document.getElementById('chipLabel');
+  const $chip = document.getElementById('chip');
+  const $gloss = document.getElementById('gloss');
+  const $extra = document.getElementById('extra');
+  const $extraLabel = document.getElementById('extraLabel');
+  const $extraBody = document.getElementById('extraBody');
+  const $note = document.getElementById('note');
+
+  let gi = 0, sel = 0, g1noun = 0, g1comma = 0;
+
+  function renderStage(d){
+    $sent.innerHTML = d.sent;
+    const len = $sent.textContent.length;
+    $sbox.className = 'sentence' + (len > 78 ? ' xlong' : len > 46 ? ' long' : '');
+    $chipLabel.textContent = d.chipLabel;
+    $chip.textContent = d.chip;
+    $gloss.innerHTML = d.gloss;
+    if(d.extra){ $extra.style.display=''; $extraLabel.textContent = d.extraLabel; $extraBody.innerHTML = d.extra; }
+    else { $extra.style.display='none'; }
+    $note.textContent = d.note;
+  }
+
+  function markBtns(){ [...$btns.children].forEach((b,j)=>b.classList.toggle('on', j===sel)); }
+
+  function renderG1(){
+    const g = GROUPS[0];
+    [...segNoun.children].forEach((b,j)=>b.classList.toggle('on', j===g1noun));
+    [...segComma.children].forEach((b,j)=>b.classList.toggle('on', j===g1comma));
+    renderStage(g.matrix[g1noun][g1comma]);
+  }
+
+  function buildG1(){
+    const g = GROUPS[0];
+    segNoun.innerHTML = ''; segComma.innerHTML = '';
+    g.segNoun.forEach((t,j)=>{
+      const b = document.createElement('button');
+      b.textContent = t;
+      b.onclick = ()=>{ g1noun = j; renderG1(); };
+      segNoun.appendChild(b);
+    });
+    ['カンマなし','カンマあり'].forEach((t,j)=>{
+      const b = document.createElement('button');
+      b.innerHTML = t + '<small>' + (j ? '補足（非制限）' : '絞り込み（制限）') + '</small>';
+      b.onclick = ()=>{ g1comma = j; renderG1(); };
+      segComma.appendChild(b);
+    });
+    renderG1();
+  }
+
+  function renderPanel(){
+    const g = GROUPS[gi];
+    $base.innerHTML = g.base;
+    if(g.id === 'restr'){
+      $g1.style.display = ''; $btns.style.display = 'none';
+      buildG1();
+    } else {
+      $g1.style.display = 'none'; $btns.style.display = '';
+      $btns.innerHTML = '';
+      g.items.forEach((it,i)=>{
+        const b = document.createElement('button');
+        b.innerHTML = it.btn + '<small>' + it.hint + '</small>';
+        b.onclick = ()=>{ sel = i; markBtns(); renderStage(it); };
+        $btns.appendChild(b);
+      });
+      sel = 0; markBtns(); renderStage(g.items[0]);
+    }
+  }
+
+  function markTabs(){ [...tabs.children].forEach((t,j)=>t.classList.toggle('on', j===gi)); }
+
+  GROUPS.forEach((g,i)=>{
+    const t = document.createElement('button');
+    t.className = 'tab';
+    t.innerHTML = g.tab + '<small>' + g.tabsub + '</small>';
+    t.onclick = ()=>{ gi = i; markTabs(); renderPanel(); };
+    tabs.appendChild(t);
+  });
+
+  markTabs();
+  renderPanel();
+</script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AIで作る 動く英語教材 — 受験ツール・ギャラリー</title>
+<style>
+  :root{
+    --ink:#2b2f3a; --sub:#87909f; --line:#eceef5;
+    --indigo:#6d5efc; --indigo-ink:#5b4ae8; --indigo-bg:#f1eefe;
+    --rose:#f8577d; --rose-ink:#e23f6d; --rose-bg:#ffe6ee;
+    --teal:#12c7b0; --teal-ink:#0d9986; --teal-bg:#d8f7f1;
+    --amber:#f59e0b; --amber-ink:#b45309; --amber-bg:#fdf0d5;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#edf4ff 0%,#ffffff 46%) no-repeat,#fff;background-attachment:fixed;}
+  .shell{max-width:1120px;margin:0 auto;padding:clamp(24px,4vw,48px) clamp(16px,3.5vw,40px) 60px;}
+
+  header{margin:0 0 clamp(22px,3vw,34px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;
+    color:var(--indigo-ink);background:var(--indigo-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";}
+  h1{font-size:clamp(25px,4.6vw,40px);line-height:1.28;margin:15px 0 8px;font-weight:800;}
+  h1 .em{color:var(--rose-ink);}
+  .sub{color:var(--sub);font-size:clamp(14px,2.3vw,16.5px);margin:0;max-width:680px;}
+  .sub b{color:var(--ink);}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 4px;}
+  .lg{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--sub);
+    background:#fff;border:1px solid var(--line);padding:5px 11px;border-radius:999px;}
+  .dot{width:9px;height:9px;border-radius:50%;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));
+    gap:clamp(12px,1.8vw,18px);margin-top:22px;}
+  .card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:#fff;
+    border:1px solid var(--line);border-radius:18px;padding:18px 18px 16px;
+    box-shadow:0 8px 24px rgba(93,74,232,.06);transition:transform .14s,box-shadow .14s,border-color .14s;}
+  .card:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(93,74,232,.13);border-color:#dcd9f6;}
+  .card .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
+  .num{font-size:13px;font-weight:800;color:#fff;width:30px;height:30px;border-radius:9px;
+    display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#8074f2,#6f61ec);}
+  .cat{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;}
+  .cat.g{color:var(--indigo-ink);background:var(--indigo-bg);}
+  .cat.r{color:var(--teal-ink);background:var(--teal-bg);}
+  .cat.u{color:var(--amber-ink);background:var(--amber-bg);}
+  .cat.w{color:var(--rose-ink);background:var(--rose-bg);}
+  .card h2{font-size:17px;font-weight:800;margin:0 0 6px;line-height:1.4;}
+  .card p{font-size:13px;color:var(--sub);margin:0;line-height:1.62;flex:1;}
+  .card .meta{font-size:11.5px;font-weight:700;color:var(--indigo-ink);margin-top:9px;line-height:1.5;}
+  .card .foot{display:flex;align-items:center;gap:8px;margin-top:12px;}
+  .go{font-size:13px;font-weight:800;color:var(--indigo-ink);}
+  .go::after{content:" →";}
+  .sup{font-size:10.5px;font-weight:800;color:var(--amber-ink);background:var(--amber-bg);
+    padding:3px 8px;border-radius:999px;}
+  .foot-note{margin-top:26px;font-size:12.5px;color:var(--sub);line-height:1.7;
+    background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+  .foot-note b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">AIで作る、動く英語教材</span>
+    <h1>参考書の説明を、<span class="em">動かせる実験装置</span>に。</h1>
+    <p class="sub">条件を1つ動かすと、英文・意味・誤り方が変わる——英語を<b>暗記対象</b>ではなく<b>条件分岐するシステム</b>として触れる、<b>大学受験レベルまで作り込んだ</b>動く教材10種です（Gemini Canvasで作れます）。カードを押すと開きます。</p>
+    <div class="legend">
+      <span class="lg"><span class="dot" style="background:var(--indigo)"></span>文法の仕組み</span>
+      <span class="lg"><span class="dot" style="background:var(--teal)"></span>読解</span>
+      <span class="lg"><span class="dot" style="background:var(--amber)"></span>語法</span>
+      <span class="lg"><span class="dot" style="background:var(--rose)"></span>英作文</span>
+      <span class="lg"><span class="sup" style="margin:0">要監修</span>英語内容の最終確認待ち</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="01-tense-timeline.html">
+      <div class="top"><span class="num">01</span><span class="cat g">文法の仕組み</span></div>
+      <h2>時制・完了形タイムライン</h2>
+      <p>時制を切り替えると、時間軸の“見ている範囲”が帯になって動く。完了形は必ず「今との関わり」を表す。</p>
+      <div class="meta">完了の4用法（経験/継続/完了/結果）＋完了進行・過去完了・未来完了・対比ペア</div>
+      <div class="foot"><span class="go">触ってみる</span><span class="sup">要監修</span></div>
+    </a>
+
+    <a class="card" href="02-articles.html">
+      <div class="top"><span class="num">02</span><span class="cat g">文法の仕組み</span></div>
+      <h2>冠詞シミュレーター a / the / 無冠詞</h2>
+      <p>条件で冠詞が決まる仕組み。総称の3通り、可算/不可算の切替、the 一つで意味が変わる（in hospital / in prison）。</p>
+      <div class="meta">5タブ・23例（山場＝「意味が変わる the」）</div>
+      <div class="foot"><span class="go">触ってみる</span><span class="sup">要監修</span></div>
+    </a>
+
+    <a class="card" href="03-word-order.html">
+      <div class="top"><span class="num">03</span><span class="cat g">文法の仕組み</span></div>
+      <h2>語順ムーバー＋倒置</h2>
+      <p>焦点語（only/even/just/also）の位置で意味が動き、否定・限定を前に出すと倒置で語順まで変わる。</p>
+      <div class="meta">2モード：焦点移動 ＋ 倒置4型（Not only… / Only then did I…）</div>
+      <div class="foot"><span class="go">触ってみる</span><span class="sup">要監修</span></div>
+    </a>
+
+    <a class="card" href="04-prepositions.html">
+      <div class="top"><span class="num">04</span><span class="cat g">文法の仕組み</span></div>
+      <h2>前置詞イメージマップ＋使い分け</h2>
+      <p>中心の空間イメージを図で掴み、紛らわしいペアの使い分けまで。訳で丸暗記しない。</p>
+      <div class="meta">コア17語 ＋ 使い分け8対（at/on/in・in/on time・made of/from…）</div>
+      <div class="foot"><span class="go">触ってみる</span><span class="sup">要監修</span></div>
+    </a>
+
+    <a class="card" href="05-relative-clauses.html">
+      <div class="top"><span class="num">05</span><span class="cat r">読解</span></div>
+      <h2>関係詞 ＆ かかり先</h2>
+      <p>カンマで絞り込み↔補足が反転。関係詞11種と、長文で“どの名詞にかかるか”（分詞も）。</p>
+      <div class="meta">3タブ・20例（制限/非制限マトリクス・関係詞11種・かかり先）</div>
+      <div class="foot"><span class="go">触ってみる</span></div>
+    </a>
+
+    <a class="card" href="06-main-clause.html">
+      <div class="top"><span class="num">06</span><span class="cat r">読解</span></div>
+      <h2>5文型 × 主節（幹）発見</h2>
+      <p>Vを軸に、後ろが O/C/OO/OC のどれかで文型が決まる。S/V/O/C/M を判定し、幹（主節）を残す。</p>
+      <div class="meta">5文型 全対応・複雑文（従属節ネスト）の構文解析</div>
+      <div class="foot"><span class="go">触ってみる</span></div>
+    </a>
+
+    <a class="card" href="07-verb-patterns.html">
+      <div class="top"><span class="num">07</span><span class="cat u">語法</span></div>
+      <h2>動詞の型（スロット）図鑑</h2>
+      <p>動詞ごとの“取れるスロット”で覚える。文型別に整理＋狙われる典型ミスを ✗→✓ で。</p>
+      <div class="meta">7タブ・約56動詞（explain me / let him go / ing⇔to…）</div>
+      <div class="foot"><span class="go">触ってみる</span></div>
+    </a>
+
+    <a class="card" href="08-register.html">
+      <div class="top"><span class="num">08</span><span class="cat w">英作文</span></div>
+      <h2>レジスター変換スライダー</h2>
+      <p>スライダーで、同じ内容が くだけた→学術的 に変わる。法助動詞・hedge・名詞化という“仕掛け”も表示。</p>
+      <div class="meta">4つの伝達内容 × 4段階 ＋ 仕掛け（device）表示</div>
+      <div class="foot"><span class="go">触ってみる</span><span class="sup">要監修</span></div>
+    </a>
+
+    <a class="card" href="09-error-severity.html">
+      <div class="top"><span class="num">09</span><span class="cat u">語法</span></div>
+      <h2>「通じるけど変」誤り診断</h2>
+      <p>頻出ミスをカテゴリ別に。誤りを「重さ」で4段階に分け、まず“意味が変わる”ミスから直す。</p>
+      <div class="meta">8カテゴリ・32例の誤り辞典</div>
+      <div class="foot"><span class="go">触ってみる</span><span class="sup">要監修</span></div>
+    </a>
+
+    <a class="card" href="10-logic-cards.html">
+      <div class="top"><span class="num">10</span><span class="cat w">英作文</span></div>
+      <h2>三角ロジック 段落作文</h2>
+      <p>Claim→Data→Warrant→回帰 の三角で段落を組む。レトリック（例示/因果/比較/時系列/提案/反例）で展開。</p>
+      <div class="meta">4テーマ × 展開・三角図・レトリック6種（自由英作文）</div>
+      <div class="foot"><span class="go">触ってみる</span><span class="sup">要監修</span></div>
+    </a>
+  </div>
+
+  <div class="foot-note">
+    全10本とも英語内容は<b>最終監修（小船さんの確認）待ち</b>です。とくに <b>要監修</b> 印（時制の含意・冠詞の英米差・前置詞の慣用・レジスター・誤りの重さ・代筆段落など）は判断を要する箇所で、各ツール内にも <b>※要確認</b> を入れてあります。<br>
+    誌面には、この中から選んだ数種を実物スクショで載せ、QRからこのギャラリー全体へ誘導する想定です。
+  </div>
+</div>
+</body>
+</html>

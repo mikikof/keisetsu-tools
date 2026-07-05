@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>単位円と三角関数 — 円を回すと、波が生まれる</title>
+<style>
+  :root{
+    --ink:#233b34; --sub:#6a807a; --line:#e3eeea;
+    --pri:#10b981; --pri-ink:#059669; --pri-bg:#e7f8f1;
+    --acc:#f59e0b; --acc-ink:#b45309; --acc-bg:#fdf0d5;
+    --cool:#0ea5e9; --cool-ink:#0369a1; --cool-bg:#e0f2fe;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#eafaf3 0%,#ffffff 52%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(16px,2.6vw,24px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--pri-ink);background:var(--pri-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"◐";font-size:14px;}
+  h1{font-size:clamp(24px,4.8vw,42px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--pri),#34d9a3);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:680px;}
+  .sub b{color:var(--ink);}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:880px){ .app{grid-template-columns:360px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(16,185,129,.09);}
+
+  .sellabel{font-size:11.5px;font-weight:800;color:var(--sub);letter-spacing:.05em;margin:0 0 9px;}
+  .sellabel:not(:first-child){margin-top:20px;}
+
+  /* ---- slider ---- */
+  .slwrap{display:flex;align-items:baseline;gap:10px;margin:0 0 12px;}
+  .slwrap .big{font-size:clamp(30px,7vw,42px);font-weight:800;color:var(--acc-ink);line-height:1;letter-spacing:.01em;}
+  .slwrap .unit{font-size:15px;font-weight:800;color:var(--acc);}
+  .slwrap .cap{font-size:12px;font-weight:700;color:var(--sub);margin-left:auto;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:999px;
+    background:linear-gradient(90deg,var(--pri-bg),#d4f2e6);outline:none;margin:2px 0 4px;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:50%;
+    background:linear-gradient(135deg,var(--acc),#fbbf24);border:3px solid #fff;cursor:pointer;
+    box-shadow:0 3px 10px rgba(245,158,11,.5);}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
+    background:var(--acc);border:3px solid #fff;cursor:pointer;box-shadow:0 3px 10px rgba(245,158,11,.5);}
+
+  /* ---- preset angle chips ---- */
+  .presets{display:flex;flex-wrap:wrap;gap:7px;}
+  .presets button{border:1.7px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+    font-weight:800;font-size:13.5px;border-radius:11px;padding:7px 11px;cursor:pointer;
+    transition:transform .1s,border-color .14s;}
+  .presets button:hover{border-color:#bfe6d6;}
+  .presets button:active{transform:scale(.95);}
+
+  .autobtn{width:100%;margin-top:12px;border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-weight:800;font-size:15px;border-radius:14px;padding:12px;cursor:pointer;
+    transition:transform .1s,border-color .14s,box-shadow .14s;}
+  .autobtn:hover{border-color:#bfe6d6;}
+  .autobtn:active{transform:scale(.98);}
+  .autobtn.on{background:linear-gradient(135deg,var(--pri),#34d9a3);border-color:transparent;color:#fff;
+    box-shadow:0 8px 20px rgba(16,185,129,.32);}
+
+  /* ---- fn toggles ---- */
+  .toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+  .toggles button{display:flex;flex-direction:column;justify-content:center;min-height:60px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:17px;font-weight:800;border-radius:15px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;padding:8px 4px;}
+  .toggles button small{font-weight:700;color:var(--sub);font-size:11.5px;margin-top:3px;}
+  .toggles button:active{transform:scale(.97);}
+  .toggles button.on{border-color:transparent;color:#fff;}
+  .toggles button.on small{color:rgba(255,255,255,.85);}
+  #tgSin.on{background:linear-gradient(135deg,var(--pri),#34d9a3);box-shadow:0 8px 18px rgba(16,185,129,.32);}
+  #tgCos.on{background:linear-gradient(135deg,var(--cool),#38bdf8);box-shadow:0 8px 18px rgba(14,165,233,.3);}
+  #tgTan.on{background:linear-gradient(135deg,var(--acc),#fbbf24);box-shadow:0 8px 18px rgba(245,158,11,.32);}
+
+  /* ---- supp chip ---- */
+  .suppchip{display:inline-flex;align-items:center;gap:9px;margin-top:18px;width:100%;justify-content:center;
+    border:1.7px solid var(--acc);background:var(--acc-bg);color:var(--acc-ink);
+    font-family:inherit;font-weight:800;font-size:14.5px;border-radius:14px;padding:12px 16px;cursor:pointer;
+    transition:transform .1s,box-shadow .14s;}
+  .suppchip::before{content:"⚛";font-size:17px;}
+  .suppchip::after{content:"›";font-size:19px;margin-left:2px;opacity:.7;}
+  .suppchip:hover{box-shadow:0 6px 16px rgba(245,158,11,.22);}
+  .suppchip:active{transform:scale(.98);}
+
+  /* ---- stage ---- */
+  .stage{display:flex;flex-direction:column;}
+  .svgwrap{width:100%;border-radius:16px;background:linear-gradient(160deg,#f3fcf8,#eefaf4);
+    border:1px solid var(--line);padding:6px;}
+  svg{display:block;width:100%;height:auto;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:14px 2px 2px;
+    font-size:12.5px;font-weight:700;color:var(--sub);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend i{width:16px;height:5px;border-radius:3px;display:inline-block;}
+
+  .readout{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
+  .tile{flex:1 1 92px;min-width:88px;border-radius:15px;padding:11px 13px 12px;border:1.5px solid var(--line);}
+  .tile .lb{display:block;font-size:12px;font-weight:800;letter-spacing:.02em;}
+  .tile .val{display:block;font-size:clamp(23px,5vw,30px);font-weight:800;line-height:1.15;margin-top:2px;
+    font-variant-numeric:tabular-nums;}
+  .tile .hint{display:block;font-size:11px;font-weight:700;color:var(--sub);margin-top:1px;}
+  .tile.theta{background:var(--acc-bg);border-color:#f6e2b8;}
+  .tile.theta .lb{color:var(--acc-ink);} .tile.theta .val{color:var(--acc-ink);}
+  .tile.sin{background:var(--pri-bg);border-color:#c7efdd;}
+  .tile.sin .lb{color:var(--pri-ink);} .tile.sin .val{color:var(--pri-ink);}
+  .tile.cos{background:var(--cool-bg);border-color:#c4e6fb;}
+  .tile.cos .lb{color:var(--cool-ink);} .tile.cos .val{color:var(--cool-ink);}
+  .tile.tan{background:var(--acc-bg);border-color:#f6e2b8;}
+  .tile.tan .lb{color:var(--acc-ink);} .tile.tan .val{color:var(--acc-ink);font-size:clamp(20px,4.4vw,27px);}
+
+  /* ---- insight ---- */
+  .insight{background:linear-gradient(135deg,#e9f9f1,#f5fcf9);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    margin-top:clamp(16px,2.4vw,26px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.74;color:#3d5952;font-weight:500;}
+  .insight b{color:var(--pri-ink);font-weight:700;}
+  .insight .k{color:var(--cool-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#a4b3ac;text-align:center;line-height:1.6;}
+
+  /* ---- modal ---- */
+  .backdrop{display:none;position:fixed;inset:0;z-index:50;background:rgba(24,50,42,.5);
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+    padding:clamp(14px,4vw,40px);align-items:center;justify-content:center;}
+  .modal{width:100%;max-width:540px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    background:#fff;border:1px solid var(--line);border-radius:24px;
+    box-shadow:0 30px 70px rgba(16,90,66,.3);}
+  .modal .mhead{position:sticky;top:0;background:linear-gradient(135deg,var(--pri),#34d9a3);color:#fff;
+    padding:18px clamp(18px,4vw,26px);border-radius:24px 24px 0 0;display:flex;align-items:center;gap:12px;}
+  .modal .mhead .mt{font-size:clamp(17px,3.4vw,21px);font-weight:800;line-height:1.3;}
+  .modal .mhead .me{font-size:12px;font-weight:800;background:rgba(255,255,255,.22);padding:4px 10px;border-radius:999px;white-space:nowrap;}
+  .modal .mclose{margin-left:auto;flex:none;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
+    background:rgba(255,255,255,.22);color:#fff;font-size:20px;font-weight:800;line-height:1;
+    display:flex;align-items:center;justify-content:center;}
+  .modal .mclose:active{transform:scale(.94);}
+  .mbody{padding:clamp(16px,4vw,24px) clamp(18px,4vw,26px) clamp(20px,4vw,28px);
+    font-size:clamp(14px,2.4vw,15.5px);line-height:1.78;color:#31504a;}
+  .mrow{display:flex;gap:12px;padding:13px 0;border-bottom:1px dashed #e0efe9;}
+  .mrow:last-of-type{border-bottom:none;}
+  .mrow .ic{flex:none;width:34px;height:34px;border-radius:11px;background:var(--pri-bg);color:var(--pri-ink);
+    font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .mrow.a .ic{background:var(--acc-bg);color:var(--acc-ink);}
+  .mrow.c .ic{background:var(--cool-bg);color:var(--cool-ink);}
+  .mrow p{margin:0;}
+  .mrow p b{color:var(--ink);}
+  .eq{display:inline-block;font-family:"Cambria Math",Georgia,"Times New Roman",serif;font-style:italic;
+    font-weight:700;color:var(--pri-ink);background:var(--pri-bg);border-radius:8px;padding:1px 8px;
+    font-size:1.02em;white-space:nowrap;}
+  .eq.a{color:var(--acc-ink);background:var(--acc-bg);}
+  .eq.c{color:var(--cool-ink);background:var(--cool-bg);}
+  .mkey{margin-top:16px;background:linear-gradient(135deg,#e9f9f1,#f5fcf9);border-radius:16px;
+    padding:15px 17px;font-weight:700;color:var(--ink);display:flex;gap:11px;align-items:flex-start;}
+  .mkey .kb{flex:none;font-size:20px;}
+  .mkey b{color:var(--pri-ink);}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">単位円と三角関数</span>
+    <h1>円を回すと、<span class="em">波</span>が生まれる</h1>
+    <p class="sub">半径 1 の円（<b>単位円</b>）の上を点が回るとき、その点の<b>高さ</b>が sinθ、<b>横幅</b>が cosθ です。θのスライダーを動かして、円の上の点と、右のグラフに描かれる波が<b>同じ高さ</b>でつながる様子を確かめてください。</p>
+  </header>
+
+  <div class="app">
+    <!-- ===== controls ===== -->
+    <section class="panel">
+      <p class="sellabel">① 角度 θ を動かす</p>
+      <div class="slwrap">
+        <span class="big" id="slBig">30</span><span class="unit">°</span>
+        <span class="cap">0°〜360°</span>
+      </div>
+      <input type="range" id="slider" min="0" max="360" step="1" value="30" aria-label="角度θ">
+      <p class="sellabel">よく使う角度</p>
+      <div class="presets" id="presets"></div>
+      <button class="autobtn" id="autobtn">▶ 自動で回す</button>
+
+      <p class="sellabel">② 表示する関数</p>
+      <div class="toggles">
+        <button id="tgSin" class="on" data-fn="sin">sin<small>高さ</small></button>
+        <button id="tgCos" data-fn="cos">cos<small>横幅</small></button>
+        <button id="tgTan" data-fn="tan">tan<small>傾き</small></button>
+      </div>
+
+      <button class="suppchip" id="suppchip">物理：角速度との対応</button>
+    </section>
+
+    <!-- ===== stage ===== -->
+    <section class="stage">
+      <div class="svgwrap">
+        <svg id="viz" viewBox="0 0 690 360" role="img" aria-label="単位円と三角関数のグラフ">
+          <!-- ===== circle: static ===== -->
+          <g stroke-linecap="round">
+            <line x1="20" y1="180" x2="272" y2="180" stroke="#d6ebe3" stroke-width="1.5"/>
+            <line x1="140" y1="52" x2="140" y2="308" stroke="#d6ebe3" stroke-width="1.5"/>
+            <circle cx="140" cy="180" r="118" fill="none" stroke="#bfe3d5" stroke-width="2"/>
+          </g>
+          <text x="266" y="196" font-size="11" fill="#9db8af" font-weight="700">x</text>
+          <text x="148" y="62" font-size="11" fill="#9db8af" font-weight="700">y</text>
+
+          <!-- ===== graph: static ===== -->
+          <g>
+            <!-- value gridlines -->
+            <line x1="300" y1="62"  x2="660" y2="62"  stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"/>
+            <line x1="300" y1="298" x2="660" y2="298" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"/>
+            <!-- angle gridlines -->
+            <line x1="390" y1="62" x2="390" y2="298" stroke="#eef6f2" stroke-width="1"/>
+            <line x1="480" y1="62" x2="480" y2="298" stroke="#eef6f2" stroke-width="1"/>
+            <line x1="570" y1="62" x2="570" y2="298" stroke="#eef6f2" stroke-width="1"/>
+            <!-- theta axis (middle) -->
+            <line x1="296" y1="180" x2="666" y2="180" stroke="#9db8af" stroke-width="1.5"/>
+            <!-- value labels -->
+            <text x="293" y="66"  font-size="12" fill="var(--sub)" text-anchor="end" font-weight="700">1</text>
+            <text x="293" y="184" font-size="12" fill="var(--sub)" text-anchor="end" font-weight="700">0</text>
+            <text x="293" y="302" font-size="12" fill="var(--sub)" text-anchor="end" font-weight="700">−1</text>
+            <!-- angle labels -->
+            <text x="300" y="315" font-size="11.5" fill="var(--sub)" text-anchor="middle" font-weight="700">0°</text>
+            <text x="390" y="315" font-size="11.5" fill="var(--sub)" text-anchor="middle" font-weight="700">90°</text>
+            <text x="480" y="315" font-size="11.5" fill="var(--sub)" text-anchor="middle" font-weight="700">180°</text>
+            <text x="570" y="315" font-size="11.5" fill="var(--sub)" text-anchor="middle" font-weight="700">270°</text>
+            <text x="660" y="315" font-size="11.5" fill="var(--sub)" text-anchor="middle" font-weight="700">360°</text>
+            <text x="666" y="333" font-size="11.5" fill="#9db8af" text-anchor="end" font-weight="700">θ →</text>
+          </g>
+
+          <!-- locator + graph curves (clipped to graph box) -->
+          <clipPath id="gclip"><rect x="298" y="54" width="366" height="252"/></clipPath>
+          <line id="locator" x1="300" y1="56" x2="300" y2="304" stroke="#b9d3ca" stroke-width="1" stroke-dasharray="3 4" opacity=".75"/>
+          <g clip-path="url(#gclip)">
+            <!-- TAN group (graph) -->
+            <g id="gTanGraph" style="display:none">
+              <path id="tanCurve" fill="none" stroke="var(--acc)" stroke-width="2.4" opacity=".5"/>
+              <circle id="tanMk" r="5" fill="var(--acc)" stroke="#fff" stroke-width="2"/>
+            </g>
+            <!-- COS group (graph) -->
+            <g id="gCosGraph" style="display:none">
+              <path id="cosFull"  fill="none" stroke="var(--cool)" stroke-width="2" opacity=".26"/>
+              <path id="cosTrace" fill="none" stroke="var(--cool)" stroke-width="3"/>
+              <circle id="cosMk" r="5.5" fill="var(--cool)" stroke="#fff" stroke-width="2"/>
+            </g>
+            <!-- SIN group (graph) -->
+            <g id="gSinGraph">
+              <path id="sinFull"  fill="none" stroke="var(--pri)" stroke-width="2" opacity=".26"/>
+              <path id="sinTrace" fill="none" stroke="var(--pri)" stroke-width="3"/>
+              <circle id="sinMk" r="5.5" fill="var(--pri)" stroke="#fff" stroke-width="2"/>
+            </g>
+          </g>
+
+          <!-- ===== TAN construction on circle ===== -->
+          <g id="gTanCircle" style="display:none">
+            <line id="tanGuide" x1="258" y1="78" x2="258" y2="282" stroke="var(--acc)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".55"/>
+            <line id="tanExt" stroke="var(--acc)" stroke-width="1.6" stroke-dasharray="5 4" opacity=".85"/>
+            <line id="tanSeg" stroke="var(--acc)" stroke-width="4" stroke-linecap="round"/>
+            <circle id="tanDot" r="5" fill="var(--acc)" stroke="#fff" stroke-width="2"/>
+          </g>
+
+          <!-- horizontal link (sin height -> graph) -->
+          <line id="hlink" stroke="var(--pri)" stroke-width="1.6" stroke-dasharray="4 4" opacity=".8"/>
+
+          <!-- ===== COS leg ===== -->
+          <g id="gCosLeg" style="display:none">
+            <line id="cosLeg" stroke="var(--cool)" stroke-width="4.5" stroke-linecap="round"/>
+            <text id="cosLbl" font-size="12.5" fill="var(--cool-ink)" font-weight="800" text-anchor="middle">cos</text>
+          </g>
+
+          <!-- ===== SIN leg ===== -->
+          <g id="gSinLeg">
+            <line id="sinLeg" stroke="var(--pri)" stroke-width="4.5" stroke-linecap="round"/>
+            <text id="sinLbl" font-size="12.5" fill="var(--pri-ink)" font-weight="800">sin</text>
+          </g>
+
+          <!-- ===== radius, arc, point (always) ===== -->
+          <path id="arc" fill="none" stroke="var(--acc)" stroke-width="2.5" stroke-linecap="round"/>
+          <text id="thetaLbl" font-size="15" fill="var(--acc-ink)" font-weight="800" text-anchor="middle" dominant-baseline="middle">θ</text>
+          <line id="rad" stroke="var(--sub)" stroke-width="2.5" stroke-linecap="round"/>
+          <circle id="pt" r="7" fill="var(--acc)" stroke="#fff" stroke-width="2.5"/>
+        </svg>
+      </div>
+
+      <div class="legend">
+        <span><i style="background:var(--pri)"></i>sin θ ＝ 高さ</span>
+        <span><i style="background:var(--cool)"></i>cos θ ＝ 横幅</span>
+        <span><i style="background:var(--acc)"></i>点・θ・tan</span>
+      </div>
+
+      <div class="readout">
+        <div class="tile theta"><span class="lb">θ</span><span class="val" id="rTheta">30°</span></div>
+        <div class="tile sin" id="tileSin"><span class="lb">sin θ</span><span class="val" id="rSin">0.50</span><span class="hint">高さ</span></div>
+        <div class="tile cos" id="tileCos" style="display:none"><span class="lb">cos θ</span><span class="val" id="rCos">0.87</span><span class="hint">横幅</span></div>
+        <div class="tile tan" id="tileTan" style="display:none"><span class="lb">tan θ</span><span class="val" id="rTan">0.58</span><span class="hint">高さ÷横幅</span></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="insight">
+    <span class="h">気づき</span>
+    <div>sin・cos は、暗記する数値ではなく <b>単位円の上の点の「高さ」と「横幅」</b>です。θを動かすと点が回り、その<b>高さ</b>がそのまま右の波（<b>sin</b> 曲線）になります。横幅は <span class="k">cos</span> の波、傾きは <span style="color:var(--acc-ink);font-weight:700">tan</span> です。<b>回転</b>を横から見ると <b>波</b>になる——この一枚に、三角比・グラフ・単振動が全部つながっています。</div>
+  </div>
+
+  <p class="foot">9月号「AIで動く教材を作る」試作 ／ 一文の指示で、この種の教材ツールが生成できます</p>
+</div>
+
+<!-- ===== supplement modal ===== -->
+<div class="backdrop" id="backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="単位円と角速度">
+    <div class="mhead">
+      <span class="me">物理</span>
+      <span class="mt">単位円 × 角速度</span>
+      <button class="mclose" id="mclose" aria-label="閉じる">×</button>
+    </div>
+    <div class="mbody">
+      <div class="mrow a">
+        <span class="ic">θ</span>
+        <p>角度θを<b>一定の速さ</b>で回すと <span class="eq a">θ = ωt</span>（ω＝角速度［rad/s］）。角度が時間に比例して増えていきます。</p>
+      </div>
+      <div class="mrow">
+        <span class="ic">∿</span>
+        <p>すると高さは <span class="eq">y = sin θ = sin(ωt)</span> ＝ 時間の<b>正弦波（単振動）</b>。等速円運動を真横から見ると単振動になります（＝<b>円運動の射影</b>）。この画面で「自動で回す」を押した動きが、まさにそれです。</p>
+      </div>
+      <div class="mrow c">
+        <span class="ic">T</span>
+        <p><b>周期</b> <span class="eq c">T = 2π/ω</span>（1回転にかかる時間）、<b>振動数</b> <span class="eq c">f = 1/T = ω/2π</span>（1秒あたりの回転数）。</p>
+      </div>
+      <div class="mrow a">
+        <span class="ic">v</span>
+        <p><b>周速</b> <span class="eq a">v = rω</span>、<b>向心加速度</b> <span class="eq a">a = rω² = v²/r</span>（常に中心を向く加速度）。</p>
+      </div>
+      <div class="mkey">
+        <span class="kb">💡</span>
+        <div><b>回転（円）を時間で回すと、波（sin）になる。</b><br>単振動・交流・波は、すべてここから出発します。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  "use strict";
+  const cx=140, cy=180, R=118, gx0=300, TANX=258;
+  const el = id => document.getElementById(id);
+
+  // precompute full sin / cos point arrays (θ = 0..360, 1° step; x = gx0 + θ)
+  const P = {sin:[], cos:[]};
+  for(let d=0; d<=360; d++){
+    const r = d*Math.PI/180;
+    P.sin.push([gx0+d, cy - R*Math.sin(r)]);
+    P.cos.push([gx0+d, cy - R*Math.cos(r)]);
+  }
+  const polyD  = arr => arr.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1].toFixed(1)).join(' ');
+  const traceD = (arr,th) => { const n=Math.round(th); let d='';
+    for(let i=0;i<=n;i++) d+=(i?'L':'M')+arr[i][0]+' '+arr[i][1].toFixed(1)+' '; return d; };
+
+  // full sin/cos curves (static)
+  el('sinFull').setAttribute('d', polyD(P.sin));
+  el('cosFull').setAttribute('d', polyD(P.cos));
+
+  // tan curve (static) — break at asymptotes, clamp, rely on clip
+  (function(){
+    let d='', started=false, prev=1;
+    for(let deg=0; deg<=360; deg++){
+      const r=deg*Math.PI/180, c=Math.cos(r);
+      if(deg>0 && c*prev<0) started=false;  // crossed asymptote
+      prev=c;
+      let y = cy - R*Math.tan(r);
+      if(y<-260) y=-260; if(y>620) y=620;
+      d += (started?'L':'M') + (gx0+deg) + ' ' + y.toFixed(1) + ' ';
+      started=true;
+    }
+    el('tanCurve').setAttribute('d', d);
+  })();
+
+  const fmt = v => { if(Math.abs(v)<0.005) v=0; let s=v.toFixed(2); return s==='-0.00'?'0.00':s; };
+  const setLine=(id,x1,y1,x2,y2)=>{const e=el(id);e.setAttribute('x1',x1.toFixed(1));e.setAttribute('y1',y1.toFixed(1));e.setAttribute('x2',x2.toFixed(1));e.setAttribute('y2',y2.toFixed(1));};
+  const setC=(id,x,y)=>{const e=el(id);e.setAttribute('cx',x.toFixed(1));e.setAttribute('cy',y.toFixed(1));};
+  const place=(id,x,y)=>{const e=el(id);e.setAttribute('x',x.toFixed(1));e.setAttribute('y',y.toFixed(1));};
+  const show=(id,on)=>{el(id).style.display = on?'':'none';};
+
+  function arcPath(th){
+    if(th<0.6) return '';
+    const r0=34, n=Math.max(2,Math.round(th/4)); let d='';
+    for(let i=0;i<=n;i++){ const a=(th*i/n)*Math.PI/180;
+      d+=(i?'L':'M')+(cx+r0*Math.cos(a)).toFixed(1)+' '+(cy-r0*Math.sin(a)).toFixed(1)+' '; }
+    return d;
+  }
+
+  const S = {theta:30, sin:true, cos:false, tan:false, auto:false};
+
+  function render(){
+    const th=S.theta, r=th*Math.PI/180;
+    const cosv=Math.cos(r), sinv=Math.sin(r);
+    const px=cx+R*cosv, py=cy-R*sinv;
+
+    // radius, point, arc, angle label
+    setLine('rad',cx,cy,px,py);
+    setC('pt',px,py);
+    el('arc').setAttribute('d', arcPath(th));
+    const midr=(th/2)*Math.PI/180;
+    place('thetaLbl', cx+50*Math.cos(midr), cy-50*Math.sin(midr));
+
+    // locator on graph
+    setLine('locator', gx0+th,56, gx0+th,304);
+
+    // ----- SIN -----
+    show('gSinLeg', S.sin); show('gSinGraph', S.sin); show('hlink', S.sin);
+    if(S.sin){
+      setLine('sinLeg', px,cy, px,py);
+      place('sinLbl', px + (cosv>=-0.15?8:-30), (cy+py)/2 + 4);
+      setLine('hlink', px,py, gx0+th,py);
+      el('sinTrace').setAttribute('d', traceD(P.sin,th));
+      setC('sinMk', gx0+th, py);
+    }
+    show('tileSin', S.sin);
+    el('rSin').textContent = fmt(sinv);
+
+    // ----- COS -----
+    show('gCosLeg', S.cos); show('gCosGraph', S.cos);
+    if(S.cos){
+      setLine('cosLeg', cx,cy, px,cy);
+      place('cosLbl', (cx+px)/2, cy + (sinv>=-0.05?18:-9));
+      el('cosTrace').setAttribute('d', traceD(P.cos,th));
+      setC('cosMk', gx0+th, cy - R*cosv);
+    }
+    show('tileCos', S.cos);
+    el('rCos').textContent = fmt(cosv);
+
+    // ----- TAN -----
+    show('gTanCircle', S.tan); show('gTanGraph', S.tan); show('tileTan', S.tan);
+    if(S.tan){
+      const defined = Math.abs(cosv) > 1e-9;
+      ['tanExt','tanSeg','tanDot'].forEach(id=>show(id, defined));
+      if(defined){
+        const tanv = sinv/cosv;
+        const ty  = cy - R*tanv;
+        const tyc = Math.max(60, Math.min(300, ty));
+        setLine('tanExt', px,py, TANX,tyc);
+        setLine('tanSeg', TANX,cy, TANX,tyc);
+        const inC = ty>62 && ty<298;
+        show('tanDot', inC); if(inC) setC('tanDot', TANX, ty);
+        const my = cy - R*tanv, inG = my>60 && my<300;
+        show('tanMk', inG); if(inG) setC('tanMk', gx0+th, my);
+        el('rTan').textContent = fmt(tanv);
+      }else{
+        show('tanMk', false);
+        el('rTan').textContent = '定義なし';
+      }
+    }
+
+    // readout θ
+    el('rTheta').textContent = Math.round(th)+'°';
+    el('slBig').textContent  = Math.round(th);
+  }
+
+  // ---- controls ----
+  const slider = el('slider');
+  slider.addEventListener('input', ()=>{ stopAuto(); S.theta=+slider.value; render(); });
+
+  const PRESETS=[0,30,45,60,90,120,135,180,270,360];
+  const pw=el('presets');
+  PRESETS.forEach(a=>{ const b=document.createElement('button'); b.textContent=a+'°';
+    b.onclick=()=>{ stopAuto(); S.theta=a; slider.value=a; render(); }; pw.appendChild(b); });
+
+  ['sin','cos','tan'].forEach(fn=>{
+    const btn = el('tg'+fn[0].toUpperCase()+fn.slice(1));
+    btn.onclick=()=>{ S[fn]=!S[fn]; btn.classList.toggle('on',S[fn]); render(); };
+  });
+
+  // ---- auto rotate ----
+  const autobtn=el('autobtn'); let raf=null, last=0;
+  function loop(t){ if(!S.auto) return; if(!last) last=t;
+    S.theta=(S.theta + 52*(t-last)/1000)%360; last=t;
+    slider.value=S.theta; render(); raf=requestAnimationFrame(loop); }
+  function startAuto(){ S.auto=true; last=0; autobtn.classList.add('on'); autobtn.textContent='⏸ 停止'; raf=requestAnimationFrame(loop); }
+  function stopAuto(){ if(!S.auto)return; S.auto=false; autobtn.classList.remove('on'); autobtn.textContent='▶ 自動で回す'; if(raf)cancelAnimationFrame(raf); }
+  autobtn.onclick=()=>{ S.auto?stopAuto():startAuto(); };
+
+  // ---- modal ----
+  const backdrop=el('backdrop');
+  function openModal(){ backdrop.style.display='flex'; document.body.style.overflow='hidden'; }
+  function closeModal(){ backdrop.style.display='none'; document.body.style.overflow=''; }
+  el('suppchip').onclick=openModal;
+  el('mclose').onclick=closeModal;
+  backdrop.addEventListener('click', e=>{ if(e.target===backdrop) closeModal(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+  render();
+  if(location.hash.indexOf('supp')>=0) openModal();
+</script>
+</body>
+</html>

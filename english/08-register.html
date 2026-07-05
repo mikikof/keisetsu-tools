@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>距離感スライダー — 同じ内容を、場面で言い分ける</title>
+<style>
+  :root{
+    --ink:#2b2f3a; --sub:#87909f; --line:#eceef5;
+    --indigo:#6d5efc; --indigo2:#9166ff; --indigo-ink:#5b4ae8; --indigo-bg:#f1eefe;
+    --rose:#f8577d; --rose-ink:#e23f6d; --rose-bg:#ffe6ee;
+    --teal:#12c7b0; --teal-ink:#0d9986; --teal-bg:#c9f2e9;
+    --amber:#fbbf24;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#edf4ff 0%,#ffffff 54%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(20px,3vw,30px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--indigo-ink);background:var(--indigo-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";font-size:13px;}
+  h1{font-size:clamp(25px,5vw,44px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--rose),#ff7aa0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:660px;}
+  .sub b{color:var(--ink);}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:390px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(93,74,232,.09);}
+
+  .plabel{font-size:12.5px;font-weight:800;color:var(--indigo-ink);letter-spacing:.02em;
+    margin:0 2px 11px;display:flex;align-items:center;gap:8px;}
+  .plabel .n{display:inline-grid;place-items:center;width:21px;height:21px;border-radius:50%;
+    background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:#fff;font-size:12px;flex:none;}
+  .divider{height:1px;background:var(--line);margin:clamp(15px,2.3vw,20px) 0;border:0;}
+
+  .base{font-size:clamp(13px,1.7vw,14.5px);color:var(--sub);margin:0 0 14px;}
+  .base b{color:var(--ink);font-weight:800;}
+
+  .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(94px,1fr));gap:10px;}
+  .picker{grid-template-columns:1fr 1fr;}
+  @media(min-width:860px){ .btns.picker{grid-template-columns:1fr 1fr;} }
+  .btns button{display:flex;flex-direction:column;justify-content:center;min-height:58px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:16px;font-weight:800;border-radius:15px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;padding:8px 6px;}
+  .btns button small{font-weight:600;color:var(--sub);font-size:11.5px;margin-top:3px;}
+  .btns button:hover{border-color:#d9d2fb;}
+  .btns button:active{transform:scale(.97);}
+  .btns button.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.34);}
+  .btns button.on small{color:#e9e4ff;}
+
+  .stage{display:flex;flex-direction:column;}
+  .stagetop{display:flex;align-items:center;justify-content:space-between;margin:0 2px 13px;}
+  .reg{background:var(--indigo-bg);color:var(--indigo-ink);font-weight:800;font-size:13px;
+    padding:6px 14px;border-radius:999px;}
+  .dots{display:flex;gap:6px;}
+  .dots i{width:8px;height:8px;border-radius:50%;background:var(--line);display:block;
+    transition:background .16s,transform .16s;}
+  .dots i.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));transform:scale(1.3);}
+
+  .sentence{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:600;
+    font-size:clamp(22px,4vw,46px);line-height:1.4;text-align:center;letter-spacing:.004em;
+    padding:clamp(22px,4vw,46px) clamp(14px,2.5vw,30px);
+    background:linear-gradient(160deg,#f2f8ff,#ebf3ff);border-radius:18px;color:#333846;
+    display:grid;place-items:center;flex:1;min-height:clamp(116px,18vw,220px);}
+  .sline{width:100%;overflow-wrap:break-word;}
+
+  .answer{margin-top:clamp(16px,2.4vw,22px);}
+  .scopechip{display:inline-flex;align-items:center;gap:9px;background:var(--teal-bg);
+    color:var(--teal-ink);font-weight:800;font-size:clamp(14px,1.8vw,16px);
+    padding:9px 16px;border-radius:999px;margin:0 0 13px;}
+  .scopechip span{color:var(--sub);font-weight:600;}
+  .gloss{font-size:clamp(15.5px,2vw,19px);line-height:1.72;font-weight:500;}
+  .gloss b{color:var(--rose-ink);font-weight:700;}
+
+  .device{margin-top:clamp(14px,2vw,18px);padding:14px 16px;border:1px solid var(--line);
+    border-radius:16px;background:linear-gradient(180deg,#faf9ff,#ffffff);}
+  .device .dh{font-size:12px;font-weight:800;color:var(--sub);margin-bottom:10px;
+    display:flex;align-items:center;gap:7px;}
+  .device .dh::before{content:"🔧";font-size:13px;}
+  .device .row{display:flex;flex-wrap:wrap;align-items:center;gap:9px 10px;}
+  .device .cat{background:var(--indigo-bg);color:var(--indigo-ink);font-weight:800;
+    font-size:12.5px;padding:5px 12px;border-radius:999px;white-space:nowrap;flex:none;}
+  .device .k{font-family:system-ui,-apple-system,sans-serif;color:var(--teal-ink);font-weight:800;
+    font-size:clamp(14px,1.9vw,16px);background:var(--teal-bg);border-radius:8px;padding:3px 10px;}
+  .device .dn{font-size:clamp(13px,1.7vw,14.5px);font-weight:600;color:var(--ink);margin-top:9px;line-height:1.64;}
+
+  .note{font-size:clamp(12px,1.5vw,13.5px);color:var(--sub);margin-top:12px;line-height:1.62;}
+
+  .insight{grid-column:1/-1;background:linear-gradient(135deg,#eef5ff,#f6faff);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.74;color:#4a4560;font-weight:500;}
+  .insight b{color:var(--indigo-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#a9afbe;text-align:center;line-height:1.6;}
+
+  /* --- 距離感スライダー(同トークンで最小追加) --- */
+  .scale{display:flex;justify-content:space-between;gap:10px;margin:2px 2px 13px;
+    font-size:clamp(11.5px,1.5vw,12.5px);font-weight:800;color:var(--sub);}
+  .scale .l{color:var(--rose-ink);}
+  .scale .r{color:var(--indigo-ink);}
+  input[type=range]{--trk:linear-gradient(90deg,var(--rose-bg),var(--indigo-bg));
+    -webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;
+    cursor:pointer;margin:0;display:block;}
+  input[type=range]:focus{outline:none;}
+  input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:999px;background:var(--trk);}
+  input[type=range]::-moz-range-track{height:10px;border-radius:999px;background:var(--trk);}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border:3px solid #fff;box-shadow:0 6px 16px rgba(109,94,252,.42);cursor:pointer;margin-top:-9px;}
+  input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(135deg,var(--indigo),var(--indigo2));border:3px solid #fff;
+    box-shadow:0 6px 16px rgba(109,94,252,.42);cursor:pointer;}
+  .ticks{display:flex;gap:7px;margin-top:14px;}
+  .ticks button{flex:1;min-width:0;border:1.7px solid var(--line);background:#fff;color:var(--sub);
+    font-family:inherit;font-size:clamp(11.5px,1.6vw,13px);font-weight:800;border-radius:13px;cursor:pointer;
+    padding:10px 3px;transition:transform .12s,border-color .14s,color .14s,background .14s,box-shadow .14s;}
+  .ticks button:hover{border-color:#d9d2fb;}
+  .ticks button:active{transform:scale(.96);}
+  .ticks button.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:#fff;
+    border-color:transparent;box-shadow:0 8px 20px rgba(109,94,252,.32);}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">距離感スライダー</span>
+    <h1>英語は、<span class="em">距離感</span>で言い方を選ぶ</h1>
+    <p class="sub">左で<b>伝えたい内容</b>をえらび、スライダーで<b>距離感</b>を変えると、同じ中身が<b>くだけた</b>言い方から<b>学術的・フォーマル</b>な言い方まで4段階で変わります。</p>
+  </header>
+
+  <div class="app">
+    <section class="panel">
+      <div class="plabel"><span class="n">1</span>伝えたい内容をえらぶ</div>
+      <div class="btns picker" id="msgs"></div>
+
+      <hr class="divider">
+
+      <div class="plabel"><span class="n">2</span>距離感をスライドする</div>
+      <p class="base" id="base"></p>
+      <div class="scale"><span class="l">親しい・近い</span><span class="r">あらたまった・遠い</span></div>
+      <input type="range" id="range" min="0" max="3" step="1" value="0" aria-label="距離感（4段階）">
+      <div class="ticks" id="ticks"></div>
+    </section>
+
+    <section class="stage">
+      <div class="stagetop">
+        <span class="reg" id="reg"></span>
+        <span class="dots" id="dots"></span>
+      </div>
+      <div class="sentence"><div class="sline" id="sent"></div></div>
+      <div class="answer">
+        <div class="scopechip"><span>場面 →</span> <b id="scope"></b></div>
+        <div class="gloss" id="gloss"></div>
+        <div class="device">
+          <div class="dh">この距離感をつくる仕掛け</div>
+          <div class="row"><span class="cat" id="cat"></span><b class="k" id="dkey"></b></div>
+          <div class="dn" id="dnote"></div>
+        </div>
+        <div class="note">※言い回しは一例です。ニュアンスは文脈で変わります（要確認／要監修）。</div>
+      </div>
+    </section>
+
+    <div class="insight">
+      <span class="h">気づき</span>
+      <div>英語は<b>「距離感の言語」</b>。同じ内容でも、<b>法助動詞</b>（can→could→may）・<b>ぼかし表現</b>（I think→it seems→it appears）・<b>命令→提案</b>・<b>名詞化／受動</b>という仕掛けで、強さと丁寧さを場面に合わせて調整します。自由英作文・会話・面接で、そのまま効いてきます。</div>
+    </div>
+  </div>
+
+  <p class="foot">9月号「AIで動く教材を作る」試作 ／ 伝えたい内容を選び、スライダーで距離感ごとに言い分けられます</p>
+</div>
+
+<script>
+  const MESSAGES = [
+    {
+      key:'反対する', hint:'これは違うと思う', base:'「これは違うと思う」',
+      steps:[
+        {label:'くだけた', en:'I think this is wrong.',
+         scope:'友だち・雑談',
+         gloss:'いちばんストレート。「間違ってる」と言い切る。',
+         cat:'直接', dkey:'wrong', dnote:'強い形容詞でズバッと断定する。'},
+        {label:'ふつう', en:"I don't think this is quite right.",
+         scope:'ふだんの会話',
+         gloss:'否定を前に出し、「そんなに正しくはない」とやわらげる。',
+         cat:'ぼかし（hedge）', dkey:'not quite right', dnote:'「wrong」を「あまり正しくない」に言い換える。'},
+        {label:'ていねい', en:'This may not be entirely accurate.',
+         scope:'授業・目上へのメール',
+         gloss:'法助動詞で「〜かもしれない」と推量にし、断定を避ける。',
+         cat:'法助動詞', dkey:'may', dnote:'「かもしれない」で、可能性の話に格下げする。'},
+        {label:'学術的', en:'There appears to be a potential issue with this interpretation.',
+         scope:'小論文・論文',
+         gloss:'「問題がある」を名詞にし、非人称の there 構文で客観的に。',
+         cat:'名詞化・非人称', dkey:'a potential issue', dnote:'動詞でなく名詞で述べ、主語（I）を消して客観化する。'}
+      ]
+    },
+    {
+      key:'依頼する', hint:'手伝って', base:'「手伝って」',
+      steps:[
+        {label:'くだけた', en:'Help me.',
+         scope:'家族・親友',
+         gloss:'命令文。ごく近い相手にだけ使える。',
+         cat:'命令文', dkey:'Help me.', dnote:'動詞で始める、直接の命令。'},
+        {label:'ふつう', en:'Can you help me?',
+         scope:'友だち・同僚',
+         gloss:'「できる?」と可能をたずねる、ふつうの依頼。',
+         cat:'法助動詞', dkey:'Can you', dnote:'できるかどうかを、疑問文でたずねる。'},
+        {label:'ていねい', en:'Could you help me with this?',
+         scope:'先生・目上へ',
+         gloss:'can の過去形で心理的な距離をとり、丁寧に頼む。',
+         cat:'法助動詞', dkey:'Could you', dnote:'過去形にして一歩引くと、丁寧さが増す。'},
+        {label:'フォーマル', en:'I was wondering if you could possibly help me.',
+         scope:'初対面・依頼メール',
+         gloss:'「〜していただけないかと思って」と前置きし、最も丁寧に。',
+         cat:'前置き＋仮定', dkey:'I was wondering if', dnote:'過去進行形の前置きで、最大限やわらげる。'}
+      ]
+    },
+    {
+      key:'意見を言う', hint:'賛成だ', base:'「賛成だ」',
+      steps:[
+        {label:'くだけた', en:'I agree.',
+         scope:'雑談・あいづち',
+         gloss:'ひとことで賛成。短く、力強い。',
+         cat:'直接', dkey:'I agree.', dnote:'主語＋動詞で言い切る。'},
+        {label:'ふつう', en:"I think that's a good point.",
+         scope:'ふだんの議論',
+         gloss:'「いい指摘だと思う」とクッションを置いて同意する。',
+         cat:'クッション', dkey:'I think', dnote:'「〜と思う」で、主観の枠に収める。'},
+        {label:'ていねい', en:"I'm inclined to agree with you.",
+         scope:'ゼミ・打ち合わせ',
+         gloss:'「賛成の方に傾いている」と、控えめに同意する。',
+         cat:'婉曲', dkey:'inclined to', dnote:'「〜する気がする」で、断定を避ける。'},
+        {label:'学術的', en:'There seems to be considerable merit in this view.',
+         scope:'小論文・論文',
+         gloss:'「この見方には相当の利点がある」と名詞で客観化する。',
+         cat:'名詞化・非人称', dkey:'considerable merit', dnote:'賛成を名詞にし、非人称の there 構文で述べる。'}
+      ]
+    },
+    {
+      key:'断る', hint:'できない', base:'「できない」',
+      steps:[
+        {label:'くだけた', en:"No. / I can't.",
+         scope:'親しい相手',
+         gloss:'はっきり断る。近い相手に、短く。',
+         cat:'直接', dkey:"No. / I can't.", dnote:'ひとことで拒否する。'},
+        {label:'ふつう', en:"I'm afraid I can't.",
+         scope:'ふだんの会話',
+         gloss:'「残念だけど無理」と、クッションを一枚はさむ。',
+         cat:'クッション', dkey:"I'm afraid", dnote:'「残念ながら」で、衝撃をやわらげる。'},
+        {label:'ていねい', en:'Unfortunately, that may be difficult.',
+         scope:'職場・目上へ',
+         gloss:'「できない」と言わず、「難しいかも」と婉曲に。',
+         cat:'婉曲＋法助動詞', dkey:'may be difficult', dnote:'不可を「難しいかもしれない」に置きかえる。'},
+        {label:'フォーマル', en:'I regret that we are unable to accommodate this request.',
+         scope:'ビジネス文書',
+         gloss:'「ご要望に応じかねます」と、定型で丁重に断る。',
+         cat:'名詞化・定型', dkey:'unable to accommodate', dnote:'定型句と名詞化で、組織として断る。'}
+      ]
+    }
+  ];
+
+  let mi = 0, si = 0;
+  const msgs = document.getElementById('msgs'),
+        range = document.getElementById('range'),
+        ticks = document.getElementById('ticks'),
+        baseEl = document.getElementById('base'),
+        $s = document.getElementById('sent'),
+        $sc = document.getElementById('scope'),
+        $g = document.getElementById('gloss'),
+        $reg = document.getElementById('reg'),
+        $dots = document.getElementById('dots'),
+        $cat = document.getElementById('cat'),
+        $dkey = document.getElementById('dkey'),
+        $dnote = document.getElementById('dnote');
+
+  MESSAGES.forEach((m,i)=>{
+    const b = document.createElement('button');
+    b.innerHTML = m.key + '<small>' + m.hint + '</small>';
+    b.onclick = ()=>{ mi = i; render(); };
+    msgs.appendChild(b);
+  });
+  for(let i=0;i<4;i++){
+    const b = document.createElement('button');
+    b.onclick = ()=>{ si = i; render(); };
+    ticks.appendChild(b);
+    $dots.appendChild(document.createElement('i'));
+  }
+
+  function paint(){
+    const pct = si / 3 * 100;
+    range.style.setProperty('--trk',
+      `linear-gradient(90deg,#9166ff,#6d5efc ${pct}%,#f1eefe ${pct}%)`);
+  }
+  function render(){
+    const m = MESSAGES[mi], d = m.steps[si];
+    baseEl.innerHTML = '伝えたい内容：<b>' + m.base + '</b>';
+    $s.textContent = d.en;
+    $sc.textContent = d.scope;
+    $g.textContent = d.gloss;
+    $reg.textContent = d.label;
+    $cat.textContent = d.cat;
+    $dkey.textContent = d.dkey;
+    $dnote.textContent = d.dnote;
+    [...msgs.children].forEach((b,j)=>b.classList.toggle('on', j===mi));
+    [...ticks.children].forEach((b,j)=>{
+      b.textContent = m.steps[j].label;
+      b.classList.toggle('on', j===si);
+    });
+    [...$dots.children].forEach((el,j)=>el.classList.toggle('on', j===si));
+    if(+range.value !== si) range.value = si;
+    paint();
+  }
+  range.addEventListener('input', ()=>{ si = +range.value; render(); });
+  render();
+</script>
+</body>
+</html>

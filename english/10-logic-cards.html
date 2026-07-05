@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>三角ロジック — 自由英作文の段落を組み立てる</title>
+<style>
+  :root{
+    --ink:#2b2f3a; --sub:#87909f; --line:#eceef5;
+    --indigo:#6d5efc; --indigo2:#9166ff; --indigo-ink:#5b4ae8; --indigo-bg:#f1eefe;
+    --rose:#f8577d; --rose-ink:#e23f6d; --rose-bg:#ffe6ee;
+    --teal:#12c7b0; --teal-ink:#0d9986; --teal-bg:#c9f2e9;
+    --amber:#fbbf24;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#edf4ff 0%,#ffffff 54%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(20px,3vw,30px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--indigo-ink);background:var(--indigo-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";font-size:13px;}
+  h1{font-size:clamp(25px,5vw,44px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--rose),#ff7aa0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:660px;}
+  .sub b{color:var(--ink);}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:390px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(93,74,232,.09);}
+
+  .base{font-size:clamp(13px,1.7vw,14.5px);color:var(--sub);margin:0 0 18px;padding-bottom:15px;
+    border-bottom:1px dashed #e7e3f6;}
+  .base b{color:var(--ink);font-weight:700;}
+
+  .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(94px,1fr));gap:10px;}
+  @media(min-width:860px){ .btns{grid-template-columns:1fr;} }
+  .btns button{display:flex;flex-direction:column;justify-content:center;min-height:60px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:16.5px;font-weight:800;border-radius:15px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;padding:8px 6px;}
+  .btns button small{font-weight:600;color:var(--sub);font-size:12px;margin-top:2px;}
+  .btns button:hover{border-color:#d9d2fb;}
+  .btns button:active{transform:scale(.97);}
+  .btns button.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.34);}
+  .btns button.on small{color:#e9e4ff;}
+
+  .stage{display:flex;flex-direction:column;}
+
+  .insight{grid-column:1/-1;background:linear-gradient(135deg,#eef5ff,#f6faff);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.74;color:#4a4560;font-weight:500;}
+  .insight b{color:var(--indigo-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#a9afbe;text-align:center;line-height:1.6;}
+</style>
+<style>
+  /* ================= 三角ロジック（Toulmin）拡張 ================= */
+  :root{
+    --amber-ink:#b45309; --amber-bg:#fde9b8;
+    --c-claim:#e23f6d; --c-data:#0d9986; --c-warrant:#b45309; --c-ret:#6d5efc;
+    --t-claim:#ffe6ee; --t-data:#d3f3ec; --t-warrant:#fcecc6; --t-ret:#ece7fe;
+  }
+
+  /* テーマボタンは2列（モバイル）／1列（PC・左段）で読みやすく */
+  .btns{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+  /* ---- 左パネルのセレクタ ---- */
+  .pick + .pick{ margin-top:16px; }
+  .pick-h{ font-size:12.5px;font-weight:800;color:var(--indigo-ink);
+    letter-spacing:.02em;margin:0 0 9px; }
+  .vbtns{ display:flex;flex-wrap:wrap;gap:9px; }
+  .vbtn{ flex:1 1 130px;min-width:0;display:flex;flex-direction:column;justify-content:center;
+    min-height:48px;border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:15px;font-weight:800;border-radius:13px;cursor:pointer;
+    transition:transform .12s,border-color .14s,box-shadow .14s;padding:7px 12px;text-align:left; }
+  .vbtn small{ font-weight:600;color:var(--sub);font-size:11.5px;margin-top:2px;
+    font-family:system-ui,-apple-system,sans-serif;line-height:1.3; }
+  .vbtn:hover{ border-color:#d9d2fb; }
+  .vbtn:active{ transform:scale(.97); }
+  .vbtn.on{ background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 7px 18px rgba(109,94,252,.30); }
+  .vbtn.on small{ color:#e9e4ff; }
+
+  /* ---- ステージ：テーマ見出し ---- */
+  .qchip{ align-self:flex-start;font-size:clamp(13px,1.8vw,15px);font-weight:800;
+    color:var(--indigo-ink);background:var(--indigo-bg);padding:8px 15px;border-radius:999px;
+    margin:0 0 14px;line-height:1.5; }
+
+  /* ---- 組み上がった段落（1つのまとまりとして折り返す） ---- */
+  .sentence{ display:block;flex:none;min-height:0;text-align:left;
+    background:linear-gradient(160deg,#f4f9ff,#eef4ff);border-radius:18px;
+    padding:clamp(18px,3vw,30px) clamp(15px,2.6vw,28px); }
+  .sline{ max-width:62ch;margin:0 auto;overflow-wrap:break-word;
+    font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;
+    font-size:clamp(15px,2.05vw,18.5px);line-height:2.05;font-weight:600;color:#2f3440;
+    text-align:left;letter-spacing:0; }
+  .mv{ border-radius:.42em;padding:.14em .14em;
+    -webkit-box-decoration-break:clone;box-decoration-break:clone; }
+  .mv.claim{ background:var(--t-claim); }
+  .mv.data{ background:var(--t-data); }
+  .mv.warrant{ background:var(--t-warrant); }
+  .mv.ret{ background:var(--t-ret); }
+  .tag{ display:inline-block;font-size:10.5px;font-weight:800;color:#fff;
+    padding:1.5px 8px;border-radius:999px;margin-right:7px;letter-spacing:.02em;
+    transform:translateY(-1px);white-space:nowrap;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",sans-serif; }
+  .tag-claim{ background:var(--c-claim); }
+  .tag-data{ background:var(--c-data); }
+  .tag-warrant{ background:var(--c-warrant); }
+  .tag-return{ background:var(--c-ret); }
+
+  /* ---- 凡例（色＝役割） ---- */
+  .legend{ display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:15px 0 2px;line-height:1.4; }
+  .legend .llab{ font-size:12px;color:var(--sub);font-weight:700;margin-right:2px; }
+  .lchip{ display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;
+    padding:5px 11px;border-radius:999px; }
+  .lchip::before{ content:"";width:10px;height:10px;border-radius:50%;flex:0 0 auto; }
+  .lchip em{ font-style:normal;font-weight:600;font-size:11px;opacity:.72; }
+  .lchip.claim{ background:var(--t-claim);color:var(--c-claim);} .lchip.claim::before{ background:var(--c-claim);}
+  .lchip.data{ background:var(--t-data);color:var(--c-data);} .lchip.data::before{ background:var(--c-data);}
+  .lchip.warrant{ background:var(--t-warrant);color:var(--c-warrant);} .lchip.warrant::before{ background:var(--c-warrant);}
+  .lchip.ret{ background:var(--t-ret);color:var(--c-ret);} .lchip.ret::before{ background:var(--c-ret);}
+
+  /* ---- 三角形の図 ＋ 各手の日本語 ---- */
+  .assembly{ display:grid;gap:16px 18px;margin-top:16px;padding-top:17px;
+    border-top:1px dashed #e7e3f6; }
+  @media(min-width:560px){ .assembly{ grid-template-columns:236px 1fr;align-items:center; } }
+  .tri svg{ width:100%;max-width:280px;height:auto;display:block;margin:0 auto; }
+  .tricap{ text-align:center;font-size:12.5px;line-height:1.62;color:var(--sub);
+    font-weight:700;margin-top:9px; }
+  .tricap b{ color:var(--ink);font-weight:800; }
+  .breakdown{ display:flex;flex-direction:column;gap:9px; }
+  .brow{ display:flex;gap:9px;align-items:flex-start; }
+  .btag{ flex:0 0 auto;font-size:11px;font-weight:800;color:#fff;padding:2.5px 0;border-radius:7px;
+    margin-top:2px;white-space:nowrap;width:44px;text-align:center; }
+  .btxt{ font-size:clamp(12.5px,1.7vw,14px);line-height:1.6;color:#454b57;font-weight:500; }
+
+  /* ---- 展開のねらい ---- */
+  .note-h{ font-size:12.5px;font-weight:800;color:var(--indigo-ink);margin:16px 0 5px; }
+  .note{ font-size:clamp(12.5px,1.6vw,14px);color:#5b616e;margin:0;line-height:1.7;font-weight:500; }
+
+  /* ---- レトリック早見（全幅バンド） ---- */
+  .reto{ grid-column:1/-1;background:#fff;border:1px solid var(--line);border-radius:20px;
+    padding:clamp(16px,2.4vw,24px);box-shadow:0 10px 28px rgba(93,74,232,.07); }
+  .reto-h{ font-size:clamp(14px,1.9vw,16.5px);font-weight:800;color:var(--ink);
+    display:flex;align-items:center;gap:8px;margin:0 0 4px; }
+  .reto-h::before{ content:"🧭"; }
+  .reto-sub{ font-size:12.5px;color:var(--sub);margin:0 0 14px;line-height:1.55; }
+  .reto-grid{ display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); }
+  .reto-card{ border:1.5px solid var(--line);border-radius:13px;padding:11px 13px;background:#fbfcff; }
+  .reto-card .rn{ font-size:14px;font-weight:800;color:var(--indigo-ink);margin-bottom:3px; }
+  .reto-card .rs{ font-size:12px;color:var(--teal-ink);font-weight:700;line-height:1.45;
+    font-family:system-ui,-apple-system,sans-serif; }
+  .reto-card .rj{ font-size:11.5px;color:var(--sub);margin-top:4px;line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">三角ロジック・トレーナー</span>
+    <h1>自由英作文は、<span class="em">三角ロジック</span>で組む</h1>
+    <p class="sub">和文英訳ではなく、<b>主張 → 根拠 → 論拠 → 回帰</b>という三角の型で段落を設計します。テーマとレトリック（合図ことば）を選ぶと、色分けされた英文と三角形の図で、論理の運びが見えます。</p>
+  </header>
+
+  <div class="app">
+    <section class="panel">
+      <p class="base"><b>① テーマ</b>と<b>② 展開（レトリック）</b>を選ぶと、右に色分けされた英文の段落と、Claim–Data–Warrant の三角形が組み上がります。色＝論理の役割です。</p>
+
+      <div class="pick">
+        <div class="pick-h">① テーマを選ぶ（自由英作文の頻出）</div>
+        <div class="btns" id="themeBtns"></div>
+      </div>
+
+      <div class="pick">
+        <div class="pick-h">② 展開（レトリック）を選ぶ</div>
+        <div class="vbtns" id="varBtns"></div>
+      </div>
+    </section>
+
+    <section class="stage">
+      <div class="qchip" id="qchip"></div>
+
+      <div class="sentence"><div class="sline" id="para"></div></div>
+
+      <div class="legend">
+        <span class="llab">色＝論理の役割</span>
+        <span class="lchip claim">主張 <em>Claim</em></span>
+        <span class="lchip data">根拠 <em>Data</em></span>
+        <span class="lchip warrant">論拠 <em>Warrant</em></span>
+        <span class="lchip ret">回帰 <em>→主張</em></span>
+      </div>
+
+      <div class="assembly">
+        <div class="tri">
+          <svg viewBox="0 0 300 200" role="img" aria-label="Claim–Data–Warrant の三角ロジック図">
+            <defs>
+              <marker id="ah" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" refX="8.5" refY="5" orient="auto">
+                <path d="M0,0 L11,5 L0,10 Z" fill="#c3c9d6"/></marker>
+              <marker id="ai" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" refX="8.5" refY="5" orient="auto">
+                <path d="M0,0 L11,5 L0,10 Z" fill="#6d5efc"/></marker>
+            </defs>
+            <!-- edges = triangle -->
+            <path d="M116,52 Q84,96 66,148" fill="none" stroke="#c3c9d6" stroke-width="2.4" marker-end="url(#ah)"/>
+            <path d="M100,170 L198,170" fill="none" stroke="#c3c9d6" stroke-width="2.4" marker-end="url(#ah)"/>
+            <path d="M234,148 Q214,96 184,52" fill="none" stroke="#6d5efc" stroke-width="2.4" stroke-dasharray="5 4" marker-end="url(#ai)"/>
+            <text x="242" y="101" text-anchor="middle" font-size="12" font-weight="800" fill="#6d5efc">④回帰</text>
+            <!-- nodes -->
+            <rect x="104" y="10" width="92" height="40" rx="13" fill="#ffe6ee" stroke="#f8577d" stroke-width="2"/>
+            <text x="150" y="29" text-anchor="middle" font-size="14.5" font-weight="800" fill="#e23f6d">①主張</text>
+            <text x="150" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#e07a97">Claim</text>
+            <rect x="6" y="150" width="92" height="40" rx="13" fill="#d3f3ec" stroke="#12c7b0" stroke-width="2"/>
+            <text x="52" y="169" text-anchor="middle" font-size="14.5" font-weight="800" fill="#0d9986">②根拠</text>
+            <text x="52" y="182" text-anchor="middle" font-size="9.5" font-weight="700" fill="#4bb3a2">Data</text>
+            <rect x="202" y="150" width="92" height="40" rx="13" fill="#fcecc6" stroke="#e0a90f" stroke-width="2"/>
+            <text x="248" y="169" text-anchor="middle" font-size="14.5" font-weight="800" fill="#b45309">③論拠</text>
+            <text x="248" y="182" text-anchor="middle" font-size="9.5" font-weight="700" fill="#c08a3a">Warrant</text>
+          </svg>
+          <div class="tricap" id="tricap"></div>
+        </div>
+        <div class="breakdown" id="breakdown"></div>
+      </div>
+
+      <div class="note-h">この展開のねらい</div>
+      <div class="note" id="note"></div>
+    </section>
+
+    <div class="reto">
+      <div class="reto-h">6つのレトリック（合図ことば）</div>
+      <p class="reto-sub">「②根拠」を主張へつなぐ運び方です。同じ主張でも、選ぶレトリックで説得の形が変わります。</p>
+      <div class="reto-grid">
+        <div class="reto-card"><div class="rn">例示</div><div class="rs">For example / For instance</div><div class="rj">具体例で主張を裏づける</div></div>
+        <div class="reto-card"><div class="rn">因果</div><div class="rs">because / therefore / as a result</div><div class="rj">理由・結果でつなぐ</div></div>
+        <div class="reto-card"><div class="rn">比較</div><div class="rs">while / compared with / whereas</div><div class="rj">二つを比べて際立たせる</div></div>
+        <div class="reto-card"><div class="rn">時系列</div><div class="rs">First … Then … Finally</div><div class="rj">順を追って展開する</div></div>
+        <div class="reto-card"><div class="rn">提案</div><div class="rs">should / it would be better to</div><div class="rj">提案・助言で締める</div></div>
+        <div class="reto-card"><div class="rn">反例→再反論</div><div class="rs">Some may argue … However … / Admittedly … but …</div><div class="rj">反論を受けて切り返す</div></div>
+      </div>
+    </div>
+
+    <div class="insight">
+      <span class="h">気づき</span>
+      <div>自由英作文は、思いついた文を並べる作業ではありません。<b>主張 → 根拠 → 論拠 → 回帰（主張へ）</b>という三角で組み、根拠を支えるレトリック（例示・因果・比較・時系列・提案・反例）を選ぶと、説得力があって最後に“落ちる”段落になります。</div>
+    </div>
+  </div>
+
+  <p class="foot">三角ロジック・トレーナー ／ 自由英作文の段落を、Claim–Data–Warrant の型で設計する</p>
+</div>
+
+<script>
+  const THEMES = [
+    {
+      tabMain:'オンライン vs 対面', tabSub:'online vs. classroom',
+      q:'オンライン学習と対面授業、どちらがよいか',
+      claim:'Face-to-face classes still play an important role, even in the online age.',
+      claimJP:'対面授業は、オンライン全盛の時代でも重要な役割を持つ。',
+      variants:[
+        { r:'例示', sign:'For example …',
+          data:'For example, students can ask questions the moment they get confused, and teachers can read their expressions.',
+          dataJP:'例えば生徒は、戸惑ったその瞬間に質問でき、教師は表情を読み取れる。',
+          warrant:'This immediate feedback keeps small misunderstandings from growing into large gaps.',
+          warrantJP:'この即時のやり取りが、小さな誤解が大きな学力差へ広がるのを防ぐ。',
+          ret:'So online tools work best alongside classrooms, not as a replacement.',
+          retJP:'だからオンラインは教室の代わりではなく、併用してこそ最も活きる。',
+          note:'例示（For example）で「対面ならではの場面」を見せ、それが主張を支える理由を論拠で述べて、主張へ回帰する王道の型です。' },
+        { r:'因果', sign:'because … / therefore …',
+          data:'Because a classroom puts teachers and students in the same room, a question can be answered the moment it arises, and attention is easier to hold.',
+          dataJP:'教室は教師と生徒を同じ場に置くため、質問はその場で解決でき、集中も保ちやすい。',
+          warrant:'It is this shared time and place that turns passive watching into active learning.',
+          warrantJP:'受け身の視聴を能動的な学びに変えるのは、この「同じ時間・場所」である。',
+          ret:'Therefore, even as online tools spread, the classroom keeps a role they cannot fill.',
+          retJP:'したがって、オンラインが広がっても、教室には代替できない役割が残る。',
+          note:'同じ主張を、今度は因果（because … / therefore …）で展開。原因→結果の鎖で「なぜ対面か」を示し、主張へ戻します。同じ主張でも運び方は選べます。' }
+      ]
+    },
+    {
+      tabMain:'スマホと学習', tabSub:'smartphones',
+      q:'スマートフォンは学習に役立つか',
+      claim:'Smartphones can support learning if they are used with clear rules.',
+      claimJP:'スマートフォンは、明確なルールのもとで使えば学習を助けられる。',
+      variants:[
+        { r:'因果', sign:'because … / therefore …',
+          data:'Because they give instant access to dictionaries and lectures, students can solve doubts on the spot, which saves time.',
+          dataJP:'辞書や講義にすぐアクセスできるため、生徒はその場で疑問を解消でき、時間を節約できる。',
+          warrant:'What matters is not the device itself but the self-control to use it for study.',
+          warrantJP:'大切なのは端末そのものではなく、それを学習に使う自制心である。',
+          ret:'Therefore, the goal should be teaching good habits, not banning the tool.',
+          retJP:'したがって目標は、道具を禁じることではなく、よい使い方の習慣を教えることであるべきだ。',
+          note:'因果（because … / therefore …）で「役立つ理由」を示しつつ、論拠で「端末より自制心」と条件を明示し、主張の if 節へ回帰します。' }
+      ]
+    },
+    {
+      tabMain:'留学すべきか', tabSub:'studying abroad',
+      q:'留学はすべきか',
+      claim:'Studying abroad is worth the cost for most students.',
+      claimJP:'留学は、多くの学生にとって費用に見合う価値がある。',
+      variants:[
+        { r:'比較', sign:'compared with … / while …',
+          data:'Compared with studying at home, living overseas forces you to use the language every day and to adapt to a different culture.',
+          dataJP:'国内で学ぶのに比べ、海外生活は毎日その言語を使い、異文化に適応することを迫る。',
+          warrant:'It is this daily necessity, not the classroom alone, that builds real fluency and independence.',
+          warrantJP:'本当の流暢さと自立を育てるのは、教室だけではなく、この「毎日の必要性」である。',
+          ret:'For that reason, the experience often pays back far more than its price.',
+          retJP:'そのため、その経験はしばしば費用をはるかに上回る見返りをもたらす。',
+          note:'比較（Compared with … / while …）で「国内 vs 海外」を対置し、論拠で差を生む要因を特定して主張へ戻します。' }
+      ]
+    },
+    {
+      tabMain:'AIと教育', tabSub:'AI in education',
+      q:'AIは教育を良くするか',
+      claim:'AI will improve education only if teachers stay at the center.',
+      claimJP:'AIは、教師が中心にあり続ける場合にのみ教育を良くする。',
+      variants:[
+        { r:'反例→再反論', sign:'Some may argue … However …',
+          data:'Some may argue that AI can replace teachers because it answers any question instantly. However, it cannot notice when a quiet student is lost.',
+          dataJP:'「AIはどんな質問にも即答するので教師を代替できる」と言う人もいるかもしれない。しかしAIは、静かな生徒がつまずいていることに気づけない。',
+          warrant:'Learning depends on this human judgment as much as on information.',
+          warrantJP:'学びは、情報と同じくらい、この人間的な判断に依存する。',
+          ret:"So AI should be a tool in the teacher's hand, not a substitute for it.",
+          retJP:'だからAIは、教師に取って代わるものではなく、教師の手の中の道具であるべきだ。',
+          note:'反例（Some may argue …）でいったん相手の主張を認め、However で切り返します。論拠で「人間の判断」を核に据え、主張へ回帰する、反論に強い型です。' }
+      ]
+    }
+  ];
+
+  const themeBtns = document.getElementById('themeBtns');
+  const varBtns   = document.getElementById('varBtns');
+  const $q  = document.getElementById('qchip');
+  const $p  = document.getElementById('para');
+  const $bd = document.getElementById('breakdown');
+  const $note = document.getElementById('note');
+  const $cap  = document.getElementById('tricap');
+
+  let ti = 0, vi = 0;
+
+  function paraHTML(t, v){
+    return '<span class="mv claim"><i class="tag tag-claim">主張</i>' + t.claim + '</span> '
+         + '<span class="mv data"><i class="tag tag-data">根拠・' + v.r + '</i>' + v.data + '</span> '
+         + '<span class="mv warrant"><i class="tag tag-warrant">論拠</i>' + v.warrant + '</span> '
+         + '<span class="mv ret"><i class="tag tag-return">回帰</i>' + v.ret + '</span>';
+  }
+
+  function bdHTML(t, v){
+    const row = (cls, label, jp) =>
+      '<div class="brow"><span class="btag ' + cls + '">' + label + '</span><span class="btxt">' + jp + '</span></div>';
+    return row('tag-claim','主張', t.claimJP)
+         + row('tag-data','根拠', v.dataJP)
+         + row('tag-warrant','論拠', v.warrantJP)
+         + row('tag-return','回帰', v.retJP);
+  }
+
+  function renderStage(){
+    const t = THEMES[ti], v = t.variants[vi];
+    $q.textContent = 'テーマ：' + t.q;
+    $p.innerHTML = paraHTML(t, v);
+    $bd.innerHTML = bdHTML(t, v);
+    $cap.innerHTML = '<b>①主張 → ②根拠〈' + v.r + '〉→ ③論拠 → ④回帰</b><br>三角をひと回りして、結論で主張へ戻ります。';
+    $note.textContent = v.note;
+    [...varBtns.children].forEach((b, j) => b.classList.toggle('on', j === vi));
+  }
+
+  function renderVarBtns(){
+    varBtns.innerHTML = '';
+    THEMES[ti].variants.forEach((v, j) => {
+      const b = document.createElement('button');
+      b.className = 'vbtn';
+      b.innerHTML = v.r + '<small>' + v.sign + '</small>';
+      b.onclick = () => { vi = j; renderStage(); };
+      varBtns.appendChild(b);
+    });
+  }
+
+  function selTheme(i){
+    ti = i; vi = 0;
+    [...themeBtns.children].forEach((b, j) => b.classList.toggle('on', j === i));
+    renderVarBtns();
+    renderStage();
+  }
+
+  THEMES.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.innerHTML = t.tabMain + '<small>' + t.tabSub + '</small>';
+    b.onclick = () => selTheme(i);
+    themeBtns.appendChild(b);
+  });
+
+  selTheme(0);
+</script>
+</body>
+</html>

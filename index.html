@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>触って分かる 教材 — 英語・数学・物理</title>
+<style>
+  :root{
+    --ink:#2b2f3a; --sub:#7c8494; --line:#e9ecf3;
+    --eng:#6d5efc; --eng-ink:#5b4ae8; --eng-bg:#f1eefe;
+    --math:#10b981; --math-ink:#059669; --math-bg:#e7f8f1;
+    --phys:#f97316; --phys-ink:#ea580c; --phys-bg:#fff0e6;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:
+      radial-gradient(90% 55% at 15% 0%, #f1eefe 0%, transparent 55%),
+      radial-gradient(90% 55% at 85% 0%, #fff0e6 0%, transparent 55%),
+      linear-gradient(180deg,#eafaf3 0%,#ffffff 46%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:940px;margin:0 auto;padding:clamp(30px,6vw,64px) clamp(18px,4vw,40px) 60px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;
+    color:var(--math-ink);background:var(--math-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";}
+  h1{font-size:clamp(27px,6vw,46px);line-height:1.24;margin:16px 0 10px;font-weight:800;letter-spacing:.01em;}
+  h1 .e{color:var(--eng-ink);} h1 .m{color:var(--math-ink);} h1 .p{color:var(--phys-ink);}
+  .sub{color:var(--sub);font-size:clamp(14.5px,2.6vw,17px);margin:0 0 34px;max-width:620px;}
+  .sub b{color:var(--ink);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:clamp(14px,2.2vw,20px);}
+  .card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:#fff;
+    border:1px solid var(--line);border-radius:22px;padding:24px 22px 22px;position:relative;overflow:hidden;
+    box-shadow:0 12px 32px rgba(40,50,70,.07);transition:transform .15s,box-shadow .15s,border-color .15s;}
+  .card::before{content:"";position:absolute;left:0;top:0;right:0;height:6px;}
+  .card.e::before{background:linear-gradient(90deg,#8074f2,#6f61ec);}
+  .card.m::before{background:linear-gradient(90deg,#14c08a,#0ea371);}
+  .card.p::before{background:linear-gradient(90deg,#fb8b3c,#f2711c);}
+  .card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(40,50,70,.14);}
+  .icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:26px;margin-bottom:14px;}
+  .card.e .icon{background:var(--eng-bg);} .card.m .icon{background:var(--math-bg);} .card.p .icon{background:var(--phys-bg);}
+  .count{font-size:12px;font-weight:800;padding:4px 11px;border-radius:999px;position:absolute;top:22px;right:20px;}
+  .card.e .count{color:var(--eng-ink);background:var(--eng-bg);}
+  .card.m .count{color:var(--math-ink);background:var(--math-bg);}
+  .card.p .count{color:var(--phys-ink);background:var(--phys-bg);}
+  h2{font-size:22px;font-weight:800;margin:0 0 7px;}
+  .card p{font-size:13.5px;color:var(--sub);margin:0;line-height:1.6;flex:1;}
+  .go{margin-top:16px;font-size:14px;font-weight:800;}
+  .card.e .go{color:var(--eng-ink);} .card.m .go{color:var(--math-ink);} .card.p .go{color:var(--phys-ink);}
+  .go::after{content:" →";}
+  .foot{margin-top:34px;font-size:12.5px;color:var(--sub);line-height:1.7;}
+  .foot b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="shell">
+  <span class="eyebrow">AIで作る、動く教材</span>
+  <h1>触って分かる、<span class="e">英語</span>・<span class="m">数学</span>・<span class="p">物理</span></h1>
+  <p class="sub">スライダーやドラッグで<b>動かす</b>と、図・グラフ・文が<b>その場で連動</b>します。参考書の「完成形」ではなく、条件を変えると何が変わるかを、自分の手で試せる教材です。教科を選んでください。</p>
+
+  <div class="grid">
+    <a class="card e" href="english/">
+      <div class="icon">🔤</div><span class="count">10種</span>
+      <h2>英語</h2>
+      <p>語順（only）・時制・冠詞・前置詞・関係詞・5文型・動詞の型・レジスター・誤り診断・三角ロジック英作文。</p>
+      <span class="go">英語のツールを見る</span>
+    </a>
+    <a class="card m" href="stem/">
+      <div class="icon">📐</div><span class="count">3種</span>
+      <h2>数学</h2>
+      <p>単位円と三角関数（＋角速度の補足）・二次関数と係数・微分＝接線の傾き。動かすと概念が腑に落ちる。</p>
+      <span class="go">数学のツールを見る</span>
+    </a>
+    <a class="card p" href="stem/">
+      <div class="icon">🧲</div><span class="count">3種</span>
+      <h2>物理</h2>
+      <p>斜方投射（45°で最大）・波の重ね合わせとうなり・電磁誘導（レンツの法則）。因果を動きで見る。</p>
+      <span class="go">物理のツールを見る</span>
+    </a>
+  </div>
+
+  <p class="foot"><b>『螢雪時代』連載「小船幹生の Study Hack」</b>の付録ツールです。AIに一文頼めば、こうした動く教材を自分でも作れます。スマートフォンでも動きます。</p>
+</div>
+</body>
+</html>

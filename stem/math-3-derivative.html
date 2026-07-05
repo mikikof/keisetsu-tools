@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>微分ビジュアライザ — 微分は「接線の傾き」を集めたもの</title>
+<style>
+  :root{
+    --ink:#233b34; --sub:#6a807a; --line:#e3eeea;
+    --pri:#10b981; --pri-ink:#059669; --pri-bg:#e7f8f1;
+    --acc:#f59e0b; --acc-ink:#b45309; --acc-bg:#fdf0d5;
+    --cool:#0ea5e9; --cool-ink:#0369a1; --cool-bg:#e0f2fe;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#eafaf3 0%,#ffffff 52%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(16px,2.6vw,24px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--pri-ink);background:var(--pri-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"∂";font-weight:900;font-size:15px;font-style:italic;}
+  h1{font-size:clamp(24px,4.8vw,42px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--pri),#34d399);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:680px;}
+  .sub b{color:var(--ink);}
+  .sub .mono{font-family:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;font-weight:700;color:var(--pri-ink);}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:352px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(6,120,95,.08);}
+
+  .sellabel{font-size:11px;font-weight:800;color:var(--sub);letter-spacing:.05em;margin:0 0 8px;}
+  .sellabel.mt{margin-top:20px;}
+
+  /* function selector */
+  .selrow{display:flex;gap:8px;margin:0 0 4px;}
+  .chip{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1.2;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+    font-weight:800;font-size:15px;border-radius:14px;padding:10px 14px;cursor:pointer;
+    transition:transform .12s,border-color .14s,box-shadow .14s;}
+  .chip .fx{font-family:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;letter-spacing:-.01em;}
+  .chip small{font-weight:700;color:#9db1ab;font-size:11px;}
+  .chip:hover{border-color:#bfe6d6;}
+  .chip:active{transform:scale(.98);}
+  .chip.on{background:linear-gradient(135deg,var(--pri),#34d399);border-color:transparent;
+    color:#fff;box-shadow:0 8px 20px rgba(16,185,129,.30);}
+  .chip.on small{color:#d7f7ec;}
+
+  /* slider */
+  .xslider{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:999px;
+    background:linear-gradient(90deg,var(--pri-bg),var(--cool-bg));outline:none;margin:2px 0 6px;cursor:pointer;}
+  .xslider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:50%;
+    background:radial-gradient(circle at 34% 30%,#fff,#fbbf24 46%,var(--acc));border:2.5px solid #fff;
+    box-shadow:0 3px 9px rgba(180,83,9,.38);cursor:grab;}
+  .xslider::-webkit-slider-thumb:active{cursor:grabbing;}
+  .xslider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;
+    background:var(--acc);border:2.5px solid #fff;box-shadow:0 3px 9px rgba(180,83,9,.38);cursor:grab;}
+  .xslider::-moz-range-track{height:8px;border-radius:999px;background:linear-gradient(90deg,var(--pri-bg),var(--cool-bg));}
+  .hintline{font-size:12.5px;color:var(--sub);margin:0 0 14px;line-height:1.55;}
+  .hintline b{color:var(--acc-ink);font-weight:800;}
+
+  .btnrow{display:grid;grid-template-columns:1fr auto;gap:10px;margin:0 0 4px;}
+  .act,.ghost{font-family:inherit;font-weight:800;font-size:15px;border-radius:14px;cursor:pointer;
+    padding:12px 14px;transition:transform .12s,box-shadow .14s,border-color .14s,background .14s;}
+  .act{border:none;color:#fff;background:linear-gradient(135deg,var(--acc),#fbbf24);
+    box-shadow:0 8px 18px rgba(180,83,9,.28);}
+  .act.playing{background:linear-gradient(135deg,#ef4444,#f87171);box-shadow:0 8px 18px rgba(220,38,38,.28);}
+  .ghost{border:1.7px solid var(--line);background:#fff;color:var(--sub);}
+  .act:active,.ghost:active{transform:scale(.97);}
+  .ghost:hover{border-color:#bfe6d6;color:var(--ink);}
+
+  /* readout */
+  .readout{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:18px 0 0;}
+  .tile{border:1.5px solid var(--line);border-radius:14px;padding:11px 8px 10px;text-align:center;background:#fbfefc;}
+  .tile .lab{display:block;font-size:11px;font-weight:800;color:var(--sub);letter-spacing:.02em;
+    font-family:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;}
+  .tile .val{display:block;font-size:clamp(19px,2.5vw,23px);font-weight:800;margin-top:3px;letter-spacing:-.01em;
+    font-family:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;}
+  .tile.pri{background:var(--pri-bg);border-color:#c8ecdd;} .tile.pri .val{color:var(--pri-ink);}
+  .tile.acc{background:var(--acc-bg);border-color:#f6dfae;} .tile.acc .val{color:var(--acc-ink);}
+
+  .status{margin:12px 0 0;font-size:13.5px;font-weight:700;color:var(--ink);
+    background:#f4faf7;border:1px solid var(--line);border-radius:12px;padding:10px 13px;line-height:1.5;
+    display:flex;align-items:center;gap:9px;}
+  .status .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto;background:var(--acc);}
+  .status.zero{background:var(--acc-bg);border-color:#f6dfae;color:var(--acc-ink);}
+  .status.zero .dot{background:var(--acc-ink);}
+  .status b{color:var(--pri-ink);}
+
+  .legend{display:flex;flex-wrap:wrap;gap:12px 16px;margin:18px 0 0;font-size:12.5px;font-weight:700;color:var(--ink);}
+  .lg{display:inline-flex;align-items:center;gap:7px;}
+  .sw{width:16px;height:4px;border-radius:2px;display:inline-block;}
+  .sw.pri{background:var(--pri);} .sw.acc{background:var(--acc);} .sw.cool{background:var(--cool);}
+  .microtip{font-size:11.5px;color:#9db1ab;margin:11px 0 0;line-height:1.55;}
+
+  .stage{display:flex;flex-direction:column;gap:8px;}
+  .stage svg{width:100%;height:auto;display:block;touch-action:pan-y;}
+  #fnPoint,#hitPoint{cursor:grab;}
+  #hitPoint:active{cursor:grabbing;}
+
+  .insight{background:linear-gradient(135deg,#e7f8f1,#f4fdf9);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);margin-top:clamp(16px,2.4vw,26px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.76;color:#3c5750;font-weight:500;}
+  .insight b{color:var(--pri-ink);font-weight:700;}
+  .insight .fp{font-family:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;font-weight:800;color:var(--cool-ink);}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#9db1ab;text-align:center;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">微分＝接線の傾き</span>
+    <h1>微分は、各点の<span class="em">接線の傾き</span>を集めたもの</h1>
+    <p class="sub">曲線 <span class="mono">y = x³ − 3x</span> の上で点を動かすと、その点での<b>接線の傾き</b> <span class="mono">f′(x)</span> が求まります。その傾きを高さとして打っていくと、動かすほどに<b>導関数 f′</b> の曲線が描かれていきます。傾きが 0 になる所が<b>極大・極小</b>です。</p>
+  </header>
+
+  <div class="app">
+    <section class="panel">
+      <p class="sellabel">関数を選ぶ</p>
+      <div class="selrow" id="fnsel"></div>
+
+      <p class="sellabel mt">点の位置 x を動かす</p>
+      <input id="xr" class="xslider" type="range" min="-2" max="2" step="0.01" value="-1.55">
+      <div class="hintline">スライダー、または右のグラフの<b>オレンジの点をドラッグ</b>。</div>
+
+      <div class="btnrow">
+        <button id="sweepBtn" class="act">▶ 自動でなぞる</button>
+        <button id="resetBtn" class="ghost">リセット</button>
+      </div>
+
+      <div class="readout">
+        <div class="tile"><span class="lab">x</span><span class="val" id="rx">–</span></div>
+        <div class="tile pri"><span class="lab">f(x)</span><span class="val" id="rfx">–</span></div>
+        <div class="tile acc"><span class="lab">傾き f′(x)</span><span class="val" id="rdx">–</span></div>
+      </div>
+      <div class="status" id="status"><span class="dot"></span><span id="statusText">–</span></div>
+
+      <div class="legend">
+        <span class="lg"><i class="sw pri"></i>y = f(x)</span>
+        <span class="lg"><i class="sw acc"></i>接線・いまの点</span>
+        <span class="lg"><i class="sw cool"></i>f′(x) 導関数（傾き）</span>
+      </div>
+      <p class="microtip">※ 導関数 f′ は形が見えるよう縦を縮小して表示しています（0 になる位置と符号は正確）。</p>
+    </section>
+
+    <section class="stage">
+      <svg id="graph" viewBox="0 0 540 540" aria-label="関数と接線と導関数のグラフ">
+        <defs>
+          <clipPath id="plot"><rect x="2" y="2" width="536" height="536" rx="8"/></clipPath>
+        </defs>
+        <g id="gstatic"></g>
+        <g id="gtrace"></g>
+        <g id="gdyn"></g>
+      </svg>
+    </section>
+  </div>
+
+  <div class="insight">
+    <span class="h">気づき</span>
+    <div>微分とは、各点の<b>「接線の傾き」を集めた関数</b>。傾きが 0 になる点が極大・極小（<span class="fp">f′ = 0</span>）です。点を動かすほど、傾きの変化が導関数 <span class="fp">f′</span> として描かれていきます。参考書は完成した f と f′ を並べるだけですが、ここでは自分で動かして、<b>傾きから f′ が生まれる瞬間</b>を確かめられます。</div>
+  </div>
+
+  <p class="foot">9月号「AIで動く教材を作る」試作 ／ 一文の指示で、この種の教材ツールが生成できます</p>
+</div>
+
+<script>
+"use strict";
+/* ===== fixed drawing window (equal x/y scale so tangent slopes look true) ===== */
+const XMIN=-2.7, XMAX=2.7, YMIN=-2.3, YMAX=3.1, PU=100; // px per math-unit; viewBox 540x540
+const sx = x => (x - XMIN) * PU;      // (x + 2.7) * 100
+const sy = y => (YMAX - y) * PU;      // (3.1 - y) * 100
+const SVGNS = "http://www.w3.org/2000/svg";
+const el = id => document.getElementById(id);
+function S(tag, a){ const e=document.createElementNS(SVGNS,tag); for(const k in a) e.setAttribute(k,a[k]); return e; }
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function fmt(v){ if(Math.abs(v)<0.005) v=0; return v.toFixed(2); }
+function sgn(v){ if(Math.abs(v)<0.005) v=0; return (v>0?"+":"") + v.toFixed(2); }
+
+/* ===== the two functions (same window; quadratic sweeps a narrower x) ===== */
+const CFG = {
+  cubic:{
+    label:"y = x³ − 3x", hint:"3次関数",
+    f:x=>x*x*x-3*x, d:x=>3*x*x-3, dExpr:"3x² − 3",
+    sweepMin:-2, sweepMax:2, sd:0.30, x0:-1.55,
+    extrema:[ {x:-1,y:2,type:"極大"}, {x:1,y:-2,type:"極小"} ]
+  },
+  quad:{
+    label:"y = x²", hint:"2次関数（やさしい例）",
+    f:x=>x*x, d:x=>2*x, dExpr:"2x",
+    sweepMin:-1.7, sweepMax:1.7, sd:0.40, x0:-1.2,
+    extrema:[ {x:0,y:0,type:"極小"} ]
+  }
+};
+let key="cubic", C=CFG[key];
+let x=C.x0, xLo=C.x0, xHi=C.x0;   // xLo/xHi = swept range for the accumulating trace
+let dragging=false, raf=0;
+
+/* ---------- path builders ---------- */
+function pathOf(fn, a, b){
+  const step=(b-a)/240; let dd="";
+  for(let t=a; t<=b+1e-9; t+=step){ dd += (dd===""?"M":"L") + sx(t).toFixed(1) + " " + sy(fn(t)).toFixed(1); }
+  return dd;
+}
+const dPlot = x => C.sd * C.d(x);   // scaled derivative height
+
+/* ---------- STATIC layer (axes, grid, f-curve, faint f', extrema) ---------- */
+function buildStatic(){
+  const g=el("gstatic"); g.innerHTML="";
+  // grid
+  for(let gx=-2; gx<=2; gx++){
+    g.appendChild(S("line",{x1:sx(gx),y1:sy(YMAX),x2:sx(gx),y2:sy(YMIN),stroke:"var(--line)","stroke-width":gx===0?0:1}));
+  }
+  for(let gy=-2; gy<=3; gy++){
+    g.appendChild(S("line",{x1:sx(XMIN),y1:sy(gy),x2:sx(XMAX),y2:sy(gy),stroke:"var(--line)","stroke-width":gy===0?0:1}));
+  }
+  // axes
+  g.appendChild(S("line",{x1:sx(XMIN),y1:sy(0),x2:sx(XMAX),y2:sy(0),stroke:"#c4d4cd","stroke-width":1.8}));
+  g.appendChild(S("line",{x1:sx(0),y1:sy(YMAX),x2:sx(0),y2:sy(YMIN),stroke:"#c4d4cd","stroke-width":1.8}));
+  g.appendChild(S("polygon",{points:`${sx(XMAX)},${sy(0)} ${sx(XMAX)-11},${sy(0)-5} ${sx(XMAX)-11},${sy(0)+5}`,fill:"#c4d4cd"}));
+  g.appendChild(S("polygon",{points:`${sx(0)},${sy(YMAX)} ${sx(0)-5},${sy(YMAX)+11} ${sx(0)+5},${sy(YMAX)+11}`,fill:"#c4d4cd"}));
+  const xa=S("text",{x:sx(XMAX)-4,y:sy(0)-11,"text-anchor":"end","font-size":15,"font-style":"italic",fill:"#8aa199","font-weight":700}); xa.textContent="x"; g.appendChild(xa);
+  const ya=S("text",{x:sx(0)+11,y:sy(YMAX)+15,"font-size":15,"font-style":"italic",fill:"#8aa199","font-weight":700}); ya.textContent="y"; g.appendChild(ya);
+  // ticks
+  [-2,-1,1,2].forEach(t=>{ const e=S("text",{x:sx(t),y:sy(0)+19,"text-anchor":"middle","font-size":12.5,fill:"#9db1ab","font-weight":700}); e.textContent=t; g.appendChild(e); });
+  [-2,-1,1,2,3].forEach(t=>{ const e=S("text",{x:sx(0)-9,y:sy(t)+4.5,"text-anchor":"end","font-size":12.5,fill:"#9db1ab","font-weight":700}); e.textContent=t; g.appendChild(e); });
+
+  // faint FULL derivative curve (the "goal" you trace over)
+  g.appendChild(S("path",{d:pathOf(dPlot,C.sweepMin,C.sweepMax),fill:"none",stroke:"var(--cool)","stroke-width":2.4,"stroke-dasharray":"2 6","stroke-linecap":"round",opacity:.30}));
+  // the function f
+  g.appendChild(S("path",{d:pathOf(C.f,C.sweepMin,C.sweepMax),fill:"none",stroke:"var(--pri)","stroke-width":3.6,"stroke-linecap":"round","stroke-linejoin":"round"}));
+
+  // extrema on f  + matching f'=0 crossing on the x-axis (same x)
+  C.extrema.forEach(m=>{
+    g.appendChild(S("line",{x1:sx(m.x),y1:sy(m.y),x2:sx(m.x),y2:sy(0),stroke:"#bfe6d6","stroke-width":1.4,"stroke-dasharray":"3 4"}));
+    g.appendChild(S("circle",{cx:sx(m.x),cy:sy(m.y),r:5.5,fill:"#fff",stroke:"var(--pri-ink)","stroke-width":2.4}));
+    g.appendChild(S("circle",{cx:sx(m.x),cy:sy(0),r:4,fill:"var(--cool)"}));
+    const lab=S("text",{x:sx(m.x)+(m.type==="極大"?-9:9),y:sy(m.y)+(m.type==="極大"?-9:20),"text-anchor":(m.type==="極大"?"end":"start"),"font-size":12.5,fill:"var(--pri-ink)","font-weight":800});
+    lab.textContent=m.type; g.appendChild(lab);
+    const z=S("text",{x:sx(m.x)+7,y:sy(0)-8,"font-size":11.5,fill:"var(--cool-ink)","font-weight":800}); z.textContent="f′=0"; g.appendChild(z);
+  });
+}
+
+/* ---------- DYNAMIC layer (guide, tangent, points, trace, slope tag) ---------- */
+function render(){
+  const gd=el("gdyn"); gd.innerHTML="";
+  const gt=el("gtrace"); gt.innerHTML="";
+  const fx=C.f(x), m=C.d(x), px=sx(x), py=sy(fx), dy=sy(dPlot(x));
+
+  // accumulating solid trace of f' over the swept range
+  if(xHi-xLo>1e-3){
+    gt.appendChild(S("path",{d:pathOf(dPlot,xLo,xHi),fill:"none",stroke:"var(--cool)","stroke-width":4.4,"stroke-linecap":"round","stroke-linejoin":"round"}));
+  }
+
+  // vertical guide at current x (ties f-point and f'-point: same x)
+  gd.appendChild(S("line",{x1:px,y1:sy(YMAX),x2:px,y2:sy(YMIN),stroke:"#d7c39a","stroke-width":1.3,"stroke-dasharray":"4 5",opacity:.9}));
+
+  // tangent line, slope m, clipped to plot area
+  const clip=S("g",{"clip-path":"url(#plot)"});
+  const tanY=t=>fx+m*(t-x);
+  const horiz=Math.abs(m)<0.06;
+  clip.appendChild(S("line",{x1:sx(XMIN),y1:sy(tanY(XMIN)),x2:sx(XMAX),y2:sy(tanY(XMAX)),
+    stroke:"var(--acc)","stroke-width":horiz?4.4:3.4,"stroke-linecap":"round",opacity:.95}));
+  gd.appendChild(clip);
+
+  // f'-point (cyan) riding the derivative curve
+  gd.appendChild(S("circle",{cx:px,cy:dy,r:8.5,fill:"var(--cool)",stroke:"#fff","stroke-width":2.6}));
+  const dtag=S("text",{x:px+13,y:dy+4.5,"font-size":12.5,fill:"var(--cool-ink)","font-weight":800}); dtag.textContent="f′"; gd.appendChild(dtag);
+
+  // f-point (amber) + big invisible drag handle
+  gd.appendChild(S("circle",{cx:px,cy:py,r:9,fill:"var(--acc)",stroke:"#fff","stroke-width":3,id:"fnPoint"}));
+  gd.appendChild(S("circle",{cx:px,cy:py,r:30,fill:"transparent",id:"hitPoint",style:"cursor:grab"}));
+  attachDrag();
+
+  // slope tag near the point (clamped inside the frame)
+  const txt = horiz ? "傾き 0" : ("傾き "+sgn(m));
+  let lx=px+18, ly=py-16, anchor="start";
+  if(lx>452){ lx=px-18; anchor="end"; }
+  ly=clamp(ly,22,528);
+  const w = txt.length*8.4 + 20;
+  const rx = anchor==="end" ? lx-w : lx-6;
+  const bg=S("rect",{x:clamp(rx,4,536-w),y:ly-15,width:w,height:22,rx:11,fill:horiz?"var(--acc-ink)":"var(--acc)",opacity:.96});
+  gd.appendChild(bg);
+  const tg=S("text",{x:anchor==="end"?lx-13:lx+4,y:ly+1,"text-anchor":anchor,"font-size":12.5,fill:"#fff","font-weight":800,
+    "font-family":"ui-monospace,Menlo,monospace"}); tg.textContent=txt; gd.appendChild(tg);
+
+  // readout + status
+  el("rx").textContent=fmt(x);
+  el("rfx").textContent=fmt(fx);
+  el("rdx").textContent=sgn(m);
+  const st=el("status"), sT=el("statusText");
+  if(horiz){
+    st.classList.add("zero");
+    const near=C.extrema.reduce((p,c)=>Math.abs(c.x-x)<Math.abs(p.x-x)?c:p);
+    sT.innerHTML="接線は<b style='color:inherit'>水平</b>（傾き 0）→ ここが<b style='color:inherit'>"+near.type+"</b>。導関数は 0 を横切ります。";
+  }else{
+    st.classList.remove("zero");
+    sT.innerHTML = m>0
+      ? "接線は<b>右上がり</b>（f は増加中・f′&gt;0）"
+      : "接線は<b>右下がり</b>（f は減少中・f′&lt;0）";
+  }
+}
+
+/* ---------- interaction ---------- */
+function setX(nx){ x=clamp(nx,C.sweepMin,C.sweepMax); if(x<xLo)xLo=x; if(x>xHi)xHi=x;
+  el("xr").value=x.toFixed(2); render(); }
+
+let dragBound=false;
+function attachDrag(){
+  const hit=el("hitPoint");
+  hit.addEventListener("pointerdown",e=>{ dragging=true; stopSweep(); hit.setPointerCapture(e.pointerId); e.preventDefault(); });
+  if(dragBound) return; dragBound=true;
+  const svg=el("graph");
+  svg.addEventListener("pointermove",e=>{ if(!dragging) return;
+    const r=svg.getBoundingClientRect(); const lx=(e.clientX-r.left)/r.width*540; setX(XMIN+lx/PU); });
+  window.addEventListener("pointerup",()=>{ dragging=false; });
+}
+
+function stopSweep(){ if(raf){ cancelAnimationFrame(raf); raf=0; } const b=el("sweepBtn"); b.classList.remove("playing"); b.textContent="▶ 自動でなぞる"; }
+function startSweep(){
+  stopSweep();
+  x=C.sweepMin; xLo=C.sweepMin; xHi=C.sweepMin; el("xr").value=x.toFixed(2); render();
+  const b=el("sweepBtn"); b.classList.add("playing"); b.textContent="■ 停止";
+  const t0=performance.now(), dur=2600;
+  (function step(now){
+    const p=Math.min(1,(now-t0)/dur);
+    setX(C.sweepMin + p*(C.sweepMax-C.sweepMin));
+    if(p<1){ raf=requestAnimationFrame(step); } else { stopSweep(); }
+  })(t0);
+}
+
+function selectFn(k){
+  stopSweep(); key=k; C=CFG[k];
+  const slider=el("xr"); slider.min=C.sweepMin; slider.max=C.sweepMax; slider.value=C.x0;
+  x=C.x0; xLo=C.x0; xHi=C.x0;
+  buildFnSel(); buildStatic(); render();
+}
+function buildFnSel(){
+  const w=el("fnsel"); w.innerHTML="";
+  Object.keys(CFG).forEach(k=>{
+    const b=document.createElement("button");
+    b.className="chip"+(k===key?" on":"");
+    b.innerHTML='<span class="fx">'+CFG[k].label+'</span><small>'+CFG[k].hint+'</small>';
+    b.onclick=()=>selectFn(k);
+    w.appendChild(b);
+  });
+}
+
+/* ---------- wire up ---------- */
+el("xr").addEventListener("input",e=>{ stopSweep(); setX(parseFloat(e.target.value)); });
+el("sweepBtn").addEventListener("click",()=>{ if(raf) stopSweep(); else startSweep(); });
+el("resetBtn").addEventListener("click",()=>{ stopSweep(); x=C.x0; xLo=C.x0; xHi=C.x0; el("xr").value=C.x0; render(); });
+
+buildFnSel(); buildStatic(); render();
+
+/* verification hooks: #fn=quad selects a function; #demo shows a full accumulated trace; #x=VALUE sets the point */
+if(location.hash.indexOf("fn=quad")>=0){ selectFn("quad"); }
+if(location.hash.indexOf("demo")>=0){ xLo=C.sweepMin; xHi=C.sweepMax; setX(0); }
+const _hm=location.hash.match(/x=(-?\d+(?:\.\d+)?)/); if(_hm){ setX(parseFloat(_hm[1])); }
+</script>
+</body>
+</html>

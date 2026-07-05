@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>電磁誘導ラボ — 磁石を動かすと電流が生まれる（ファラデー・レンツ）</title>
+<style>
+  :root{
+    --ink:#3a2a20; --sub:#8a7566; --line:#f0e7df;
+    --pri:#f97316; --pri-ink:#ea580c; --pri-bg:#fff0e6;
+    --acc:#ef4444; --acc-ink:#dc2626; --acc-bg:#fde4e4;
+    --cool:#3b82f6; --cool-ink:#2563eb; --cool-bg:#e4eeff;
+    --flux:#8b5cf6; --flux-ink:#7c3aed; --flux-bg:#f1ecfe;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#fff3ea 0%,#ffffff 52%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(16px,2.6vw,24px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--pri-ink);background:var(--pri-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"🧲";font-size:13px;}
+  h1{font-size:clamp(23px,4.6vw,40px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--pri),#fb923c);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:680px;}
+  .sub b{color:var(--ink);}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:352px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(16px,2.4vw,24px);box-shadow:0 12px 34px rgba(249,115,22,.10);}
+
+  .sellabel{font-size:11px;font-weight:800;color:var(--sub);letter-spacing:.05em;margin:0 0 8px;
+    display:flex;align-items:center;gap:6px;}
+  .sellabel .n{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;
+    background:var(--pri-bg);color:var(--pri-ink);font-size:10.5px;}
+  .block{margin:0 0 clamp(15px,2.2vw,19px);}
+
+  .selrow{display:flex;gap:8px;}
+  .chip{flex:1;display:inline-flex;flex-direction:column;align-items:center;line-height:1.2;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+    font-weight:800;font-size:15px;border-radius:13px;padding:10px 8px;cursor:pointer;
+    transition:transform .12s,border-color .14s,box-shadow .14s;}
+  .chip .dot{width:13px;height:13px;border-radius:50%;margin-bottom:4px;}
+  .chip small{font-weight:600;color:var(--sub);font-size:11px;margin-top:2px;}
+  .chip:hover{border-color:#f4d3b8;}
+  .chip:active{transform:scale(.97);}
+  .chip.on{background:linear-gradient(135deg,var(--pri),#fb923c);border-color:transparent;
+    color:#fff;box-shadow:0 6px 16px rgba(249,115,22,.30);}
+  .chip.on small{color:#ffe6d2;}
+
+  /* speed slider */
+  .srow{display:flex;align-items:center;gap:11px;}
+  .srow input[type=range]{flex:1;height:26px;accent-color:var(--pri);cursor:pointer;}
+  .srow .cap{font-size:11.5px;font-weight:700;color:var(--sub);white-space:nowrap;}
+
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .btns button{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:60px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:16px;font-weight:800;border-radius:15px;cursor:pointer;
+    transition:transform .1s,box-shadow .14s,border-color .14s;padding:8px 6px;touch-action:none;user-select:none;}
+  .btns button .ar{font-size:19px;line-height:1;margin-bottom:3px;}
+  .btns button small{font-weight:600;color:var(--sub);font-size:11px;margin-top:2px;}
+  .btns button:hover{border-color:#f4d3b8;}
+  .btns button.press{transform:scale(.96);background:linear-gradient(135deg,var(--pri),#fb923c);
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(249,115,22,.34);}
+  .btns button.press small{color:#ffe6d2;}
+  .hint{font-size:11.5px;color:var(--sub);margin:9px 2px 0;line-height:1.55;}
+  .hint b{color:var(--pri-ink);font-weight:700;}
+
+  /* live status */
+  .status{background:linear-gradient(160deg,#fff7f1,#fffdfb);border:1px solid var(--line);
+    border-radius:16px;padding:13px 14px;}
+  .strow{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:7px 0;border-bottom:1px dashed #f2e7dd;}
+  .strow:last-child{border-bottom:0;}
+  .stk{font-size:12px;font-weight:800;color:var(--sub);white-space:nowrap;}
+  .stv{font-size:13.5px;font-weight:800;text-align:right;line-height:1.3;}
+  .stv .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;}
+  .bar{display:inline-block;vertical-align:middle;height:9px;border-radius:99px;background:#f0e2d4;overflow:hidden;width:86px;}
+  .bar > i{display:block;height:100%;width:0%;border-radius:99px;
+    background:linear-gradient(90deg,#fb923c,var(--pri-ink));transition:width .12s;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:6px 13px;margin:12px 2px 0;font-size:11.5px;font-weight:700;color:var(--sub);}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block;}
+
+  .stage{display:flex;flex-direction:column;}
+  .stagewrap{width:100%;border-radius:16px;overflow:hidden;
+    background:linear-gradient(170deg,#fffaf5,#fff);border:1px solid var(--line);}
+  svg{display:block;width:100%;height:auto;touch-action:none;}
+  svg text{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;}
+
+  .lead{fill:none;stroke:#c9bcae;stroke-width:3.4;stroke-linecap:round;}
+  .lead.flow{stroke:var(--pri);stroke-dasharray:8 8;animation:march .55s linear infinite;}
+  .lead.flow.neg{animation-direction:reverse;}
+  @keyframes march{to{stroke-dashoffset:-16;}}
+
+  .caption{margin:13px 3px 0;font-size:clamp(13px,1.9vw,15px);line-height:1.66;font-weight:600;color:#5a463a;}
+  .caption b.n{color:var(--acc-ink);} .caption b.s{color:var(--cool-ink);}
+  .caption b.f{color:var(--flux-ink);} .caption b.c{color:var(--pri-ink);}
+  .uncertain{margin:11px 3px 0;font-size:11.5px;line-height:1.6;color:#9a8676;
+    background:#fbf6f1;border:1px dashed #ecdfd3;border-radius:11px;padding:9px 12px;}
+  .uncertain b{color:var(--pri-ink);font-weight:800;}
+
+  .insight{background:linear-gradient(135deg,#fff0e6,#fff8f3);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    margin-top:clamp(16px,2.4vw,26px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.76;color:#5a463a;font-weight:500;}
+  .insight b{color:var(--pri-ink);font-weight:700;}
+  .insight .fx{color:var(--flux-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+  .insight .eq{display:inline-block;font-weight:800;color:var(--ink);
+    background:#fff;border:1px solid var(--line);border-radius:8px;padding:1px 9px;}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#bca998;text-align:center;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">電磁誘導ラボ</span>
+    <h1>磁石を動かすと、<span class="em">電流が生まれる</span>。<br>止めると、消える。</h1>
+    <p class="sub">コイルに磁石を<b>近づけたり遠ざけたり</b>すると、検流計の針が振れます。誘導電流は<b>磁束の変化を妨げる向き</b>に流れ（レンツの法則）、その大きさは<b>動かす速さ</b>で決まります（ファラデー）。磁石を<b>ドラッグ</b>して、あるいはボタンを<b>長押し</b>して確かめてください。</p>
+  </header>
+
+  <div class="app">
+    <!-- ============ CONTROLS ============ -->
+    <section class="panel">
+      <div class="block">
+        <p class="sellabel"><span class="n">1</span>コイルに向ける磁極</p>
+        <div class="selrow" id="poleSel">
+          <button class="chip on" id="poleN"><span class="dot" style="background:#ef4444"></span>N極を向ける<small>手前が赤</small></button>
+          <button class="chip" id="poleS"><span class="dot" style="background:#3b82f6"></span>S極を向ける<small>手前が青</small></button>
+        </div>
+      </div>
+
+      <div class="block">
+        <p class="sellabel"><span class="n">2</span>動かす速さ</p>
+        <div class="srow">
+          <span class="cap">ゆっくり</span>
+          <input type="range" id="speed" min="1" max="10" step="1" value="6">
+          <span class="cap">速く</span>
+        </div>
+      </div>
+
+      <div class="block">
+        <p class="sellabel"><span class="n">3</span>磁石を動かす（長押し）</p>
+        <div class="btns">
+          <button id="btnApproach"><span class="ar">→</span>近づける<small>コイルへ</small></button>
+          <button id="btnRecede"><span class="ar">←</span>遠ざける<small>コイルから</small></button>
+        </div>
+        <p class="hint">ボタンを<b>押している間</b>だけ動きます。図の磁石を<b>直接ドラッグ</b>してもOK。手を止めると磁束は変化せず、電流は<b>ゼロ</b>に戻ります。</p>
+      </div>
+
+      <div class="status" id="status">
+        <div class="strow"><span class="stk">磁束 Φ</span><span class="stv" id="stFlux"></span></div>
+        <div class="strow"><span class="stk">コイル手前の面</span><span class="stv" id="stFace"></span></div>
+        <div class="strow"><span class="stk">誘導電流</span><span class="stv" id="stCur"></span></div>
+        <div class="strow"><span class="stk">電流の大きさ</span><span class="stv"><span class="bar"><i id="curBar"></i></span></span></div>
+        <div class="strow"><span class="stk">検流計の針</span><span class="stv" id="stNeedle"></span></div>
+      </div>
+
+      <div class="legend">
+        <span><i style="background:#ef4444"></i>N極</span>
+        <span><i style="background:#3b82f6"></i>S極</span>
+        <span><i style="background:#8b5cf6"></i>磁束</span>
+        <span><i style="background:#f97316"></i>誘導電流</span>
+      </div>
+    </section>
+
+    <!-- ============ STAGE ============ -->
+    <section class="stage">
+      <div class="stagewrap">
+        <svg id="scene" viewBox="0 0 640 452" role="img" aria-label="コイルと検流計に棒磁石を近づける電磁誘導のアニメーション">
+          <defs>
+            <marker id="ahCur" markerWidth="7" markerHeight="7" refX="3.2" refY="3.2" orient="auto">
+              <path d="M0.4,0.4 L6.6,3.2 L0.4,6 L2.2,3.2 Z" fill="#f97316"/>
+            </marker>
+            <marker id="ahFlux" markerWidth="8" markerHeight="8" refX="3.6" refY="3.6" orient="auto">
+              <path d="M0.5,0.5 L7.6,3.6 L0.5,6.7 L2.5,3.6 Z" fill="#8b5cf6"/>
+            </marker>
+            <marker id="ahMove" markerWidth="7" markerHeight="7" refX="3.2" refY="3.2" orient="auto">
+              <path d="M0.4,0.4 L6.6,3.2 L0.4,6 L2.2,3.2 Z" fill="#8a7566"/>
+            </marker>
+            <linearGradient id="gN" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#f6685e"/><stop offset="1" stop-color="#e0342a"/>
+            </linearGradient>
+            <linearGradient id="gS" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#5a97f7"/><stop offset="1" stop-color="#2f6fe0"/>
+            </linearGradient>
+          </defs>
+
+          <!-- slide track -->
+          <line x1="26" y1="176" x2="356" y2="176" stroke="#efe3d7" stroke-width="2" stroke-dasharray="3 6"/>
+
+          <!-- leads coil -> galvanometer -->
+          <path id="leadL" class="lead" d="M378,226 C378,270 402,278 411,306"/>
+          <path id="leadR" class="lead" d="M478,226 C478,270 456,278 447,306"/>
+
+          <!-- coil turns + current arrows (built by JS) -->
+          <g id="coilTurns"></g>
+          <g id="curArrows"></g>
+
+          <!-- flux arrow through coil axis -->
+          <line id="flux" x1="220" y1="176" x2="502" y2="176" stroke="#8b5cf6" stroke-width="5"
+                stroke-linecap="round" marker-end="url(#ahFlux)"/>
+          <text id="fluxTag" x="512" y="181" font-size="15" font-weight="800" fill="#7c3aed">Φ</text>
+
+          <!-- induced pole badge on coil near (left) face -->
+          <g id="induced" opacity="0">
+            <line id="indConn" x1="362" y1="113" x2="362" y2="128" stroke="#c9bcae" stroke-width="2"/>
+            <circle id="indDisc" cx="362" cy="96" r="18" fill="#fde4e4" stroke="#ef4444" stroke-width="2.4"/>
+            <text id="indText" x="362" y="97" font-size="18" font-weight="800" fill="#dc2626"
+                  text-anchor="middle" dominant-baseline="central">N</text>
+            <text x="362" y="128.5" font-size="9.5" font-weight="800" fill="#8a7566"
+                  text-anchor="middle" dominant-baseline="central" opacity="0">手前</text>
+          </g>
+
+          <!-- magnet (draggable) -->
+          <g id="magnet" style="cursor:grab">
+            <rect x="-62" y="-25" width="124" height="50" rx="8" fill="#000" opacity="0.06" transform="translate(2,3)"/>
+            <rect id="magL" x="-60" y="-24" width="60" height="48" rx="6" fill="url(#gS)"/>
+            <rect id="magR" x="0" y="-24" width="60" height="48" rx="6" fill="url(#gN)"/>
+            <rect x="-60" y="-24" width="120" height="15" rx="6" fill="#fff" opacity="0.20"/>
+            <line x1="0" y1="-24" x2="0" y2="24" stroke="#fff" stroke-width="1.4" opacity="0.55"/>
+            <text id="magLT" x="-30" y="1" font-size="23" font-weight="800" fill="#fff"
+                  text-anchor="middle" dominant-baseline="central">S</text>
+            <text id="magRT" x="30" y="1" font-size="23" font-weight="800" fill="#fff"
+                  text-anchor="middle" dominant-baseline="central">N</text>
+            <text id="draghint" x="0" y="-40" font-size="11.5" font-weight="800" fill="#b8a596"
+                  text-anchor="middle" dominant-baseline="central">⟵ ドラッグ ⟶</text>
+            <g id="motionArrow" opacity="0">
+              <line id="moveLine" x1="-26" y1="-40" x2="26" y2="-40" stroke="#8a7566"
+                    stroke-width="3" stroke-linecap="round" marker-end="url(#ahMove)"/>
+            </g>
+          </g>
+
+          <!-- galvanometer -->
+          <g id="galv">
+            <circle cx="429" cy="356" r="53" fill="#fff" stroke="#e2d5c8" stroke-width="2.5"/>
+            <circle cx="429" cy="356" r="53" fill="none" stroke="#f6ede4" stroke-width="6" opacity="0.7"/>
+            <g id="galvScale"></g>
+            <text x="410" y="322" font-size="15" font-weight="800" fill="#c9382f" text-anchor="middle">−</text>
+            <text x="448" y="322" font-size="14" font-weight="800" fill="#2f6fe0" text-anchor="middle">＋</text>
+            <text x="429" y="313" font-size="10.5" font-weight="800" fill="#a08a78" text-anchor="middle">0</text>
+            <g id="needle">
+              <line x1="429" y1="356" x2="429" y2="316" stroke="#3a2a20" stroke-width="3.4" stroke-linecap="round"/>
+              <polygon points="429,309 424.5,320 433.5,320" fill="#ef4444"/>
+              <line x1="429" y1="356" x2="429" y2="371" stroke="#3a2a20" stroke-width="3.4" stroke-linecap="round"/>
+            </g>
+            <circle cx="429" cy="356" r="5.2" fill="#3a2a20"/>
+            <circle cx="429" cy="356" r="2" fill="#fff"/>
+            <text x="429" y="428" font-size="13" font-weight="800" fill="#8a7566" text-anchor="middle">検流計</text>
+            <text x="391" y="388" font-size="12" font-weight="800" fill="#cbb8a8" text-anchor="middle">G</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="caption" id="caption"></div>
+      <div class="uncertain" id="uncertain">
+        <b>※要確認</b>：コイル内の電流の描画向き（手前ストランドが上向き＝コイル手前がN極）は右手の法則に基づく作図です。教科書の図法と一度ご確認ください。なお「近づける⇄遠ざける」「N⇄S」で電流が反転する関係・速さに比例する関係・静止でゼロになる関係は、どの向きの取り決めでも常に正しく保たれます。
+      </div>
+    </section>
+  </div>
+
+  <div class="insight">
+    <span class="h">気づき ― レンツの法則とファラデーの法則</span>
+    <div>誘導電流は、いつでも<b>「磁束の変化を妨げる向き」</b>に流れます（<b>レンツの法則</b>）。だから近づけるときと遠ざけるときで向きが逆になり、コイル手前の面は<b>近づく磁極とは反発／遠ざかる磁極を引き寄せ</b>ます。電流の大きさは<span class="fx">磁束の変化の速さ</span>に比例します（<b>ファラデー</b>：起電力 <span class="eq">V ∝ dΦ/dt</span>）。だから磁石を<b>止めると</b>、磁束は変化せず電流は<b>ゼロ</b>。強い磁石・多い巻数・速い動きほど、針は大きく振れます。</div>
+  </div>
+
+  <p class="foot">9月号「AIで動く教材を作る」試作 ／ 一文の指示で、この種の教材ツールが生成できます</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var el = function(id){ return document.getElementById(id); };
+  var svgNS = "http://www.w3.org/2000/svg";
+
+  /* ---------- geometry ---------- */
+  var AXIS_Y = 176;
+  var COIL_CX = [378,398,418,438,458,478];
+  var COIL_RX = 16, COIL_RY = 50;
+  var FAR = 100, NEAR = 292;         // magnet centre-x limits
+  var MAG_HALF = 60;
+  var GX = 429, GY = 356, NEEDLE_R = 40, MAXDEG = 58;
+  var VREF = 0.62;                   // svg px/ms for drag -> magnitude=1
+  var VPMS = 0.185;                  // button move speed at slider=1.0
+
+  /* ---------- colours ---------- */
+  var C = { N:"#ef4444", Nd:"#dc2626", Nbg:"#fde4e4",
+            S:"#3b82f6", Sd:"#2563eb", Sbg:"#e4eeff",
+            cur:"#f97316", flux:"#8b5cf6", fluxd:"#7c3aed" };
+
+  /* ---------- state ---------- */
+  var state = { pole:"N", mx:168, motion:0, mag:0, speed:0.62, dragging:false, frozen:false };
+  function opp(p){ return p==="N" ? "S" : "N"; }
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+  function sp01(v){ return 0.15 + 0.85*(clamp(v,1,10)-1)/9; }
+
+  /* refs */
+  var refs = {};
+  ["magnet","magL","magR","magLT","magRT","draghint","motionArrow","moveLine",
+   "flux","fluxTag","induced","indDisc","indText","needle","leadL","leadR",
+   "coilTurns","curArrows","galvScale","caption",
+   "stFlux","stFace","stCur","stNeedle","curBar","poleN","poleS","speed",
+   "btnApproach","btnRecede"].forEach(function(k){ refs[k]=el(k); });
+
+  var curTop = [], curBot = [];
+
+  /* ---------- build coil + current arrows + galvo scale ---------- */
+  function buildStatic(){
+    COIL_CX.forEach(function(cx){
+      var e = document.createElementNS(svgNS,"ellipse");
+      e.setAttribute("cx",cx); e.setAttribute("cy",AXIS_Y);
+      e.setAttribute("rx",COIL_RX); e.setAttribute("ry",COIL_RY);
+      e.setAttribute("fill","none"); e.setAttribute("stroke","#b3a498"); e.setAttribute("stroke-width","3.2");
+      refs.coilTurns.appendChild(e);
+    });
+
+    COIL_CX.forEach(function(cx){
+      var t = document.createElementNS(svgNS,"line");
+      t.setAttribute("stroke",C.cur); t.setAttribute("stroke-width","3.4");
+      t.setAttribute("stroke-linecap","round"); t.setAttribute("marker-end","url(#ahCur)");
+      t.setAttribute("opacity","0");
+      refs.curArrows.appendChild(t); curTop.push(t);
+      var b = document.createElementNS(svgNS,"line");
+      b.setAttribute("stroke",C.cur); b.setAttribute("stroke-width","3.4");
+      b.setAttribute("stroke-linecap","round"); b.setAttribute("marker-end","url(#ahCur)");
+      b.setAttribute("opacity","0");
+      refs.curArrows.appendChild(b); curBot.push(b);
+    });
+
+    // galvanometer arc + ticks
+    var ticks = [-58,-40,-20,0,20,40,58];
+    ticks.forEach(function(a){
+      var r = a*Math.PI/180, sn=Math.sin(r), cs=Math.cos(r);
+      var ro = a===0?47:46, ri = a===0?37:39.5;
+      var ln = document.createElementNS(svgNS,"line");
+      ln.setAttribute("x1", GX+ri*sn); ln.setAttribute("y1", GY-ri*cs);
+      ln.setAttribute("x2", GX+ro*sn); ln.setAttribute("y2", GY-ro*cs);
+      ln.setAttribute("stroke", a===0?"#a08a78":"#d9cabb");
+      ln.setAttribute("stroke-width", a===0?"2.4":"1.8"); ln.setAttribute("stroke-linecap","round");
+      refs.galvScale.appendChild(ln);
+    });
+    var R=47, a0=-58*Math.PI/180, a1=58*Math.PI/180;
+    var arc = document.createElementNS(svgNS,"path");
+    arc.setAttribute("d","M "+(GX+R*Math.sin(a0))+","+(GY-R*Math.cos(a0))+
+      " A "+R+" "+R+" 0 0 1 "+(GX+R*Math.sin(a1))+","+(GY-R*Math.cos(a1)));
+    arc.setAttribute("fill","none"); arc.setAttribute("stroke","#ecdfd2"); arc.setAttribute("stroke-width","2");
+    refs.galvScale.appendChild(arc);
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    var s = state;
+    var magRight = s.mx + MAG_HALF;
+    var moving = (s.motion !== 0 && s.mag > 0.001);
+    var curSign = (s.pole==="N"?1:-1) * s.motion;   // +1 near-strand UP / needle right
+
+    /* magnet */
+    refs.magnet.setAttribute("transform","translate("+s.mx+","+AXIS_Y+")");
+    if(s.pole==="N"){
+      refs.magR.setAttribute("fill","url(#gN)"); refs.magL.setAttribute("fill","url(#gS)");
+      refs.magRT.textContent="N"; refs.magLT.textContent="S";
+    } else {
+      refs.magR.setAttribute("fill","url(#gS)"); refs.magL.setAttribute("fill","url(#gN)");
+      refs.magRT.textContent="S"; refs.magLT.textContent="N";
+    }
+    refs.draghint.setAttribute("opacity", (moving||s.dragging)?"0":"1");
+    if(moving){
+      refs.motionArrow.setAttribute("opacity","1");
+      // approach(+1)=toward coil=rightward ; recede(-1)=leftward
+      refs.moveLine.setAttribute("transform", s.motion>0 ? "scale(1,1)" : "translate(0,0) scale(-1,1)");
+    } else {
+      refs.motionArrow.setAttribute("opacity","0");
+    }
+
+    /* flux arrow — direction set by facing pole, thickness by proximity */
+    var prox = clamp((s.mx-FAR)/(NEAR-FAR),0,1);
+    var fw = (2.6 + 4.4*prox).toFixed(1);
+    refs.flux.setAttribute("stroke-width", fw);
+    var tail = magRight + 10, head = 500;
+    if(head < tail+24) head = tail+24;
+    if(s.pole==="N"){  // field points into coil (rightward)
+      refs.flux.setAttribute("x1", tail); refs.flux.setAttribute("x2", head);
+    } else {           // S facing -> field points leftward (out toward magnet)
+      refs.flux.setAttribute("x1", head); refs.flux.setAttribute("x2", tail);
+    }
+    var arrowChar = s.motion>0 ? " ↑" : (s.motion<0 ? " ↓" : "");
+    refs.fluxTag.textContent = "Φ" + arrowChar;
+    refs.fluxTag.setAttribute("fill", C.fluxd);
+
+    /* induced pole on near (left) face */
+    if(moving){
+      var nearPole = (s.motion>0) ? s.pole : opp(s.pole); // approach -> same pole (repel)
+      refs.induced.setAttribute("opacity","1");
+      refs.indText.textContent = nearPole;
+      if(nearPole==="N"){ refs.indDisc.setAttribute("fill",C.Nbg); refs.indDisc.setAttribute("stroke",C.N); refs.indText.setAttribute("fill",C.Nd); }
+      else { refs.indDisc.setAttribute("fill",C.Sbg); refs.indDisc.setAttribute("stroke",C.S); refs.indText.setAttribute("fill",C.Sd); }
+    } else {
+      refs.induced.setAttribute("opacity","0");
+    }
+
+    /* current arrows on near strand of each turn */
+    var op = moving ? (0.55 + 0.45*s.mag).toFixed(2) : "0";
+    var w  = (2.6 + 1.6*(moving?s.mag:0)).toFixed(1);
+    for(var i=0;i<COIL_CX.length;i++){
+      var cx = COIL_CX[i];
+      var top=curTop[i], bot=curBot[i];
+      top.setAttribute("opacity",op); bot.setAttribute("opacity",op);
+      top.setAttribute("stroke-width",w); bot.setAttribute("stroke-width",w);
+      if(curSign>0){ // UP
+        top.setAttribute("x1",cx); top.setAttribute("y1",160); top.setAttribute("x2",cx); top.setAttribute("y2",134);
+        bot.setAttribute("x1",cx); bot.setAttribute("y1",218); bot.setAttribute("x2",cx); bot.setAttribute("y2",194);
+      } else { // DOWN
+        top.setAttribute("x1",cx); top.setAttribute("y1",134); top.setAttribute("x2",cx); top.setAttribute("y2",160);
+        bot.setAttribute("x1",cx); bot.setAttribute("y1",194); bot.setAttribute("x2",cx); bot.setAttribute("y2",218);
+      }
+    }
+
+    /* needle */
+    var theta = curSign * s.mag * MAXDEG;
+    refs.needle.setAttribute("transform","rotate("+theta.toFixed(2)+","+GX+","+GY+")");
+
+    /* leads flow */
+    [refs.leadL, refs.leadR].forEach(function(L){
+      L.classList.toggle("flow", moving);
+      L.classList.toggle("neg", curSign<0);
+    });
+
+    updateStatus(moving, curSign, theta);
+  }
+
+  function pill(txt,color,bg){ return '<span class="pill" style="color:'+color+';background:'+bg+'">'+txt+'</span>'; }
+
+  function updateStatus(moving, curSign, theta){
+    var s = state;
+    // flux
+    if(s.motion>0) refs.stFlux.innerHTML = pill("増加中 ↑", C.fluxd, C.fluxd==="#7c3aed"?"#f1ecfe":"#f1ecfe");
+    else if(s.motion<0) refs.stFlux.innerHTML = pill("減少中 ↓", C.fluxd, "#f1ecfe");
+    else refs.stFlux.innerHTML = '<span style="color:#a08a78">変化なし（一定）</span>';
+    // near face
+    if(moving){
+      var np = (s.motion>0)?s.pole:opp(s.pole);
+      var act = (s.motion>0)?"反発":"引き寄せ";
+      refs.stFace.innerHTML = (np==="N")
+        ? pill("N極 ・"+act, C.Nd, C.Nbg)
+        : pill("S極 ・"+act, C.Sd, C.Sbg);
+    } else refs.stFace.innerHTML = '<span style="color:#a08a78">—</span>';
+    // current
+    if(moving) refs.stCur.innerHTML = pill("変化を妨げる向き", "#ea580c", "#fff0e6");
+    else refs.stCur.innerHTML = '<span style="color:#a08a78">0（流れない）</span>';
+    // magnitude bar
+    refs.curBar.style.width = (moving ? Math.round(s.mag*100) : 0) + "%";
+    // needle words
+    if(!moving || Math.abs(theta)<0.5) refs.stNeedle.innerHTML = '<span style="color:#a08a78">中央（ゼロ）</span>';
+    else if(theta>0) refs.stNeedle.innerHTML = pill("右に振れる ＋", C.Sd, C.Sbg);
+    else refs.stNeedle.innerHTML = pill("左に振れる −", C.Nd, C.Nbg);
+
+    updateCaption(moving);
+  }
+
+  function updateCaption(moving){
+    var s = state, cap = refs.caption;
+    if(!moving){
+      cap.innerHTML = '磁石は静止中。<b class="f">磁束は変化せず</b>、誘導電流は流れません（針は中央）。磁石をドラッグするか、ボタンを長押ししてみてください。';
+      return;
+    }
+    var pN = s.pole==="N";
+    var poleTxt = pN ? '<b class="n">N極</b>' : '<b class="s">S極</b>';
+    var dir = s.motion>0 ? "近づけて" : "遠ざけて";
+    var fdir = pN ? "右向き" : "左向き";
+    var fchg = s.motion>0 ? "増加" : "減少";
+    var nearPole = (s.motion>0)?s.pole:opp(s.pole);
+    var faceTxt = nearPole==="N" ? '<b class="n">N極</b>' : '<b class="s">S極</b>';
+    var actTxt = s.motion>0 ? "反発して" : "引き寄せて";
+    cap.innerHTML = poleTxt+'を'+dir+'います。<b class="f">磁束（'+fdir+'）が'+fchg+'</b> → コイル手前が'+faceTxt+'になり、'+actTxt+'<b class="c">変化を妨げます</b>（レンツの法則）。速く動かすほど針は大きく振れます。';
+  }
+
+  /* ---------- animation (buttons) ---------- */
+  var anim = null, rafId = null, lastTs = 0;
+  function ensureRAF(){ if(rafId===null){ lastTs = performance.now(); rafId = requestAnimationFrame(tick); } }
+  function tick(ts){
+    rafId = null;
+    if(!anim){ return; }
+    var dt = clamp(ts - lastTs, 0, 60); lastTs = ts;
+    var step = anim.dir * VPMS * state.speed * dt;
+    var nx = state.mx + step;
+    var done = (anim.dir>0 && nx >= anim.target) || (anim.dir<0 && nx <= anim.target);
+    var limit = (nx>=NEAR) || (nx<=FAR);
+    if(done || limit){
+      state.mx = clamp(done?anim.target:nx, FAR, NEAR);
+      anim = null; state.motion = 0; state.mag = 0; render(); return;
+    }
+    state.mx = nx; state.motion = anim.dir; state.mag = state.speed;
+    render();
+    rafId = requestAnimationFrame(tick);
+  }
+  function startHold(dir){ cancelDrag(); anim = { dir:dir, target: dir>0?NEAR:FAR };
+    state.motion = dir; state.mag = state.speed; ensureRAF(); }
+  function startGlide(dir){ cancelDrag(); anim = { dir:dir, target: clamp(state.mx + dir*115, FAR, NEAR) };
+    state.motion = dir; state.mag = state.speed; ensureRAF(); }
+  function stopMove(){ if(anim){ anim=null; state.motion=0; state.mag=0; render(); } }
+
+  function bindButton(btn, dir){
+    var downAt = 0, moved = false;
+    btn.addEventListener("pointerdown", function(e){
+      e.preventDefault(); downAt = performance.now(); moved = true;
+      btn.classList.add("press");
+      try{ btn.setPointerCapture(e.pointerId); }catch(_){}
+      startHold(dir);
+    });
+    var up = function(e){
+      btn.classList.remove("press");
+      if(!moved) return; moved = false;
+      var held = performance.now() - downAt;
+      if(held < 200){ startGlide(dir); }   // tap -> short glide
+      else { stopMove(); }
+    };
+    btn.addEventListener("pointerup", up);
+    btn.addEventListener("pointercancel", function(){ btn.classList.remove("press"); moved=false; stopMove(); });
+    btn.addEventListener("pointerleave", function(){ if(moved){} });
+    btn.addEventListener("keydown", function(e){
+      if(e.key===" "||e.key==="Enter"||e.key==="Spacebar"){ e.preventDefault(); startGlide(dir); }
+    });
+  }
+
+  /* ---------- drag magnet ---------- */
+  var drag = { active:false, id:null, lastX:0, lastT:0, decay:null };
+  function svgX(e){ var r = refs.magnet.ownerSVGElement.getBoundingClientRect();
+    return (e.clientX - r.left) / r.width * 640; }
+  function cancelDrag(){ /* used before button anim */ }
+  function armDecay(){
+    if(drag.decay) clearTimeout(drag.decay);
+    drag.decay = setTimeout(function(){ state.motion=0; state.mag=0; render(); }, 90);
+  }
+  refs.magnet.addEventListener("pointerdown", function(e){
+    e.preventDefault(); if(anim){ anim=null; }
+    drag.active=true; drag.id=e.pointerId; drag.lastX=svgX(e); drag.lastT=performance.now();
+    refs.magnet.style.cursor="grabbing";
+    try{ refs.magnet.ownerSVGElement.setPointerCapture(e.pointerId); }catch(_){}
+    state.dragging=true;
+  });
+  function onMove(e){
+    if(!drag.active || e.pointerId!==drag.id) return;
+    var x = svgX(e), now = performance.now();
+    var dx = x - drag.lastX, dt = Math.max(now - drag.lastT, 1);
+    var nx = clamp(state.mx + dx, FAR, NEAR);
+    var applied = nx - state.mx;
+    state.mx = nx;
+    if(Math.abs(applied) > 0.25){
+      var v = Math.abs(applied)/dt;
+      state.mag = clamp(v/VREF, 0, 1);
+      state.motion = applied>0 ? 1 : -1;   // rightward=toward coil=approach
+      armDecay();
+    }
+    drag.lastX = x; drag.lastT = now;
+    render();
+  }
+  function onUp(e){
+    if(!drag.active) return;
+    drag.active=false; drag.dragging=false; state.dragging=false;
+    refs.magnet.style.cursor="grab";
+    if(drag.decay) clearTimeout(drag.decay);
+    state.motion=0; state.mag=0; render();
+  }
+  refs.magnet.ownerSVGElement.addEventListener("pointermove", onMove);
+  refs.magnet.ownerSVGElement.addEventListener("pointerup", onUp);
+  refs.magnet.ownerSVGElement.addEventListener("pointercancel", onUp);
+
+  /* ---------- controls ---------- */
+  refs.poleN.addEventListener("click", function(){ setPole("N"); });
+  refs.poleS.addEventListener("click", function(){ setPole("S"); });
+  function setPole(p){
+    state.pole = p;
+    refs.poleN.classList.toggle("on", p==="N");
+    refs.poleS.classList.toggle("on", p==="S");
+    render();
+  }
+  refs.speed.addEventListener("input", function(){
+    state.speed = sp01(+refs.speed.value);
+    if(state.motion!==0 && !drag.active){ state.mag = state.speed; }
+    render();
+  });
+
+  bindButton(refs.btnApproach, 1);
+  bindButton(refs.btnRecede, -1);
+
+  /* ---------- hash demo (static frozen state for verification) ---------- */
+  function applyHash(){
+    var h = (location.hash||"").replace(/^#/,"");
+    if(!h) return false;
+    var parts = h.split("-");
+    var pole = (parts[0]||"").toUpperCase();
+    var m = (parts[1]||"").toLowerCase();
+    var sp = parseInt(parts[2]||"7",10); if(isNaN(sp)) sp=7;
+    if(pole!=="N"&&pole!=="S") return false;
+    var motion = m==="approach"?1 : (m==="recede"?-1 : 0);
+    setPole(pole);
+    refs.speed.value = clamp(sp,1,10);
+    state.speed = sp01(sp);
+    state.motion = motion;
+    state.mag = motion===0 ? 0 : sp01(sp);
+    state.mx = motion>0 ? 236 : (motion<0 ? 170 : 168);
+    state.frozen = true;
+    render();
+    return true;
+  }
+
+  /* ---------- init ---------- */
+  buildStatic();
+  setPole("N");
+  state.speed = sp01(+refs.speed.value);
+  if(!applyHash()){ render(); }
+  window.addEventListener("hashchange", function(){ applyHash(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>動かして分かる 数学・物理 — 理数ツール・ギャラリー</title>
+<style>
+  :root{
+    --ink:#28322e; --sub:#77857f; --line:#e9edeb;
+    --m:#10b981; --m-ink:#059669; --m-bg:#e7f8f1;
+    --p:#f97316; --p-ink:#ea580c; --p-bg:#fff0e6;
+    --amber-ink:#b45309; --amber-bg:#fdf0d5;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#eafaf3 0%,#fff6ee 40%,#ffffff 72%) no-repeat,#fff;background-attachment:fixed;}
+  .shell{max-width:1120px;margin:0 auto;padding:clamp(24px,4vw,48px) clamp(16px,3.5vw,40px) 60px;}
+
+  header{margin:0 0 clamp(20px,3vw,30px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;
+    color:var(--m-ink);background:var(--m-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";}
+  h1{font-size:clamp(25px,4.6vw,40px);line-height:1.28;margin:15px 0 8px;font-weight:800;}
+  h1 .m{color:var(--m-ink);} h1 .p{color:var(--p-ink);}
+  .sub{color:var(--sub);font-size:clamp(14px,2.3vw,16.5px);margin:0;max-width:680px;}
+  .sub b{color:var(--ink);}
+
+  .sec{display:flex;align-items:center;gap:10px;margin:30px 0 4px;}
+  .sec .tag{font-size:14px;font-weight:800;color:#fff;padding:5px 14px;border-radius:999px;}
+  .sec.m .tag{background:linear-gradient(135deg,#14c08a,#0ea371);}
+  .sec.p .tag{background:linear-gradient(135deg,#fb8b3c,#f2711c);}
+  .sec .cap{font-size:13px;color:var(--sub);font-weight:600;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));
+    gap:clamp(12px,1.8vw,18px);margin-top:14px;}
+  .card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:#fff;
+    border:1px solid var(--line);border-radius:18px;padding:18px 18px 16px;position:relative;overflow:hidden;
+    box-shadow:0 8px 24px rgba(20,60,50,.06);transition:transform .14s,box-shadow .14s,border-color .14s;}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;}
+  .card.m::before{background:linear-gradient(180deg,#14c08a,#0ea371);}
+  .card.p::before{background:linear-gradient(180deg,#fb8b3c,#f2711c);}
+  .card:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(20,60,50,.13);}
+  .card.m:hover{border-color:#bfe9d9;} .card.p:hover{border-color:#fcd6b8;}
+  .card .top{display:flex;align-items:center;justify-content:space-between;margin:0 0 11px 6px;}
+  .num{font-size:12.5px;font-weight:800;color:#fff;width:30px;height:30px;border-radius:9px;
+    display:inline-flex;align-items:center;justify-content:center;}
+  .card.m .num{background:linear-gradient(135deg,#14c08a,#0ea371);}
+  .card.p .num{background:linear-gradient(135deg,#fb8b3c,#f2711c);}
+  .field{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;}
+  .card.m .field{color:var(--m-ink);background:var(--m-bg);}
+  .card.p .field{color:var(--p-ink);background:var(--p-bg);}
+  .card h2{font-size:16.5px;font-weight:800;margin:0 0 6px 6px;line-height:1.4;}
+  .card p{font-size:13px;color:var(--sub);margin:0 0 0 6px;line-height:1.62;flex:1;}
+  .card .move{font-size:11.5px;font-weight:700;margin:9px 0 0 6px;line-height:1.5;}
+  .card.m .move{color:var(--m-ink);} .card.p .move{color:var(--p-ink);}
+  .card .foot{display:flex;align-items:center;gap:8px;margin:12px 0 0 6px;}
+  .go{font-size:13px;font-weight:800;}
+  .card.m .go{color:var(--m-ink);} .card.p .go{color:var(--p-ink);}
+  .go::after{content:" →";}
+  .badge{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;}
+  .badge.tap{color:var(--m-ink);background:var(--m-bg);}
+  .badge.chk{color:var(--amber-ink);background:var(--amber-bg);}
+  .foot-note{margin-top:28px;font-size:12.5px;color:var(--sub);line-height:1.7;
+    background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+  .foot-note b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">AIで作る、動く理数教材</span>
+    <h1>動かして分かる <span class="m">数学</span>・<span class="p">物理</span></h1>
+    <p class="sub">スライダーやドラッグで<b>動かす</b>と、グラフ・図・ベクトルが<b>リアルタイムに連動</b>する——見て・触って納得する、受験レベルのツールです。カードを押すと開きます。</p>
+  </header>
+
+  <div class="sec m"><span class="tag">数学</span><span class="cap">グラフと数式が連動して動く</span></div>
+  <div class="grid">
+    <a class="card m" href="math-1-trig.html">
+      <div class="top"><span class="num">1</span><span class="field">三角関数</span></div>
+      <h2>単位円と三角関数</h2>
+      <p>θを回すと円上の点が回り、その高さがそのまま sin の波として描かれる。sin/cos/tan＋自動回転。</p>
+      <div class="move">動かす：角度θ → 円の点・sin/cos/tan波が連動</div>
+      <div class="foot"><span class="go">触ってみる</span><span class="badge tap">📌タップ補足：角速度との対応</span></div>
+    </a>
+    <a class="card m" href="math-2-quadratic.html">
+      <div class="top"><span class="num">2</span><span class="field">二次関数</span></div>
+      <h2>二次関数と係数 a, b, c</h2>
+      <p>係数を動かすと放物線・頂点・軸・交点が連動。判別式Dの符号で交点が生まれる/消える瞬間が見える。</p>
+      <div class="move">動かす：a,b,c → 頂点・軸・判別式D・交点数</div>
+      <div class="foot"><span class="go">触ってみる</span></div>
+    </a>
+    <a class="card m" href="math-3-derivative.html">
+      <div class="top"><span class="num">3</span><span class="field">微分</span></div>
+      <h2>微分＝接線の傾き</h2>
+      <p>曲線上の点を動かすと接線が回り、傾き f′(x) を打点して導関数が描かれていく。極大・極小で f′=0。</p>
+      <div class="move">動かす：点(x) → 接線の傾き・導関数f′のトレース</div>
+      <div class="foot"><span class="go">触ってみる</span></div>
+    </a>
+  </div>
+
+  <div class="sec p"><span class="tag">物理</span><span class="cap">図とベクトルが動いて因果が見える</span></div>
+  <div class="grid">
+    <a class="card p" href="phys-1-projectile.html">
+      <div class="top"><span class="num">1</span><span class="field">力学</span></div>
+      <h2>斜方投射（放物運動）</h2>
+      <p>初速と角度を動かすと軌道・飛距離・最高点が連動。45°で最大、補角ゴースト弧で「30°と60°は同じ」。</p>
+      <div class="move">動かす：v₀・θ → 軌道・速度の水平/鉛直分解・飛距離</div>
+      <div class="foot"><span class="go">触ってみる</span></div>
+    </a>
+    <a class="card p" href="phys-2-superposition.html">
+      <div class="top"><span class="num">2</span><span class="field">波動</span></div>
+      <h2>波の重ね合わせ・うなり</h2>
+      <p>2つの波を足すと、同位相で強め合い・逆位相で打ち消し・振動数が近いと うなり。合成波が動く。</p>
+      <div class="move">動かす：振動数 f₁,f₂・位相差 → 合成波・うなり</div>
+      <div class="foot"><span class="go">触ってみる</span></div>
+    </a>
+    <a class="card p" href="phys-3-induction.html">
+      <div class="top"><span class="num">3</span><span class="field">電磁気</span></div>
+      <h2>電磁誘導（ファラデー・レンツ）</h2>
+      <p>磁石をコイルに出し入れすると、磁束・誘導電流・検流計の針が連動。止めるとゼロ、速いほど大。</p>
+      <div class="move">動かす：磁石の出し入れ → 誘導電流の向き・大きさ</div>
+      <div class="foot"><span class="go">触ってみる</span><span class="badge chk">要確認：作図の向き</span></div>
+    </a>
+  </div>
+
+  <div class="foot-note">
+    数値・数式・グラフは各ツールが<b>既知値で自己検算</b>済み（θ=30°→sin0.50 ／ 判別式D&lt;0で交点なし ／ 45°で最大射程 ／ 逆位相で打ち消し ／ レンツの向き など）。<b>要確認</b>印は、電磁誘導のコイル内電流の<b>作図の向き</b>が教科書の流儀に合うかの確認だけで、近づけ/遠ざけ・N/S反転・速さ比例・静止ゼロといった物理関係はすべて正しく動きます。<br>
+    英語ツール10種は別ギャラリー。誌面には各教科から選んだ数種を実物スクショで載せ、QRでギャラリーへ誘導する想定です。
+  </div>
+</div>
+</body>
+</html>

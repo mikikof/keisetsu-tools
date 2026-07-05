@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>動詞の型スロット図鑑 — その動詞、どの枠を取れる？</title>
+<style>
+  :root{
+    --ink:#2b2f3a; --sub:#87909f; --line:#eceef5;
+    --indigo:#6d5efc; --indigo2:#9166ff; --indigo-ink:#5b4ae8; --indigo-bg:#f1eefe;
+    --rose:#f8577d; --rose-ink:#e23f6d; --rose-bg:#ffe6ee;
+    --teal:#12c7b0; --teal-ink:#0d9986; --teal-bg:#c9f2e9;
+    --amber:#fbbf24; --amber-bg:#fef4d6; --amber-ink:#b7791f;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#edf4ff 0%,#ffffff 54%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(18px,2.6vw,26px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--indigo-ink);background:var(--indigo-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";font-size:13px;}
+  h1{font-size:clamp(25px,5vw,44px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--rose),#ff7aa0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:680px;}
+  .sub b{color:var(--ink);}
+
+  .app{display:grid;gap:clamp(14px,2.2vw,22px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:392px 1fr;} }
+
+  /* ---- category tabs (文型/構文) ---- */
+  .tabs{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;}
+  .tab{flex:1 1 118px;display:flex;flex-direction:column;justify-content:center;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+    font-size:15px;font-weight:800;border-radius:14px;cursor:pointer;padding:9px 11px;
+    transition:transform .12s,box-shadow .14s,border-color .14s;text-align:center;line-height:1.2;}
+  .tab small{display:block;font-weight:600;color:var(--sub);font-size:11.5px;margin-top:3px;}
+  .tab:hover{border-color:#d9d2fb;}
+  .tab:active{transform:scale(.98);}
+  .tab.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.3);}
+  .tab.on small{color:#e9e4ff;}
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(93,74,232,.09);}
+
+  .plabel{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:6px 11px;
+    background:var(--indigo-bg);color:var(--indigo-ink);font-weight:800;
+    font-size:clamp(13.5px,1.9vw,16px);padding:9px 15px;border-radius:12px;margin:0 0 13px;}
+  .plabel .slots{color:#8b83c9;font-weight:700;font-size:.9em;letter-spacing:.02em;}
+
+  .base{font-size:clamp(13px,1.7vw,14.5px);color:var(--sub);margin:0 0 16px;padding-bottom:14px;
+    border-bottom:1px dashed #e7e3f6;line-height:1.66;}
+  .base b{color:var(--ink);font-weight:700;}
+
+  .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:9px;}
+  @media(min-width:860px){ .btns{grid-template-columns:1fr 1fr;} }
+  .btns button{display:flex;flex-direction:column;justify-content:center;min-height:54px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:15.5px;font-weight:800;border-radius:14px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;padding:7px 6px;
+    overflow-wrap:anywhere;}
+  .btns button small{font-weight:600;color:var(--sub);font-size:11px;margin-top:2px;}
+  .btns button:hover{border-color:#d9d2fb;}
+  .btns button:active{transform:scale(.97);}
+  .btns button.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.34);}
+  .btns button.on small{color:#e9e4ff;}
+
+  .stage{display:flex;flex-direction:column;}
+  .sentence{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:600;
+    text-align:center;padding:clamp(20px,3.6vw,40px) clamp(14px,2.5vw,28px);
+    background:linear-gradient(160deg,#f2f8ff,#ebf3ff);border-radius:18px;color:#333846;
+    display:grid;place-items:center;flex:1;min-height:clamp(120px,18vw,210px);}
+  .sline{width:100%;overflow-wrap:break-word;}
+
+  .answer{margin-top:clamp(15px,2.2vw,20px);}
+  .note{font-size:clamp(12px,1.5vw,13.5px);color:var(--sub);margin-top:11px;line-height:1.62;}
+
+  .insight{grid-column:1/-1;background:linear-gradient(135deg,#eef5ff,#f6faff);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.78;color:#4a4560;font-weight:500;}
+  .insight b{color:var(--indigo-ink);font-weight:700;}
+  .insight code{font-family:system-ui,-apple-system,sans-serif;font-weight:800;
+    color:var(--rose-ink);background:var(--rose-bg);padding:1px 8px;border-radius:7px;
+    font-size:.94em;white-space:nowrap;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#a9afbe;text-align:center;line-height:1.6;}
+
+  /* --- 動詞スロット表示 --- */
+  .vhead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;
+    gap:5px 12px;margin-bottom:clamp(12px,2vw,18px);}
+  .vword{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:800;
+    font-size:clamp(28px,5vw,44px);color:var(--indigo-ink);letter-spacing:.005em;line-height:1.1;}
+  .vjp{font-size:clamp(12px,1.7vw,15px);color:var(--sub);font-weight:700;}
+
+  .pats{display:flex;flex-direction:column;gap:clamp(7px,1.3vw,11px);width:100%;}
+  .pat{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 7px;}
+  .op{color:var(--sub);font-weight:700;font-size:clamp(13px,1.9vw,18px);}
+  .orsep{align-self:center;font-size:clamp(11px,1.4vw,12.5px);font-weight:800;
+    color:var(--sub);letter-spacing:.06em;}
+  .chint{font-size:clamp(13px,2vw,16px);color:var(--sub);font-weight:600;
+    margin-top:8px;text-align:center;line-height:1.5;}
+
+  .slot{display:inline-flex;align-items:center;font-family:system-ui,-apple-system,sans-serif;
+    font-weight:700;font-size:clamp(15px,2.5vw,22px);line-height:1;border-radius:11px;
+    padding:.42em .6em;white-space:nowrap;}
+  .slot.v{background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:#fff;
+    box-shadow:0 6px 16px rgba(109,94,252,.26);}
+  .slot.r{background:#fff;border:1.7px solid var(--line);color:var(--ink);}
+  .slot.c{background:var(--teal-bg);color:var(--teal-ink);font-size:clamp(14px,2.3vw,21px);}
+  .slot.d{background:var(--indigo-bg);color:var(--indigo-ink);font-size:clamp(13px,2.1vw,19px);}
+  .slot.p{background:var(--amber-bg);color:var(--amber-ink);font-size:clamp(13px,2vw,18px);}
+  .slot.opt{background:transparent;border:1.6px dashed #d7d2e6;color:var(--sub);
+    font-weight:600;font-size:clamp(12.5px,1.9vw,17px);}
+
+  .vnote{font-size:clamp(12.5px,1.7vw,14px);color:var(--sub);margin:2px 0 4px;
+    line-height:1.64;text-align:center;}
+  .vnote b{color:var(--ink);font-weight:700;}
+
+  .excard{border-radius:15px;padding:clamp(13px,2vw,17px) clamp(14px,2.2vw,18px);margin-top:12px;}
+  .excard.good{background:var(--teal-bg);}
+  .excard.bad{background:var(--rose-bg);}
+  .exlabel{display:inline-flex;align-items:center;gap:6px;font-weight:800;
+    font-size:clamp(12.5px,1.7vw,14px);margin-bottom:9px;letter-spacing:.01em;}
+  .exlabel.g{color:var(--teal-ink);}
+  .exlabel.b{color:var(--rose-ink);}
+  .exlist{display:flex;flex-direction:column;gap:8px;}
+  .exline{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;}
+  .exen{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:700;
+    font-size:clamp(15px,2.3vw,20px);line-height:1.45;color:#333846;}
+  .exen.wrong{color:var(--rose-ink);text-decoration:line-through;text-decoration-thickness:2px;
+    text-decoration-color:rgba(226,63,109,.55);font-weight:600;}
+  .eq{color:var(--teal-ink);font-weight:800;font-size:clamp(15px,2.3vw,20px);}
+  .exsub{font-size:clamp(11.5px,1.5vw,13px);color:var(--sub);font-weight:600;}
+  .fixarrow{display:flex;justify-content:center;align-items:center;gap:9px;color:var(--sub);
+    font-weight:800;font-size:clamp(12px,1.6vw,13.5px);margin-top:11px;}
+  .fixarrow::before,.fixarrow::after{content:"";height:1px;flex:0 0 22px;background:#e2ddf0;}
+
+  /* --- ing ⇔ to 意味対比カード --- */
+  .ctwo{display:grid;gap:11px;margin-top:12px;}
+  @media(min-width:560px){ .ctwo{grid-template-columns:1fr 1fr;} }
+  .ccard{background:var(--teal-bg);border-radius:15px;padding:clamp(13px,2vw,17px) clamp(14px,2.1vw,17px);}
+  .chead{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+  .cnum{font-weight:900;color:var(--teal-ink);font-size:clamp(14px,1.9vw,16px);}
+  .cmean{font-weight:800;color:var(--teal-ink);font-size:clamp(14px,1.9vw,16.5px);
+    margin:0 0 9px;line-height:1.5;}
+  .cex .cexen{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:700;
+    font-size:clamp(14px,2vw,18px);line-height:1.4;color:#25604f;}
+  .cex .cexjp{font-size:clamp(11.5px,1.5vw,13px);color:#5f8a7f;font-weight:600;margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">動詞の型スロット図鑑</span>
+    <h1>その動詞は <span class="em">どのスロット</span> を取れる？</h1>
+    <p class="sub">「第4文型・第5文型」と名前で暗記するより、動詞ごとに<b>置けるスロット（枠）</b>で見るほうが速くて正確です。上の<b>型（構文）</b>を選び、動詞ごとの枠と例、そして<b>典型ミス</b>を確かめてください。</p>
+  </header>
+
+  <div class="app">
+    <div class="tabs" id="tabs"></div>
+
+    <section class="panel">
+      <div class="plabel" id="plabel"></div>
+      <p class="base" id="base"></p>
+      <div class="btns" id="btns"></div>
+    </section>
+
+    <section class="stage">
+      <div class="sentence"><div class="sline" id="disp"></div></div>
+      <div class="answer" id="answer"></div>
+    </section>
+
+    <div class="insight">
+      <span class="h">気づき</span>
+      <div>名前（第4／第5）より、動詞ごとの<b>“取れるスロット”</b>で覚えるほうが速く、ミスも減ります。とくに <code>explain me</code>・<code>discuss about</code>・<code>let him to go</code>・<code>stop doing⇔to do</code> は入試の定番。ここは<b>反射で正解が出る</b>まで。</div>
+    </div>
+  </div>
+
+  <p class="foot">『螢雪時代』Study Hack 試作 ／ 動詞は「文型の名前」でなく「取れるスロット」で覚える</p>
+</div>
+
+<script>
+  const GROUPS = [
+    /* ===== 1. 第4文型 SVOO ===== */
+    { tab:'SVOO', tabsub:'第4文型・人＋物',
+      form:{ label:'第4文型', slots:'S＋V＋人＋物' },
+      blurb:'動詞のうしろに〈人〉〈物〉を続ける型。多くは〈物＋to／for＋人〉に言い換えられます（give 系は to、buy 系は for）。',
+      verbs:[
+        { verb:'give', jp:'（人に物を）あげる', small:'あげる',
+          patterns:[[{v:'give'},{r:'人'},{r:'物'}],[{v:'give'},{r:'物'},{p:'to'},{r:'人'}]],
+          note:'〈人＋物〉と、<b>to</b> で後ろへ回す形。どちらも自然です。',
+          good:{ eq:['give me a book','give a book to me'], sub:'意味は同じ（to 型）' } },
+        { verb:'show', jp:'見せる', small:'見せる',
+          patterns:[[{v:'show'},{r:'人'},{r:'物'}],[{v:'show'},{r:'物'},{p:'to'},{r:'人'}]],
+          note:'<b>to</b> 型に言い換え可。',
+          good:{ eq:['show me the photo','show the photo to me'] } },
+        { verb:'tell', jp:'（人に）伝える', small:'伝える',
+          patterns:[[{v:'tell'},{r:'人'},{r:'物'}],[{v:'tell'},{r:'人'},{r:'that 節'}]],
+          note:'人をすぐ後ろに置けます。<b>that</b> 節（〜と）も取れます。',
+          good:{ list:['tell me the truth', "tell me (that) you're OK"] } },
+        { verb:'lend', jp:'貸す', small:'貸す',
+          patterns:[[{v:'lend'},{r:'人'},{r:'物'}],[{v:'lend'},{r:'物'},{p:'to'},{r:'人'}]],
+          note:'<b>to</b> 型に言い換え可。',
+          good:{ eq:['lend me your pen','lend your pen to me'] } },
+        { verb:'send', jp:'送る', small:'送る',
+          patterns:[[{v:'send'},{r:'人'},{r:'物'}],[{v:'send'},{r:'物'},{p:'to'},{r:'人'}]],
+          note:'<b>to</b> 型に言い換え可。',
+          good:{ eq:['send me an email','send an email to me'] } },
+        { verb:'offer', jp:'申し出る／提供する', small:'申し出る',
+          patterns:[[{v:'offer'},{r:'人'},{r:'物'}],[{v:'offer'},{r:'物'},{p:'to'},{r:'人'}]],
+          note:'<b>to</b> 型に言い換え可。',
+          good:{ eq:['offer him a job','offer a job to him'] } },
+        { verb:'buy', jp:'買う', small:'買う',
+          patterns:[[{v:'buy'},{r:'人'},{r:'物'}],[{v:'buy'},{r:'物'},{p:'for'},{r:'人'}]],
+          note:'言い換えは <b>to</b> でなく <b>for</b>。「（人のために）買う」の意識から。',
+          good:{ eq:['buy me a coffee','buy a coffee for me'], sub:'for 型（× to me）' } },
+        { verb:'make', jp:'（人に）作ってあげる', small:'作る',
+          patterns:[[{v:'make'},{r:'人'},{r:'物'}],[{v:'make'},{r:'物'},{p:'for'},{r:'人'}]],
+          note:'buy と同じく <b>for</b> 型。相手は for で回します。',
+          good:{ eq:['make me a cake','make a cake for me'], sub:'for 型（× to me）' } },
+        { verb:'explain', jp:'説明する', small:'説明',
+          patterns:[[{v:'explain'},{r:'物'},{opt:'to ＋ 人'}]],
+          note:'〈人＋物〉の形にできない動詞。相手は <b>to＋人</b>（suggest も同じ）。',
+          mistake:'explain me the rule',
+          fix:{ list:['explain the rule to me'] } }
+      ] },
+
+    /* ===== 2. 第5文型 SVOC ===== */
+    { tab:'O＋C', tabsub:'第5文型・名詞/形容詞',
+      form:{ label:'第5文型', slots:'S＋V＋O＋C' },
+      blurb:'O のあとに〈どんな状態か〉を表す C（形容詞・名詞）を置く型。「O ＝ C」の関係になり、<b>O→C の順</b>が鉄則。',
+      verbs:[
+        { verb:'make', jp:'（O を C の状態に）する', small:'〜にする',
+          patterns:[[{v:'make'},{r:'O'},{c:'C'}]],
+          note:'C は<b>形容詞・名詞</b>。「O を C の状態にする」。',
+          good:{ list:['make me happy','make it easy','make him a star'] } },
+        { verb:'keep', jp:'（O を C のまま）保つ', small:'保つ',
+          patterns:[[{v:'keep'},{r:'O'},{c:'C'}]],
+          note:'「O を C のままに保つ」。<b>O→C の順</b>を崩さない。',
+          mistake:'keep clean the room',
+          fix:{ list:['keep the room clean'] } },
+        { verb:'find', jp:'（O が C だと）分かる', small:'分かる',
+          patterns:[[{v:'find'},{r:'O'},{c:'C'}]],
+          note:'「O が C だと気づく」。長い O は形式目的語 <b>it</b> で受けます。',
+          good:{ list:['found it difficult','found the book interesting','found it hard to sleep'] } },
+        { verb:'call', jp:'（O を C と）呼ぶ', small:'呼ぶ',
+          patterns:[[{v:'call'},{r:'O'},{c:'C'}]],
+          note:'「O を C と呼ぶ」。',
+          good:{ list:['call me Ken','call it a day'] } },
+        { verb:'leave', jp:'（O を C のまま）放っておく', small:'放置',
+          patterns:[[{v:'leave'},{r:'O'},{c:'C'}]],
+          note:'「O を C のまま放置する」。',
+          good:{ list:['leave the door open','leave me alone'] } },
+        { verb:'name', jp:'（O を C と）名づける', small:'名づけ',
+          patterns:[[{v:'name'},{r:'O'},{c:'C'}]],
+          note:'「O を C と名づける／指名する」。',
+          good:{ list:['named the dog Pochi','named him captain'] } },
+        { verb:'consider', jp:'（O を C と）みなす', small:'みなす',
+          patterns:[[{v:'consider'},{r:'O'},{c:'C'}]],
+          note:'「O を C とみなす」。C の前に <b>(to be)</b> を補えることも。',
+          good:{ list:['consider it a success','consider him (to be) honest'] } }
+      ] },
+
+    /* ===== 3. 第5文型 O＋to do ===== */
+    { tab:'O＋to do', tabsub:'第5文型・〜させたい',
+      form:{ label:'第5文型', slots:'S＋V＋O＋to do' },
+      blurb:'O に〈to do〉を続けて「O に〜してほしい／させる」を表す型。to を<b>落とさない</b>のがコツ（make/let とは逆）。',
+      verbs:[
+        { verb:'want', jp:'（O に）〜してほしい', small:'してほしい',
+          patterns:[[{v:'want'},{r:'O'},{d:'to do'}]],
+          note:'日本語の「〜と思う」につられた <b>that 節はダメ</b>。to do で受けます。',
+          good:{ list:['want you to come','want him to stay'] },
+          mistake:'want that you come',
+          fix:{ list:['want you to come'] } },
+        { verb:'ask', jp:'（O に）〜を頼む', small:'頼む',
+          patterns:[[{v:'ask'},{r:'O'},{d:'to do'}]],
+          note:'「O に〜してくれと頼む」。',
+          good:{ list:['asked him to wait','ask her to help'] } },
+        { verb:'tell', jp:'（O に）〜しろと言う', small:'言う',
+          patterns:[[{v:'tell'},{r:'O'},{d:'to do'}]],
+          note:'第4文型 tell（人＋物）とは別の顔。命令的に「〜しろと言う」。',
+          good:{ list:['told me to wait','tell him to hurry'] } },
+        { verb:'allow', jp:'（O が）〜するのを許す', small:'許す',
+          patterns:[[{v:'allow'},{r:'O'},{d:'to do'}]],
+          note:'「O が〜するのを許す」。',
+          good:{ list:['allowed him to go','allow us to enter'] } },
+        { verb:'expect', jp:'（O が）〜すると思う', small:'予期',
+          patterns:[[{v:'expect'},{r:'O'},{d:'to do'}]],
+          note:'「O が〜すると思う／期待する」。',
+          good:{ list:['expect you to win','expected it to rain'] } },
+        { verb:'advise', jp:'（O に）〜するよう勧める', small:'勧める',
+          patterns:[[{v:'advise'},{r:'O'},{d:'to do'}]],
+          note:'「O に〜するよう助言する」。',
+          good:{ list:['advised me to rest'] } },
+        { verb:'enable', jp:'（O が）〜できるようにする', small:'可能に',
+          patterns:[[{v:'enable'},{r:'O'},{d:'to do'}]],
+          note:'無生物主語で頻出。「O が〜できるようにする」。',
+          good:{ list:['enabled us to win','enables you to save time'] } },
+        { verb:'encourage', jp:'（O を）〜するよう促す', small:'促す',
+          patterns:[[{v:'encourage'},{r:'O'},{d:'to do'}]],
+          note:'「O を〜するよう励ます／促す」。',
+          good:{ list:['encouraged her to try'] } }
+      ] },
+
+    /* ===== 4. 使役・知覚（O＋原形） ===== */
+    { tab:'O＋原形', tabsub:'使役・知覚',
+      form:{ label:'第5文型', slots:'S＋V＋O＋原形' },
+      blurb:'使役 make／let／have と知覚 see／hear／feel は、O のあとが〈原形〉。<b>to は付けません</b>。',
+      verbs:[
+        { verb:'make', jp:'（強制的に）〜させる', small:'させる',
+          patterns:[[{v:'make'},{r:'O'},{d:'do（原形）'}]],
+          note:'強制の使役。※ 受け身では <b>be made to do</b> と to が復活。',
+          good:{ list:['made me laugh','make him wait'] },
+          mistake:'made me to wait',
+          fix:{ list:['made me wait'] } },
+        { verb:'let', jp:'（許して）〜させる', small:'させる',
+          patterns:[[{v:'let'},{r:'O'},{d:'do（原形）'}]],
+          note:'<b>let O do</b> が鉄則。to は絶対に付けません。',
+          good:{ list:['let me go','let him try'] },
+          mistake:'let him to go',
+          fix:{ list:['let him go'] } },
+        { verb:'have', jp:'（〜してもらう）', small:'してもらう',
+          patterns:[[{v:'have'},{r:'O'},{d:'do（原形）'}]],
+          note:'「O に〜してもらう」。※ get は <b>get O to do</b>（to が要る）。',
+          good:{ list:['had him check it','have her call you'] } },
+        { verb:'help', jp:'（〜するのを）手伝う', small:'手伝う',
+          patterns:[[{v:'help'},{r:'O'},{d:'(to) do'}]],
+          note:'help だけは <b>to あり／なし両方OK</b>。',
+          good:{ list:['helped me carry it','helped me to carry it'] } },
+        { verb:'see', jp:'（〜するのが）見える', small:'見える',
+          patterns:[[{v:'see'},{r:'O'},{d:'do'}],[{v:'see'},{r:'O'},{d:'doing'}]], sep:'／',
+          note:'原形＝一部始終／<b>doing</b>＝その最中の一場面。',
+          good:{ list:['saw him leave','saw him crossing the street'] } },
+        { verb:'hear', jp:'（〜が）聞こえる', small:'聞こえる',
+          patterns:[[{v:'hear'},{r:'O'},{d:'do'}],[{v:'hear'},{r:'O'},{d:'doing'}]], sep:'／',
+          note:'原形＝ひと続き／doing＝進行中。',
+          good:{ list:['heard someone knock','heard her singing'] } },
+        { verb:'feel', jp:'（〜を）感じる', small:'感じる',
+          patterns:[[{v:'feel'},{r:'O'},{d:'do'}],[{v:'feel'},{r:'O'},{d:'doing'}]], sep:'／',
+          note:'原形＝ひと続き／doing＝進行中。',
+          good:{ list:['felt the ground shake','felt it moving'] } }
+      ] },
+
+    /* ===== 5. ing ⇔ to で意味が変わる ===== */
+    { tab:'ing ⇔ to', tabsub:'意味が変わる',
+      form:{ label:'準動詞', slots:'V＋to do ／ V＋~ing' },
+      blurb:'同じ動詞でも、うしろが〈~ing〉か〈to do〉かで意味が変わる動詞。ざっくり <b>~ing＝もう起きた／実際</b>、<b>to do＝これから／未実行</b>。',
+      verbs:[
+        { verb:'stop', jp:'止める／立ち止まる', small:'中止', type:'contrast',
+          pairs:[
+            { form:'~ing', mean:'〜するのをやめる', ex:'stop smoking', exJp:'たばこをやめる' },
+            { form:'to do', mean:'〜するために立ち止まる', ex:'stop to smoke', exJp:'一服しに立ち止まる' } ],
+          note:'to do は「目的」。動名詞のほうが本当の目的語。' },
+        { verb:'remember', jp:'覚えている', small:'記憶', type:'contrast',
+          pairs:[
+            { form:'~ing', mean:'（もう）〜したのを覚えている', ex:'remember locking the door', exJp:'鍵をかけたのを覚えている' },
+            { form:'to do', mean:'忘れずに〜する', ex:'remember to lock the door', exJp:'忘れずに鍵をかける' } ] },
+        { verb:'forget', jp:'忘れる', small:'忘却', type:'contrast',
+          pairs:[
+            { form:'~ing', mean:'〜したのを忘れる', ex:"never forget meeting you", exJp:'あなたに会ったことは忘れない' },
+            { form:'to do', mean:'〜し忘れる', ex:'forget to call', exJp:'電話し忘れる' } ] },
+        { verb:'try', jp:'試す／努める', small:'試み', type:'contrast',
+          pairs:[
+            { form:'~ing', mean:'試しに〜してみる', ex:'try opening the window', exJp:'試しに窓を開けてみる' },
+            { form:'to do', mean:'〜しようと努力する', ex:'try to open the window', exJp:'窓を開けようとがんばる' } ] },
+        { verb:'regret', jp:'後悔する', small:'後悔', type:'contrast',
+          pairs:[
+            { form:'~ing', mean:'〜したのを後悔する', ex:'regret saying that', exJp:'あんな事を言って後悔している' },
+            { form:'to do', mean:'残念ながら（これから）〜する', ex:'regret to tell you…', exJp:'残念ながらお伝えします' } ] },
+        { verb:'mean', jp:'意味する／つもり', small:'意図', type:'contrast',
+          pairs:[
+            { form:'~ing', mean:'〜を意味する（必然的に伴う）', ex:'This means starting over', exJp:'これはやり直しを意味する' },
+            { form:'to do', mean:'〜するつもりだ', ex:'I meant to call you', exJp:'電話するつもりだった' } ] },
+        { verb:'go on', jp:'続ける', small:'継続', type:'contrast',
+          pairs:[
+            { form:'~ing', mean:'（同じことを）続ける', ex:'went on talking', exJp:'話し続けた' },
+            { form:'to do', mean:'（次に別のことを）続けてする', ex:'went on to become a doctor', exJp:'その後、医者になった' } ] }
+      ] },
+
+    /* ===== 6. 他動詞（前置詞なし） ===== */
+    { tab:'前置詞なし', tabsub:'じつは他動詞',
+      form:{ label:'第3文型', slots:'S＋V＋O（前置詞なし）' },
+      blurb:'日本語につられて前置詞を付けがちだが、じつは他動詞。<b>目的語を直接</b>続けます。',
+      verbs:[
+        { verb:'discuss', jp:'話し合う', small:'話し合う',
+          patterns:[[{v:'discuss'},{r:'物'}]],
+          note:'他動詞。<b>about は不要</b>。',
+          mistake:'discuss about the plan', fix:{ list:['discuss the plan'] } },
+        { verb:'marry', jp:'結婚する', small:'結婚',
+          patterns:[[{v:'marry'},{r:'人'}]],
+          note:'他動詞。<b>with は不要</b>。※ 状態は <b>be／get married to</b> 人。',
+          mistake:'marry with her', fix:{ list:['marry her'] } },
+        { verb:'reach', jp:'着く／届く', small:'着く',
+          patterns:[[{v:'reach'},{r:'場所'}]],
+          note:'「〜に着く」は他動詞。※ reach out <b>to</b> 人＝連絡する（別語法）。',
+          mistake:'reach to the station', fix:{ list:['reach the station'] } },
+        { verb:'enter', jp:'入る', small:'入る',
+          patterns:[[{v:'enter'},{r:'場所'}]],
+          note:'「〜に入る」は他動詞。※ enter <b>into</b> an agreement＝契約を結ぶ（別語法）。',
+          mistake:'enter into the room', fix:{ list:['enter the room'] } },
+        { verb:'mention', jp:'言及する', small:'言及',
+          patterns:[[{v:'mention'},{r:'物'}]],
+          note:'「〜に言及する」は他動詞。about は不要。',
+          mistake:'mention about it', fix:{ list:['mention it'] } },
+        { verb:'approach', jp:'近づく', small:'近づく',
+          patterns:[[{v:'approach'},{r:'物'}]],
+          note:'「〜に近づく」は他動詞。to は不要。',
+          mistake:'approach to him', fix:{ list:['approach him'] } },
+        { verb:'attend', jp:'出席する', small:'出席',
+          patterns:[[{v:'attend'},{r:'物'}]],
+          note:'「〜に出席する」は他動詞。※ attend <b>to</b>＝対応・世話をする（別語法）。',
+          mistake:'attend to the meeting', fix:{ list:['attend the meeting'] } },
+        { verb:'resemble', jp:'似ている', small:'似る',
+          patterns:[[{v:'resemble'},{r:'人'}]],
+          note:'「〜に似ている」は他動詞。to／with 不要。<b>進行形にしない</b>状態動詞。',
+          mistake:'resemble to his father', fix:{ list:['resemble his father'] } },
+        { verb:'answer', jp:'答える', small:'答える',
+          patterns:[[{v:'answer'},{r:'物'}]],
+          note:'「〜に答える」は他動詞。to は不要。',
+          mistake:'answer to the question', fix:{ list:['answer the question'] } }
+      ] },
+
+    /* ===== 7. 自動詞（前置詞あり） ===== */
+    { tab:'前置詞あり', tabsub:'じつは自動詞',
+      form:{ label:'第1文型', slots:'S＋V＋前置詞＋O' },
+      blurb:'他動詞のつもりで前置詞を落としがちだが、じつは自動詞。<b>前置詞が必要</b>です。',
+      verbs:[
+        { verb:'apologize', jp:'謝る', small:'謝る',
+          patterns:[[{v:'apologize'},{p:'to'},{r:'人'},{opt:'for ＋ 事'}]],
+          note:'謝る相手は <b>to</b>、理由は <b>for</b>。',
+          mistake:'apologize him', fix:{ list:['apologize to him','apologize to him for the delay'] } },
+        { verb:'graduate', jp:'卒業する', small:'卒業',
+          patterns:[[{v:'graduate'},{p:'from'},{r:'学校'}]],
+          note:'卒業する母体は <b>from</b>。',
+          mistake:'graduate the college', fix:{ list:['graduate from college'] } },
+        { verb:'object', jp:'反対する', small:'反対',
+          patterns:[[{v:'object'},{p:'to'},{r:'物'}]],
+          note:'反対する対象は <b>to</b>（＋名詞・動名詞）。',
+          mistake:'object the plan', fix:{ list:['object to the plan'] } },
+        { verb:'listen', jp:'聞く', small:'聞く',
+          patterns:[[{v:'listen'},{p:'to'},{r:'物'}]],
+          note:'聞く対象は <b>to</b>。',
+          mistake:'listen music', fix:{ list:['listen to music'] } },
+        { verb:'arrive', jp:'着く', small:'着く',
+          patterns:[[{v:'arrive'},{p:'at'},{r:'地点'}],[{v:'arrive'},{p:'in'},{r:'都市・国'}]], sep:'／',
+          note:'到着は <b>at</b>（狭い地点）／<b>in</b>（広い都市・国）。',
+          mistake:'arrive the airport', fix:{ list:['arrive at the airport','arrive in Tokyo'] } },
+        { verb:'agree', jp:'同意する', small:'同意',
+          patterns:[[{v:'agree'},{p:'with'},{r:'人'}],[{v:'agree'},{p:'to'},{r:'提案'}]], sep:'／',
+          note:'人・意見には <b>with</b>、提案・条件には <b>to</b>、取り決めには <b>on</b>。',
+          good:{ list:['agree with you','agree to the terms','agree on a date'] },
+          mistake:'agree the plan', fix:{ list:['agree to the plan'] } },
+        { verb:'complain', jp:'不平を言う', small:'不平',
+          patterns:[[{v:'complain'},{p:'about'},{r:'事'}]],
+          note:'不平の対象は <b>about ／ of</b>。',
+          mistake:'complain the noise', fix:{ list:['complain about the noise'] } },
+        { verb:'reply', jp:'返信する', small:'返信',
+          patterns:[[{v:'reply'},{p:'to'},{r:'物'}]],
+          note:'返信の相手・対象は <b>to</b>。',
+          mistake:'reply the email', fix:{ list:['reply to the email'] } },
+        { verb:'wait', jp:'待つ', small:'待つ',
+          patterns:[[{v:'wait'},{p:'for'},{r:'人・物'}]],
+          note:'待つ対象は <b>for</b>。',
+          mistake:'wait me', fix:{ list:['wait for me'] } }
+      ] }
+  ];
+
+  const tabsEl = document.getElementById('tabs');
+  const plabel = document.getElementById('plabel');
+  const base   = document.getElementById('base');
+  const btns   = document.getElementById('btns');
+  const disp   = document.getElementById('disp');
+  const answer = document.getElementById('answer');
+
+  function chip(tok){
+    const s = document.createElement('span');
+    s.className = 'slot';
+    if(tok.v){ s.classList.add('v'); s.textContent = tok.v; }
+    else if(tok.c){ s.classList.add('c'); s.textContent = tok.c; }
+    else if(tok.d){ s.classList.add('d'); s.textContent = tok.d; }
+    else if(tok.p){ s.classList.add('p'); s.textContent = tok.p; }
+    else if(tok.opt){ s.classList.add('opt'); s.textContent = '(＋ ' + tok.opt + ')'; }
+    else { s.classList.add('r'); s.textContent = tok.r; }
+    return s;
+  }
+  function patRow(tokens){
+    const row = document.createElement('div');
+    row.className = 'pat';
+    tokens.forEach((tok,i)=>{
+      if(i>0 && !tok.opt){
+        const op = document.createElement('span');
+        op.className = 'op'; op.textContent = '＋';
+        row.appendChild(op);
+      }
+      row.appendChild(chip(tok));
+    });
+    return row;
+  }
+  function vheadEl(word,jp){
+    const head = document.createElement('div'); head.className = 'vhead';
+    const vw = document.createElement('span'); vw.className = 'vword'; vw.textContent = word;
+    head.appendChild(vw);
+    if(jp){ const vj = document.createElement('span'); vj.className = 'vjp'; vj.textContent = jp; head.appendChild(vj); }
+    return head;
+  }
+  function badCard(en){
+    const c = document.createElement('div'); c.className = 'excard bad';
+    const l = document.createElement('div'); l.className = 'exlabel b'; l.textContent = '✗ 典型ミス';
+    const line = document.createElement('div'); line.className = 'exline';
+    const s = document.createElement('span'); s.className = 'exen wrong'; s.textContent = en;
+    line.appendChild(s); c.appendChild(l); c.appendChild(line);
+    return c;
+  }
+  function goodCard(good,label){
+    const c = document.createElement('div'); c.className = 'excard good';
+    const l = document.createElement('div'); l.className = 'exlabel g'; l.textContent = label;
+    const list = document.createElement('div'); list.className = 'exlist';
+    if(good.eq){
+      const line = document.createElement('div'); line.className = 'exline';
+      const a = document.createElement('span'); a.className = 'exen'; a.textContent = good.eq[0];
+      const eq = document.createElement('span'); eq.className = 'eq'; eq.textContent = '=';
+      const b = document.createElement('span'); b.className = 'exen'; b.textContent = good.eq[1];
+      line.appendChild(a); line.appendChild(eq); line.appendChild(b);
+      list.appendChild(line);
+      if(good.sub){
+        const sub = document.createElement('div'); sub.className = 'exsub'; sub.textContent = good.sub;
+        list.appendChild(sub);
+      }
+    } else {
+      good.list.forEach(en=>{
+        const line = document.createElement('div'); line.className = 'exline';
+        const s = document.createElement('span'); s.className = 'exen'; s.textContent = en;
+        line.appendChild(s); list.appendChild(line);
+      });
+    }
+    c.appendChild(l); c.appendChild(list);
+    return c;
+  }
+  function contrastCards(pairs){
+    const wrap = document.createElement('div'); wrap.className = 'ctwo';
+    const nums = ['①','②','③'];
+    pairs.forEach((p,i)=>{
+      const c = document.createElement('div'); c.className = 'ccard';
+      const h = document.createElement('div'); h.className = 'chead';
+      const num = document.createElement('span'); num.className = 'cnum'; num.textContent = nums[i]||'';
+      const form = document.createElement('span'); form.className = 'slot d'; form.textContent = p.form;
+      h.appendChild(num); h.appendChild(form);
+      const m = document.createElement('div'); m.className = 'cmean'; m.textContent = p.mean;
+      const ex = document.createElement('div'); ex.className = 'cex';
+      const en = document.createElement('div'); en.className = 'cexen'; en.textContent = '✓ ' + p.ex;
+      ex.appendChild(en);
+      if(p.exJp){ const jp = document.createElement('div'); jp.className = 'cexjp'; jp.textContent = p.exJp; ex.appendChild(jp); }
+      c.appendChild(h); c.appendChild(m); c.appendChild(ex);
+      wrap.appendChild(c);
+    });
+    return wrap;
+  }
+
+  function renderVerb(gi,vi){
+    const d = GROUPS[gi].verbs[vi];
+
+    // big display: verb head + patterns (or contrast hint)
+    disp.innerHTML = '';
+    disp.appendChild(vheadEl(d.verb, d.jp));
+    if(d.type === 'contrast'){
+      const hint = document.createElement('div'); hint.className = 'chint';
+      hint.textContent = 'うしろが ~ing か to do かで意味が変わる';
+      disp.appendChild(hint);
+    } else {
+      const pats = document.createElement('div'); pats.className = 'pats';
+      d.patterns.forEach((p,k)=>{
+        if(k>0){
+          const or = document.createElement('div'); or.className = 'orsep';
+          or.textContent = d.sep || 'または';
+          pats.appendChild(or);
+        }
+        pats.appendChild(patRow(p));
+      });
+      disp.appendChild(pats);
+    }
+
+    // answer: note + example(s) / mistake→fix / contrast cards
+    answer.innerHTML = '';
+    if(d.note){ const n = document.createElement('div'); n.className = 'vnote'; n.innerHTML = d.note; answer.appendChild(n); }
+    if(d.type === 'contrast'){
+      answer.appendChild(contrastCards(d.pairs));
+    } else {
+      if(d.good) answer.appendChild(goodCard(d.good, '✓ 自然な例'));
+      if(d.mistake){
+        answer.appendChild(badCard(d.mistake));
+        const fa = document.createElement('div'); fa.className = 'fixarrow'; fa.textContent = '↓ 直す';
+        answer.appendChild(fa);
+        answer.appendChild(goodCard(d.fix, '✓ 直し'));
+      }
+    }
+
+    [...btns.children].forEach((b,j)=>b.classList.toggle('on', j===vi));
+  }
+
+  function selectGroup(gi){
+    const g = GROUPS[gi];
+    plabel.innerHTML = '<b>' + g.form.label + '</b><span class="slots">' + g.form.slots + '</span>';
+    base.innerHTML = g.blurb;
+    btns.innerHTML = '';
+    g.verbs.forEach((d,vi)=>{
+      const b = document.createElement('button');
+      b.innerHTML = d.verb + (d.small ? '<small>' + d.small + '</small>' : '');
+      b.onclick = ()=>renderVerb(gi,vi);
+      btns.appendChild(b);
+    });
+    [...tabsEl.children].forEach((t,j)=>t.classList.toggle('on', j===gi));
+    renderVerb(gi,0);
+  }
+
+  GROUPS.forEach((g,gi)=>{
+    const t = document.createElement('button'); t.className = 'tab';
+    t.innerHTML = g.tab + '<small>' + g.tabsub + '</small>';
+    t.onclick = ()=>selectGroup(gi);
+    tabsEl.appendChild(t);
+  });
+  selectGroup(0);
+</script>
+</body>
+</html>

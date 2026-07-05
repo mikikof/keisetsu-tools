@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>波の重ね合わせ — 2つの波を足すと、うなりが生まれる</title>
+<style>
+  :root{
+    --ink:#3a2a20; --sub:#8a7566; --line:#f0e7df;
+    --pri:#f97316; --pri-ink:#ea580c; --pri-bg:#fff0e6;
+    --acc:#ef4444; --acc-ink:#dc2626; --acc-bg:#fde4e4;
+    --cool:#3b82f6; --cool-ink:#2563eb; --cool-bg:#e4eeff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#fff3ea 0%,#ffffff 52%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(16px,2.6vw,24px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--pri-ink);background:var(--pri-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"🌊";font-size:13px;}
+  h1{font-size:clamp(24px,4.8vw,42px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--pri),#fb923c);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:680px;}
+  .sub b{color:var(--ink);}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:880px){
+    .app{grid-template-columns:352px 1fr;}
+    .panel{order:-1;}   /* controls on the left; waves keep their prominence on the right */
+  }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(234,88,12,.08);}
+
+  .sellabel{font-size:11px;font-weight:800;color:var(--sub);letter-spacing:.05em;margin:0 0 10px;}
+
+  /* ---- presets ---- */
+  .presets{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:0 0 22px;}
+  .presets button{display:flex;flex-direction:column;gap:3px;align-items:flex-start;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);font-family:inherit;
+    font-weight:800;font-size:14px;border-radius:14px;padding:11px 11px;cursor:pointer;text-align:left;
+    transition:transform .12s,border-color .14s,box-shadow .14s;}
+  .presets button small{font-weight:600;color:var(--sub);font-size:10px;letter-spacing:0;line-height:1.25;}
+  .presets button:hover{border-color:#f6c89a;}
+  .presets button:active{transform:scale(.97);}
+  .presets button.on{background:linear-gradient(135deg,var(--pri),#fb923c);border-color:transparent;color:#fff;
+    box-shadow:0 8px 20px rgba(249,115,22,.32);}
+  .presets button.on small{color:#ffe8d6;}
+
+  /* ---- sliders ---- */
+  .ctrl{margin:0 0 17px;}
+  .ctrlhead{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:800;margin:0 0 4px;}
+  .ctrlhead sub{font-size:.72em;font-weight:800;}
+  .ctrlhead b{margin-left:auto;font-weight:800;color:var(--pri-ink);background:var(--pri-bg);
+    border-radius:8px;padding:2px 10px;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:.01em;}
+  .ctrlhead b.cool{color:var(--cool-ink);background:var(--cool-bg);}
+  .ctrlhead b.acc{color:var(--acc-ink);background:var(--acc-bg);}
+  .dot{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 0 3px #fff,0 0 0 4px var(--line);}
+  .dot--pri{background:var(--pri);} .dot--cool{background:var(--cool);} .dot--acc{background:var(--acc);}
+  .tworow{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .tworow .ctrl{margin-bottom:17px;}
+
+  input[type=range].rng{-webkit-appearance:none;appearance:none;width:100%;height:7px;border-radius:999px;
+    background:var(--pri-bg);outline:none;margin:7px 0 0;--thumb:var(--pri);}
+  input[type=range].rng.cool{background:var(--cool-bg);--thumb:var(--cool);}
+  input[type=range].rng.acc{background:var(--acc-bg);--thumb:var(--acc);}
+  input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:23px;height:23px;border-radius:50%;
+    background:var(--thumb);border:3.5px solid #fff;box-shadow:0 2px 7px rgba(80,40,10,.28);cursor:pointer;}
+  input[type=range].rng::-moz-range-thumb{width:23px;height:23px;border-radius:50%;background:var(--thumb);
+    border:3.5px solid #fff;box-shadow:0 2px 7px rgba(80,40,10,.28);cursor:pointer;}
+  input[type=range].rng::-moz-range-track{height:7px;border-radius:999px;background:transparent;}
+
+  .playbtn{width:100%;margin-top:4px;border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-weight:800;font-size:16px;border-radius:15px;padding:13px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;}
+  .playbtn:hover{border-color:#f6c89a;}
+  .playbtn:active{transform:scale(.98);}
+  .playbtn.on{background:linear-gradient(135deg,var(--acc),#f87171);border-color:transparent;color:#fff;
+    box-shadow:0 8px 20px rgba(239,68,68,.3);}
+  .hint{font-size:12px;color:var(--sub);line-height:1.62;margin:13px 2px 0;}
+
+  /* ---- stage ---- */
+  .stage{display:flex;flex-direction:column;gap:15px;}
+  .scope{width:100%;height:auto;display:block;}
+  .bandbg{fill:#fffaf5;stroke:var(--line);stroke-width:1;}
+  .zero{stroke:#e8d8c8;stroke-width:1;stroke-dasharray:3 4.5;}
+  .wave{fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .w1{stroke:var(--pri);stroke-width:2.6;}
+  .w2{stroke:var(--cool);stroke-width:2.6;}
+  .wsum{stroke:var(--acc-ink);stroke-width:3.4;}
+  .envfill{fill:var(--acc);opacity:.09;}
+  .envline{fill:none;stroke:var(--acc);stroke-width:1.4;stroke-dasharray:4 4;opacity:.5;}
+  .blabel{font-weight:800;font-size:14px;font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",sans-serif;}
+  .blabel--pri{fill:var(--pri-ink);} .blabel--cool{fill:var(--cool-ink);} .blabel--acc{fill:var(--acc-ink);}
+  .bsub{font-weight:600;font-size:11.5px;fill:var(--sub);}
+  .axline{stroke:#e2cfbe;stroke-width:1.2;}
+  .axtxt{font-weight:600;font-size:11.5px;fill:var(--sub);}
+
+  .readrow{display:flex;flex-wrap:wrap;gap:9px;}
+  .read{flex:1;min-width:100px;background:#fffaf5;border:1px solid var(--line);border-radius:13px;
+    padding:9px 13px;display:flex;flex-direction:column;gap:2px;}
+  .read span{font-size:11px;font-weight:700;color:var(--sub);}
+  .read b{font-size:17px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .read.hot{background:var(--acc-bg);border-color:#f7c9c9;}
+  .read.hot span{color:var(--acc-ink);} .read.hot b{color:var(--acc-ink);}
+  .read.dim{opacity:.48;}
+
+  .status{border-radius:16px;padding:14px 17px;font-size:clamp(13.5px,1.9vw,15.5px);line-height:1.66;
+    font-weight:600;display:flex;gap:11px;align-items:flex-start;}
+  .status::before{font-size:19px;line-height:1.35;flex:none;}
+  .status b{font-weight:800;}
+  .status--con{background:var(--pri-bg);color:#9a4a12;}
+  .status--con::before{content:"➕";}
+  .status--con b{color:var(--pri-ink);}
+  .status--des{background:var(--cool-bg);color:#28457a;}
+  .status--des::before{content:"🚫";}
+  .status--des b{color:var(--cool-ink);}
+  .status--same{background:#fbf3ea;color:#7a5a3a;}
+  .status--same::before{content:"⚖️";}
+  .status--same b{color:var(--pri-ink);}
+  .status--beat{background:var(--acc-bg);color:#9b2626;}
+  .status--beat::before{content:"🔊";}
+  .status--beat b{color:var(--acc-ink);}
+
+  .insight{background:linear-gradient(135deg,#fff2e8,#fff9f4);border-radius:20px;
+    padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);margin-top:clamp(16px,2.4vw,26px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.74;color:#5a4436;font-weight:500;}
+  .insight b{color:var(--pri-ink);font-weight:700;}
+  .insight .em2{color:var(--cool-ink);font-weight:700;}
+  .insight .em3{color:var(--acc-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#c0ad9d;text-align:center;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">波の重ね合わせ・うなり</span>
+    <h1>2つの波を<span class="em">重ねる</span>と、うなりが生まれる</h1>
+    <p class="sub">波は「足し算（重ね合わせ）」でできています。振動数や位相差を動かすと、<b>合成波（波1＋波2）</b>がその場で描き変わります。同じ振動数で位相をそろえれば<b>強め合い</b>、逆にすれば<b>打ち消し合い</b>。振動数をわずかにずらすと、ゆっくり脈打つ<b>うなり</b>が現れます。指で確かめてください。</p>
+  </header>
+
+  <div class="app">
+    <!-- ============ STAGE ============ -->
+    <section class="stage">
+      <svg class="scope" id="scope" viewBox="0 0 660 432" preserveAspectRatio="xMidYMid meet"
+           role="img" aria-label="波1・波2・合成波の3段グラフ">
+        <!-- band 1 : 波1 -->
+        <text class="blabel blabel--pri" x="20" y="24">波1</text>
+        <text class="bsub" x="55" y="24">＝ 振動数 f₁ の波</text>
+        <rect class="bandbg" x="20" y="34" width="620" height="84" rx="12"/>
+        <line class="zero" x1="20" y1="76" x2="640" y2="76"/>
+        <path class="wave w1" id="w1" d=""/>
+        <!-- band 2 : 波2 -->
+        <text class="blabel blabel--cool" x="20" y="140">波2</text>
+        <text class="bsub" x="55" y="140">＝ 振動数 f₂ の波（位相差 φ）</text>
+        <rect class="bandbg" x="20" y="148" width="620" height="84" rx="12"/>
+        <line class="zero" x1="20" y1="190" x2="640" y2="190"/>
+        <path class="wave w2" id="w2" d=""/>
+        <!-- band 3 : 合成波 -->
+        <text class="blabel blabel--acc" x="20" y="262">合成波</text>
+        <text class="bsub" x="88" y="262">＝ 波1 ＋ 波2（重ね合わせ）／ 薄い帯は振幅の包絡線</text>
+        <rect class="bandbg" x="20" y="272" width="620" height="116" rx="12"/>
+        <path class="envfill" id="envfill" d=""/>
+        <line class="zero" x1="20" y1="330" x2="640" y2="330"/>
+        <path class="envline" id="envtop" d=""/>
+        <path class="envline" id="envbot" d=""/>
+        <path class="wave wsum" id="wsum" d=""/>
+        <!-- axis -->
+        <line class="axline" x1="20" y1="402" x2="640" y2="402"/>
+        <line class="axline" x1="20" y1="397" x2="20" y2="407"/>
+        <line class="axline" x1="640" y1="397" x2="640" y2="407"/>
+        <text class="axtxt" x="330" y="421" text-anchor="middle">横軸 ＝ 時間 → ／ 表示している幅は 1 秒（この中のうなりの回数を数えられます）</text>
+      </svg>
+
+      <div class="readrow">
+        <div class="read"><span>振動数 f₁</span><b id="r_f1">8 Hz</b></div>
+        <div class="read"><span>振動数 f₂</span><b id="r_f2">10 Hz</b></div>
+        <div class="read"><span>位相差 φ</span><b id="r_ph">0.00π</b></div>
+        <div class="read hot" id="read_beat"><span>うなり数 ＝ |f₁−f₂|</span><b id="r_beat">2 回/秒</b></div>
+      </div>
+
+      <div class="status" id="status">…</div>
+    </section>
+
+    <!-- ============ PANEL ============ -->
+    <section class="panel">
+      <p class="sellabel">プリセット（ワンタップで代表例へ）</p>
+      <div class="presets">
+        <button id="pre_con"  onclick="applyPreset('con',this)">強め合い<small>f₁=f₂・同位相</small></button>
+        <button id="pre_des"  onclick="applyPreset('des',this)">打ち消し<small>f₁=f₂・逆位相</small></button>
+        <button id="pre_beat" onclick="applyPreset('beat',this)">うなり<small>f₁≒f₂</small></button>
+      </div>
+
+      <div class="ctrl">
+        <div class="ctrlhead"><span class="dot dot--pri"></span>振動数 f<sub>1</sub><b id="f1v">8 Hz</b></div>
+        <input type="range" class="rng" id="f1" min="1" max="16" step="1" value="8">
+      </div>
+      <div class="ctrl">
+        <div class="ctrlhead"><span class="dot dot--cool"></span>振動数 f<sub>2</sub><b class="cool" id="f2v">10 Hz</b></div>
+        <input type="range" class="rng cool" id="f2" min="1" max="16" step="1" value="10">
+      </div>
+      <div class="ctrl">
+        <div class="ctrlhead"><span class="dot dot--acc"></span>位相差 φ<b class="acc" id="phv">0.00π</b></div>
+        <input type="range" class="rng acc" id="ph" min="0" max="6.2831853" step="0.1308997" value="0">
+      </div>
+      <div class="tworow">
+        <div class="ctrl">
+          <div class="ctrlhead">振幅 A<sub>1</sub><b id="a1v">0.80</b></div>
+          <input type="range" class="rng" id="a1" min="0" max="1" step="0.05" value="0.8">
+        </div>
+        <div class="ctrl">
+          <div class="ctrlhead">振幅 A<sub>2</sub><b class="cool" id="a2v">0.80</b></div>
+          <input type="range" class="rng cool" id="a2" min="0" max="1" step="0.05" value="0.8">
+        </div>
+      </div>
+
+      <button class="playbtn" id="play">▶ 動かす（波を流す）</button>
+      <p class="hint">スライダーを動かすと、3つの波がその場で描き変わります。「動かす」で波が流れ、うなりの脈打ちがくり返し見えます。合成波は、上の2つを縦に足しただけです。</p>
+    </section>
+  </div>
+
+  <div class="insight">
+    <span class="h">気づき</span>
+    <div>波は「<b>重ね合わせ（足し算）</b>」でできています。同じ振動数で位相をそろえれば<b>強め合い</b>（振幅は2倍）、逆位相なら<span class="em2">打ち消し合い</span>（0になる）。そして振動数がわずかに違うと、振幅がゆっくり脈打つ<span class="em3">うなり</span>が生まれます。1秒あたりのうなりの回数は <span class="em3">|f₁−f₂|</span> です。参考書は完成した波形を並べるだけですが、ここでは自分で動かして確かめられます。</div>
+  </div>
+
+  <p class="foot">9月号「AIで動く教材を作る」試作 ／ 一文の指示で、この種の物理教材ツールが生成できます</p>
+</div>
+
+<script>
+  const $=id=>document.getElementById(id);
+  const TAU=Math.PI*2, WINDOW=1.0;      // 表示する時間幅 = 1 秒
+  const P={x0:20, w:620};               // プロット領域（px）
+  const CY={w1:76, w2:190, sum:330};    // 各段の中心 y
+  const K=26;                           // 値→px（3段で共通 → 「振幅2倍」が見た目で分かる）
+  const N=720;                          // サンプル数
+  let t0=0, anim=false, raf=0;
+  const st={f1:8, f2:10, ph:0, a1:0.8, a2:0.8};
+
+  /* ---- 物理：y = A1 sin(2π f1 x) + A2 sin(2π f2 x + φ) ---- */
+  const fW1 =x=> st.a1*Math.sin(TAU*st.f1*x);
+  const fW2 =x=> st.a2*Math.sin(TAU*st.f2*x + st.ph);
+  const fSum=x=> fW1(x)+fW2(x);
+  /* 合成波の振幅（包絡線）= √(A1²+A2²+2A1A2·cos(2π(f1−f2)x − φ)) */
+  const envE=x=> Math.sqrt(st.a1*st.a1 + st.a2*st.a2
+                 + 2*st.a1*st.a2*Math.cos(TAU*(st.f1-st.f2)*x - st.ph));
+
+  function pathOf(fn, cy){
+    let d='';
+    for(let i=0;i<=N;i++){
+      const px=P.x0+P.w*i/N, xx=t0+WINDOW*i/N, py=cy-fn(xx)*K;
+      d+=(i?'L':'M')+px.toFixed(1)+' '+py.toFixed(1);
+    }
+    return d;
+  }
+  function envFillPath(cy){
+    let top='', bot=[];
+    for(let i=0;i<=N;i++){
+      const px=P.x0+P.w*i/N, xx=t0+WINDOW*i/N, e=envE(xx)*K;
+      top+=(i?'L':'M')+px.toFixed(1)+' '+(cy-e).toFixed(1);
+      bot.push(px.toFixed(1)+' '+(cy+e).toFixed(1));
+    }
+    bot.reverse();
+    return top+'L'+bot.join('L')+'Z';
+  }
+  function drawWaves(){
+    $('w1').setAttribute('d', pathOf(fW1, CY.w1));
+    $('w2').setAttribute('d', pathOf(fW2, CY.w2));
+    $('wsum').setAttribute('d', pathOf(fSum, CY.sum));
+    $('envfill').setAttribute('d', envFillPath(CY.sum));
+    $('envtop').setAttribute('d', pathOf(x=> envE(x), CY.sum));
+    $('envbot').setAttribute('d', pathOf(x=>-envE(x), CY.sum));
+  }
+
+  const phLabel=()=> (st.ph/Math.PI).toFixed(2)+'π';
+  const near=(a,b)=> Math.abs(a-b)<0.06;
+
+  function render(){
+    $('f1v').textContent=st.f1+' Hz';  $('f2v').textContent=st.f2+' Hz';
+    $('phv').textContent=phLabel();
+    $('a1v').textContent=st.a1.toFixed(2); $('a2v').textContent=st.a2.toFixed(2);
+    $('r_f1').textContent=st.f1+' Hz';  $('r_f2').textContent=st.f2+' Hz';
+    $('r_ph').textContent=phLabel();
+
+    const beat=Math.abs(st.f1-st.f2);
+    $('r_beat').textContent=beat+' 回/秒';
+    $('read_beat').classList.toggle('dim', beat===0);
+
+    let key, msg;
+    if(beat===0){
+      const p=((st.ph%TAU)+TAU)%TAU;
+      if(near(p,0)||near(p,TAU)){
+        key='con';
+        msg=`<b>完全に強め合い</b>（同位相）。波1と波2の山どうし・谷どうしがぴったり重なり、合成波の振幅は<b>2倍</b>（A₁＋A₂ ＝ ${(st.a1+st.a2).toFixed(2)}）になります。`;
+      }else if(near(p,Math.PI)){
+        key='des';
+        msg=`<b>完全に打ち消し合い</b>（逆位相 φ＝π）。一方の山ともう一方の谷が重なり、合成波は<b>0</b>（平ら）になります。`;
+      }else{
+        key='same';
+        msg=`同じ振動数で、位相差 φ＝${phLabel()}。合成波は振幅<b>${envE(0).toFixed(2)}</b>の一定の波です（φを0に近づけるほど強め合い、πに近づけるほど打ち消し合いに向かいます）。`;
+      }
+    }else{
+      key='beat';
+      msg=`<b>うなり</b>が発生。振動数がわずかに違うため、合成波の振幅がゆっくり脈打ちます。1秒間に振幅が最大になる回数（うなりの回数）＝ <b>|f₁−f₂| ＝ ${beat} 回</b>。`;
+    }
+    $('status').className='status status--'+key;
+    $('status').innerHTML=`<span>${msg}</span>`;
+
+    drawWaves();
+  }
+
+  function syncInputs(){
+    $('f1').value=st.f1; $('f2').value=st.f2; $('ph').value=st.ph;
+    $('a1').value=st.a1; $('a2').value=st.a2;
+  }
+  const clearPre=()=> document.querySelectorAll('.presets button').forEach(b=>b.classList.remove('on'));
+
+  $('f1').addEventListener('input',e=>{ st.f1=+e.target.value; clearPre(); render(); });
+  $('f2').addEventListener('input',e=>{ st.f2=+e.target.value; clearPre(); render(); });
+  $('ph').addEventListener('input',e=>{ st.ph=+e.target.value; clearPre(); render(); });
+  $('a1').addEventListener('input',e=>{ st.a1=+e.target.value; clearPre(); render(); });
+  $('a2').addEventListener('input',e=>{ st.a2=+e.target.value; clearPre(); render(); });
+
+  const PRE={
+    con:  {f1:8, f2:8,  ph:0,        a1:0.8, a2:0.8},
+    des:  {f1:8, f2:8,  ph:Math.PI,  a1:0.8, a2:0.8},
+    beat: {f1:8, f2:10, ph:0,        a1:0.8, a2:0.8},
+  };
+  function applyPreset(k, btn){
+    Object.assign(st, PRE[k]); syncInputs();
+    clearPre(); if(btn) btn.classList.add('on');
+    render();
+  }
+
+  function tick(){ t0+=0.006; drawWaves(); raf=requestAnimationFrame(tick); }
+  $('play').addEventListener('click',()=>{
+    anim=!anim; const b=$('play');
+    if(anim){ b.classList.add('on'); b.textContent='⏸ 止める'; raf=requestAnimationFrame(tick); }
+    else    { b.classList.remove('on'); b.textContent='▶ 動かす（波を流す）'; cancelAnimationFrame(raf); }
+  });
+
+  /* 状態を URL ハッシュから読める（共有・検証用）: #f1=8&f2=8&phi=0 など */
+  function initHash(){
+    const h=location.hash.replace(/^#/,''); if(!h) return false;
+    const q=new URLSearchParams(h);
+    const num=(k,lo,hi,d)=>{ if(!q.has(k)) return d; const v=+q.get(k); return isNaN(v)?d:Math.min(hi,Math.max(lo,v)); };
+    st.f1=Math.round(num('f1',1,16,st.f1));
+    st.f2=Math.round(num('f2',1,16,st.f2));
+    st.ph=num('phi',0,TAU,st.ph);
+    st.a1=num('a1',0,1,st.a1);
+    st.a2=num('a2',0,1,st.a2);
+    return true;
+  }
+
+  const hadHash=initHash();
+  syncInputs();
+  if(!hadHash) $('pre_beat').classList.add('on');   // 初期状態はうなり
+  render();
+</script>
+</body>
+</html>

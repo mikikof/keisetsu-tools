@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>5文型トレーナー — Vの後ろで文型を決める</title>
+<style>
+  :root{
+    --ink:#2b2f3a; --sub:#87909f; --line:#eceef5;
+    --indigo:#6d5efc; --indigo2:#9166ff; --indigo-ink:#5b4ae8; --indigo-bg:#f1eefe;
+    --rose:#f8577d; --rose-ink:#e23f6d; --rose-bg:#ffe6ee;
+    --teal:#12c7b0; --teal-ink:#0d9986; --teal-bg:#c9f2e9;
+    --amber:#fbbf24; --amber-ink:#985a06; --amber-bg:#fdeec1;
+    --m-ink:#77808f; --m-bg:#edeff4;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#edf4ff 0%,#ffffff 54%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(20px,3vw,30px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--indigo-ink);background:var(--indigo-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";font-size:13px;}
+  h1{font-size:clamp(24px,5vw,42px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--rose),#ff7aa0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:660px;}
+  .sub b{color:var(--ink);}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:392px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(93,74,232,.09);}
+
+  .base{font-size:clamp(13px,1.7vw,14.5px);color:var(--sub);margin:0 0 16px;padding-bottom:14px;
+    border-bottom:1px dashed #e7e3f6;}
+  .base .lbl{display:block;font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--indigo-ink);margin-bottom:5px;}
+  .base b{color:var(--ink);font-weight:700;}
+
+  .ctl{margin-bottom:15px;}
+  .ctl-label{font-size:11.5px;font-weight:800;letter-spacing:.04em;color:var(--sub);margin:0 2px 8px;}
+  .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:9px;}
+  @media(min-width:860px){ .btns{grid-template-columns:1fr;} }
+  .btns.two{grid-template-columns:1fr 1fr;}
+  .btns button{display:flex;flex-direction:column;justify-content:center;min-height:52px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:15px;font-weight:800;border-radius:14px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;padding:7px 6px;text-align:center;}
+  .btns button small{font-weight:600;color:var(--sub);font-size:11px;margin-top:2px;}
+  .btns button:hover{border-color:#d9d2fb;}
+  .btns button:active{transform:scale(.97);}
+  .btns button.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.34);}
+  .btns button.on small{color:#e9e4ff;}
+
+  .stage{display:flex;flex-direction:column;}
+
+  .patternhead{display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;
+    margin:0 0 16px;padding-bottom:15px;border-bottom:1px dashed #e7e3f6;}
+  .patbadge{display:flex;align-items:baseline;gap:11px;}
+  .patno{font-size:clamp(14px,1.9vw,17px);font-weight:800;color:var(--ink);white-space:nowrap;}
+  .patcode{font-size:clamp(27px,5vw,42px);font-weight:800;letter-spacing:.05em;line-height:1;}
+  .patcode .l{margin:0 1px;}
+  .l-s{color:var(--indigo-ink);} .l-v{color:var(--rose-ink);}
+  .l-o{color:var(--teal-ink);} .l-c{color:var(--amber-ink);}
+  .patdesc{margin:0;font-size:clamp(12.5px,1.7vw,14.5px);color:var(--sub);font-weight:600;flex:1;min-width:190px;}
+
+  .sentence{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:600;
+    text-align:left;letter-spacing:.004em;
+    padding:clamp(20px,3.6vw,34px) clamp(15px,2.6vw,26px);
+    background:linear-gradient(160deg,#f2f8ff,#ebf3ff);border-radius:18px;color:#333846;
+    display:flex;align-items:center;flex:1;min-height:clamp(108px,17vw,190px);
+    font-size:clamp(18px,3.1vw,31px);line-height:1.95;}
+  .sline{width:100%;overflow-wrap:break-word;}
+
+  .chunk{cursor:pointer;border-radius:7px;padding:1px 6px;
+    -webkit-box-decoration-break:clone;box-decoration-break:clone;
+    transition:background .16s,color .16s,opacity .2s,filter .2s,box-shadow .14s;outline:none;}
+  .role-s{background:var(--indigo-bg);color:var(--indigo-ink);}
+  .role-v{background:var(--rose-bg);color:var(--rose-ink);}
+  .role-o{background:var(--teal-bg);color:var(--teal-ink);}
+  .role-c{background:var(--amber-bg);color:var(--amber-ink);}
+  .role-m{background:var(--m-bg);color:var(--m-ink);}
+  .chunk.role-v{font-weight:700;}
+  .chunk:hover{filter:brightness(.97);}
+  .chunk:focus-visible{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--teal);}
+  .chunk.selected{font-weight:800;box-shadow:0 0 0 2px #fff,0 0 0 4px currentColor;}
+  .trunkonly .chunk.role-m{background:transparent;color:var(--sub);opacity:.3;
+    filter:grayscale(.6);font-weight:500;box-shadow:none;}
+  .trunkonly .chunk.role-m.selected{background:var(--m-bg);color:var(--m-ink);opacity:1;filter:none;}
+  .trunkonly .chunk:not(.role-m){box-shadow:0 5px 15px rgba(93,74,232,.10);}
+
+  .answer{margin-top:clamp(15px,2.2vw,20px);}
+  .scopechip{display:inline-flex;align-items:center;gap:9px;
+    font-weight:800;font-size:clamp(14px,1.8vw,16px);
+    padding:8px 16px;border-radius:999px;margin:0 0 12px;}
+  .scopechip b{font-size:1.16em;font-weight:800;}
+  .scopechip span{font-weight:600;opacity:.82;}
+  .gloss{font-size:clamp(15px,2vw,18.5px);line-height:1.72;font-weight:500;}
+  .gloss b{color:var(--rose-ink);font-weight:700;}
+
+  .skel{margin-top:16px;background:#f6f8fd;border:1px solid #e9ecf6;border-radius:15px;padding:14px 16px;}
+  .skel-h{font-size:12px;font-weight:800;letter-spacing:.05em;color:var(--sub);
+    display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+  .skel-h::before{content:"";width:16px;height:16px;border-radius:5px;flex:none;
+    background:linear-gradient(135deg,var(--teal),var(--indigo));}
+  .skel-body{font-family:system-ui,-apple-system,sans-serif;font-weight:700;
+    font-size:clamp(16px,2.3vw,22px);line-height:1.85;}
+  .skel-body .tok{border-radius:6px;padding:1px 7px;margin:1px 1px;display:inline-block;
+    -webkit-box-decoration-break:clone;box-decoration-break:clone;}
+  .skel-body .dot{color:var(--sub);}
+  .skel-note{margin-top:10px;font-size:12.5px;color:var(--sub);line-height:1.6;}
+  .skel-note b{color:var(--teal-ink);font-weight:800;}
+
+  .tip{margin-top:14px;background:var(--indigo-bg);border-radius:14px;padding:12px 15px;
+    font-size:clamp(12.5px,1.7vw,14px);line-height:1.68;color:var(--indigo-ink);font-weight:600;}
+  .tip::before{content:"この文のポイント";display:block;font-size:10.5px;font-weight:800;
+    letter-spacing:.05em;opacity:.68;margin-bottom:4px;}
+
+  .legend{margin-top:4px;display:grid;gap:9px;}
+  .legend .lg{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--ink);}
+  .legend .lg small{font-weight:600;color:var(--sub);}
+  .legend .sw{width:24px;height:16px;border-radius:5px;flex:none;}
+  .sw.s{background:var(--indigo-bg);border:1.6px solid var(--indigo);}
+  .sw.v{background:var(--rose-bg);border:1.6px solid var(--rose);}
+  .sw.o{background:var(--teal-bg);border:1.6px solid var(--teal);}
+  .sw.c{background:var(--amber-bg);border:1.6px solid var(--amber);}
+  .sw.m{background:var(--m-bg);border:1.6px solid #c4cad6;}
+  .legend-hint{margin-top:12px;font-size:12px;color:var(--sub);line-height:1.62;}
+
+  .insight{grid-column:1/-1;background:linear-gradient(135deg,#eef5ff,#f6faff);
+    border-radius:20px;padding:clamp(17px,2.4vw,26px) clamp(18px,2.6vw,30px);}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:14px;}
+  .insight .h::before{content:"💡";}
+  .steps{display:grid;gap:10px;margin-bottom:14px;}
+  @media(min-width:640px){ .steps{grid-template-columns:repeat(3,1fr);} }
+  .step{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #e5ecfb;
+    border-radius:14px;padding:11px 14px;font-size:clamp(13px,1.8vw,14.5px);font-weight:700;color:var(--ink);line-height:1.4;}
+  .step .n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:#fff;font-size:14px;font-weight:800;}
+  .ins-body{font-size:clamp(13.5px,1.9vw,15.5px);line-height:1.76;color:#4a4560;font-weight:500;}
+  .ins-body b{color:var(--indigo-ink);font-weight:700;}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#a9afbe;text-align:center;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">構文解析トレーナー</span>
+    <h1>動詞の<span class="em">後ろ</span>を見て、5文型を決める</h1>
+    <p class="sub">文型は暗記ではなく「<b>V の後ろに何が来るか</b>」の見取り図。各パートをクリックして <b>S / V / O / C / M</b> を確かめ、『幹だけ表示』で骨格だけを取り出してみてください。</p>
+  </header>
+
+  <div class="app">
+    <section class="panel">
+      <p class="base"><span class="lbl">全文の意味</span><span id="baseJp"></span></p>
+
+      <div class="ctl">
+        <div class="ctl-label">① 文型を選ぶ</div>
+        <div class="btns" id="patBtns">
+          <button type="button" data-pat="1">第1文型<small>SV</small></button>
+          <button type="button" data-pat="2">第2文型<small>SVC</small></button>
+          <button type="button" data-pat="3">第3文型<small>SVO</small></button>
+          <button type="button" data-pat="4">第4文型<small>SVOO</small></button>
+          <button type="button" data-pat="5">第5文型<small>SVOC</small></button>
+        </div>
+      </div>
+
+      <div class="ctl">
+        <div class="ctl-label">② 難易度</div>
+        <div class="btns two" id="diffBtns">
+          <button type="button" data-diff="easy">やさしい<small>基本の形</small></button>
+          <button type="button" data-diff="hard">複雑<small>従属節・関係節つき</small></button>
+        </div>
+      </div>
+
+      <div class="ctl">
+        <div class="ctl-label">③ 表示</div>
+        <div class="btns two" id="viewBtns">
+          <button type="button" id="bTrunk">幹だけ表示<small>修飾 M を消す</small></button>
+          <button type="button" id="bAll">全部表示<small>すべて見せる</small></button>
+        </div>
+      </div>
+
+      <div class="ctl-label">役割の色分け</div>
+      <div class="legend">
+        <div class="lg"><span class="sw s"></span>S<small>主語</small></div>
+        <div class="lg"><span class="sw v"></span>V<small>動詞（まず探す）</small></div>
+        <div class="lg"><span class="sw o"></span>O<small>目的語（S と≠）</small></div>
+        <div class="lg"><span class="sw c"></span>C<small>補語（S・O と＝）</small></div>
+        <div class="lg"><span class="sw m"></span>M<small>修飾語（幹から外す）</small></div>
+      </div>
+      <p class="legend-hint">文中の各パートをクリックすると、その役割の解説が右側に出ます。</p>
+    </section>
+
+    <section class="stage">
+      <div class="patternhead">
+        <div class="patbadge"><span class="patno" id="patNo"></span><span class="patcode" id="patCode"></span></div>
+        <p class="patdesc" id="patDesc"></p>
+      </div>
+
+      <div class="sentence"><div class="sline" id="sent"></div></div>
+
+      <div class="answer">
+        <div class="scopechip" id="chip"></div>
+        <div class="gloss" id="gloss"></div>
+        <div class="skel">
+          <div class="skel-h">この文の幹（骨格）</div>
+          <div class="skel-body" id="skelBody"></div>
+          <div class="skel-note" id="skelNote"></div>
+        </div>
+        <div class="tip" id="tip"></div>
+      </div>
+    </section>
+
+    <div class="insight">
+      <span class="h">解き方 — V の後ろを見る</span>
+      <div class="steps">
+        <div class="step"><span class="n">1</span>まず動詞 V を見つける</div>
+        <div class="step"><span class="n">2</span>その前の主語 S を確かめる</div>
+        <div class="step"><span class="n">3</span>V の後ろ（O / C / OO / OC）で文型が決まる</div>
+      </div>
+      <div class="ins-body">C は S（または O）と<b>イコール</b>、O は<b>イコールでない</b>。修飾（M）は骨格から外します。長い文も「V を見つけ → S を確かめ → V の後ろで文型を決める」の順でたどれば、修飾がいくら付いても<b>幹は崩れません</b>。5文型は暗記ではなく、<b>V の後ろに何が来るか</b>の見取り図です。</div>
+    </div>
+  </div>
+
+  <p class="foot">螢雪時代『小船幹生のStudy Hack』試作 ／ 参考書の一文を、動かせる装置に。</p>
+</div>
+
+<script>
+  const ROLE = {
+    s:{k:'S', jp:'主語',   cls:'role-s'},
+    v:{k:'V', jp:'動詞',   cls:'role-v'},
+    o:{k:'O', jp:'目的語', cls:'role-o'},
+    c:{k:'C', jp:'補語',   cls:'role-c'},
+    m:{k:'M', jp:'修飾語', cls:'role-m'}
+  };
+
+  const SENT = {
+    '1':{
+      easy:{ no:'第1文型', code:'SV', desc:'「S＋V」。V の後ろに O も C も要らない（自動詞）。',
+        jp:'その老人は、川沿いをゆっくりと歩いた。',
+        tip:'V（walked）の後ろに O も C も無い → 第1文型 SV。slowly / along the river はすべて修飾（M）です。',
+        chunks:[
+          {r:'s',t:'The old man',g:'「その老人は」＝ 主語 S。動作をする主体です。'},
+          {r:'v',t:'walked',g:'「歩いた」＝ 動詞 V。walk は<b>自動詞</b>で、後ろに O も C も要りません。ここで文型が SV に決まります。'},
+          {r:'m',t:'slowly',g:'「ゆっくりと」＝ 修飾 M（副詞）。どう歩いたかを添えるだけ。幹からは外します。'},
+          {r:'m',t:'along the river',g:'「川沿いを」＝ 修飾 M（前置詞句）。どこを歩いたか。幹からは外します。'}
+        ]},
+      hard:{ no:'第1文型', code:'SV', desc:'「S＋V」。V の後ろに O も C も要らない（自動詞）。',
+        jp:'私たちがずっと待っていた電車が、ついに駅に到着した。',
+        tip:'関係節や副詞をはがすと、核は The train arrived だけ。arrive は自動詞 → 第1文型 SV。',
+        chunks:[
+          {r:'s',t:'The train',g:'「その電車が」＝ 主語 S の核。'},
+          {r:'m',t:'that we had been waiting for',g:'「私たちがずっと待っていた」＝ <b>関係代名詞節</b>。train を説明する修飾 M（枝）。長くても幹からは外します。'},
+          {r:'m',t:'finally',g:'「ついに」＝ 修飾 M（副詞）。'},
+          {r:'v',t:'arrived',g:'「到着した」＝ 動詞 V。arrive は<b>自動詞</b>。後ろの at the station は目的語ではなく修飾なので、文型は SV。'},
+          {r:'m',t:'at the station',g:'「駅に」＝ 修飾 M（前置詞句）。'}
+        ]}
+    },
+    '2':{
+      easy:{ no:'第2文型', code:'SVC', desc:'「S＋V＋C」。C は主語とイコール（S＝C）。',
+        jp:'その実験の結果は、驚くほど一貫しているように見えた。',
+        tip:'seem の後ろは主語とイコールの C → 第2文型 SVC。The results ＝ consistent。surprisingly は C を強めるだけの M。',
+        chunks:[
+          {r:'s',t:'The results',g:'「結果は」＝ 主語 S の核。'},
+          {r:'m',t:'of the experiment',g:'「その実験の」＝ 修飾 M（results を説明する前置詞句）。幹からは外します。'},
+          {r:'v',t:'seemed',g:'「〜に見えた」＝ 動詞 V。seem は後ろに<b>C（補語）</b>を取る動詞です。'},
+          {r:'m',t:'surprisingly',g:'「驚くほど」＝ 修飾 M（副詞）。補語 consistent を強めるだけ。幹からは外します。'},
+          {r:'c',t:'consistent',g:'「一貫している」＝ 補語 C。The results ＝ consistent（結果は一貫していた）。<b>S とイコール</b>なので C です。'}
+        ]},
+      hard:{ no:'第2文型', code:'SVC', desc:'「S＋V＋C」。C は主語とイコール（S＝C）。',
+        jp:'彼が成功した主な理由は、ライバルたちにとって今も謎のままだ。',
+        tip:'remain の後ろは S とイコールの C → 第2文型 SVC。節や前置詞句をはがすと The main reason remains a mystery。',
+        chunks:[
+          {r:'s',t:'The main reason',g:'「主な理由は」＝ 主語 S の核。'},
+          {r:'m',t:'he succeeded',g:'「彼が成功した」＝ reason を説明する節（why の省略）。修飾 M（枝）。幹からは外します。'},
+          {r:'v',t:'remains',g:'「〜のままである」＝ 動詞 V。remain は<b>C</b>を取る動詞です。'},
+          {r:'c',t:'a mystery',g:'「謎」＝ 補語 C。The main reason ＝ a mystery。<b>S とイコール</b>なので C です。'},
+          {r:'m',t:'to his rivals',g:'「ライバルにとって」＝ 修飾 M（前置詞句）。幹からは外します。'}
+        ]}
+    },
+    '3':{
+      easy:{ no:'第3文型', code:'SVO', desc:'「S＋V＋O」。O は主語とイコールでない（S≠O）。',
+        jp:'委員会は、長い議論の末に、その新しい提案をついに承認した。',
+        tip:'approve の後ろは S とイコールでない O → 第3文型 SVO。finally / after a long debate は M。',
+        chunks:[
+          {r:'s',t:'The committee',g:'「委員会は」＝ 主語 S。'},
+          {r:'m',t:'finally',g:'「ついに」＝ 修飾 M（副詞）。幹からは外します。'},
+          {r:'v',t:'approved',g:'「〜を承認した」＝ 動詞 V。approve は<b>O を取る他動詞</b>です。'},
+          {r:'o',t:'the new proposal',g:'「その新しい提案を」＝ 目的語 O。The committee ≠ the new proposal（<b>イコールでない</b>）なので O です。'},
+          {r:'m',t:'after a long debate',g:'「長い議論のあとで」＝ 修飾 M（前置詞句）。幹からは外します。'}
+        ]},
+      hard:{ no:'第3文型', code:'SVO', desc:'「S＋V＋O」。O は主語とイコールでない（S≠O）。',
+        jp:'その科学者は、何十年も研究者を悩ませてきたその理論を説明した。',
+        tip:'O が関係節でふくらんでも核は the theory。第3文型 SVO。幹は The scientist explained the theory。',
+        chunks:[
+          {r:'s',t:'The scientist',g:'「その科学者は」＝ 主語 S。'},
+          {r:'v',t:'explained',g:'「〜を説明した」＝ 動詞 V。explain は<b>O を取る他動詞</b>です。'},
+          {r:'o',t:'the theory',g:'「その理論を」＝ 目的語 O の核。S とイコールでない → O。'},
+          {r:'m',t:'that had puzzled researchers for decades',g:'「何十年も研究者を悩ませてきた」＝ <b>関係代名詞節</b>。theory を説明する修飾 M（枝）。長くても幹からは外します。'}
+        ]}
+    },
+    '4':{
+      easy:{ no:'第4文型', code:'SVOO', desc:'「S＋V＋O＋O」。人に物を。O①≠O②。',
+        jp:'おじは去年の夏、イタリアから私に絵はがきを送ってくれた。',
+        tip:'sent の後ろに「人（me）＋物（a postcard）」の 2 つの O → 第4文型 SVOO。',
+        chunks:[
+          {r:'s',t:'My uncle',g:'「おじは」＝ 主語 S。'},
+          {r:'v',t:'sent',g:'「〜に…を送った」＝ 動詞 V。send は<b>O を 2 つ</b>取れる動詞（人＋物）です。'},
+          {r:'o',subK:'O①',subJp:'目的語（人）',t:'me',g:'「私に」＝ 目的語① O（人）。'},
+          {r:'o',subK:'O②',subJp:'目的語（物）',t:'a postcard',g:'「絵はがきを」＝ 目的語② O（物）。me ≠ a postcard で<b>別々の 2 つ</b>だから SVOO。'},
+          {r:'m',t:'from Italy',g:'「イタリアから」＝ 修飾 M（前置詞句）。幹からは外します。'},
+          {r:'m',t:'last summer',g:'「去年の夏」＝ 修飾 M（副詞句）。幹からは外します。'}
+        ]},
+      hard:{ no:'第4文型', code:'SVOO', desc:'「S＋V＋O＋O」。人に物を。O①≠O②。',
+        jp:'祖母は、自分のまわりに集まった子どもたちに、魅力的な古い物語を話してくれた。',
+        tip:'O①（人）が関係節でふくらんでも、核は told the children a story。第4文型 SVOO。',
+        chunks:[
+          {r:'s',t:'My grandmother',g:'「祖母は」＝ 主語 S。'},
+          {r:'v',t:'told',g:'「〜に…を話した」＝ 動詞 V。tell は<b>O を 2 つ</b>取る動詞（人＋物）です。'},
+          {r:'o',subK:'O①',subJp:'目的語（人）',t:'the children',g:'「子どもたちに」＝ 目的語① O（人）の核。'},
+          {r:'m',t:'who had gathered around her',g:'「彼女のまわりに集まった」＝ <b>関係代名詞節</b>。children を説明する修飾 M（枝）。幹からは外します。'},
+          {r:'o',subK:'O②',subJp:'目的語（物）',t:'a fascinating old story',g:'「魅力的な古い物語を」＝ 目的語② O（物）。'}
+        ]}
+    },
+    '5':{
+      easy:{ no:'第5文型', code:'SVOC', desc:'「S＋V＋O＋C」。C は目的語とイコール（O＝C）。',
+        jp:'その思いがけない知らせは、部屋にいた全員を完全に黙り込ませた。',
+        tip:'make の後ろが「O（everyone）＋ C（silent）」で O＝C の関係 → 第5文型 SVOC。',
+        chunks:[
+          {r:'s',t:'The unexpected news',g:'「その思いがけない知らせは」＝ 主語 S。'},
+          {r:'v',t:'made',g:'「〜を…にした」＝ 動詞 V。make O C で「O を C にする」。'},
+          {r:'o',t:'everyone',g:'「全員を」＝ 目的語 O の核。'},
+          {r:'m',t:'in the room',g:'「部屋にいる」＝ 修飾 M。everyone を説明します。幹からは外します。'},
+          {r:'m',t:'completely',g:'「完全に」＝ 修飾 M（副詞）。補語 silent を強めます。幹からは外します。'},
+          {r:'c',t:'silent',g:'「静かな」＝ 補語 C。everyone ＝ silent（全員が静かになった）。<b>O とイコール</b>なので C です。'}
+        ]},
+      hard:{ no:'第5文型', code:'SVOC', desc:'「S＋V＋O＋C」。C は目的語とイコール（O＝C）。',
+        jp:'教授が講義で言ったことは、多くの学生に進路を考え直させた。',
+        tip:'使役 make の C は原形。many students が reconsider する（O＝C）→ 第5文型 SVOC。主語は What 節まるごと。',
+        chunks:[
+          {r:'s',t:'What the professor said',g:'「教授が言ったことは」＝ 主語 S。What で始まる<b>名詞節がまるごと主語</b>です。'},
+          {r:'m',t:'in the lecture',g:'「講義で」＝ 修飾 M（said を説明）。幹からは外します。'},
+          {r:'v',t:'made',g:'「〜に…させた」＝ 動詞 V。<b>使役</b>の make O C。'},
+          {r:'o',t:'many students',g:'「多くの学生に」＝ 目的語 O。'},
+          {r:'c',t:'reconsider their career plans',g:'「進路を考え直させる」＝ 補語 C（<b>原形不定詞</b>）。many students が reconsider する関係（<b>O＝C</b>）。'}
+        ]}
+    }
+  };
+
+  const CORECLS = {s:'role-s',v:'role-v',o:'role-o',c:'role-c'};
+  const CODEMAP = {S:'l-s',V:'l-v',O:'l-o',C:'l-c'};
+
+  const sline   = document.getElementById('sent');
+  const chip    = document.getElementById('chip');
+  const gloss   = document.getElementById('gloss');
+  const patNo   = document.getElementById('patNo');
+  const patCode = document.getElementById('patCode');
+  const patDesc = document.getElementById('patDesc');
+  const skelBody= document.getElementById('skelBody');
+  const skelNote= document.getElementById('skelNote');
+  const tipBox  = document.getElementById('tip');
+  const bTrunk  = document.getElementById('bTrunk');
+  const bAll    = document.getElementById('bAll');
+  const patBtns = document.getElementById('patBtns');
+  const diffBtns= document.getElementById('diffBtns');
+  const baseJp  = document.getElementById('baseJp');
+
+  const cur = { pat:'1', diff:'easy', obj:null };
+  let chunkEls = [];
+
+  function renderCode(code){
+    return [...code].map(ch=>`<span class="l ${CODEMAP[ch]}">${ch}</span>`).join('');
+  }
+  function renderSkel(chunks){
+    const core = chunks.filter(c=>c.r!=='m');
+    const toks = core.map(c=>`<span class="tok ${CORECLS[c.r]}">${c.t}</span>`).join(' ');
+    return toks + '<span class="dot">.</span>';
+  }
+  function setActive(group, val, attr){
+    group.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset[attr]===val));
+  }
+  function applyMode(m){
+    const trunk = (m==='trunk');
+    sline.classList.toggle('trunkonly', trunk);
+    bTrunk.classList.toggle('on', trunk);
+    bAll.classList.toggle('on', !trunk);
+  }
+  function select(i){
+    chunkEls.forEach((e,j)=>e.classList.toggle('selected', j===i));
+    const c = cur.obj.chunks[i];
+    const meta = ROLE[c.r];
+    const k  = c.subK  || meta.k;
+    const jp = c.subJp || meta.jp;
+    chip.className = 'scopechip ' + meta.cls;
+    chip.innerHTML = `<b>${k}</b><span>${jp}</span>`;
+    gloss.innerHTML = c.g;
+  }
+  function loadSentence(){
+    const obj = SENT[cur.pat][cur.diff];
+    cur.obj = obj;
+    baseJp.textContent = obj.jp;
+    patNo.textContent  = obj.no;
+    patCode.innerHTML  = renderCode(obj.code);
+    patDesc.textContent= obj.desc;
+
+    sline.innerHTML = '';
+    chunkEls = [];
+    obj.chunks.forEach((c,i)=>{
+      if(i>0) sline.appendChild(document.createTextNode(' '));
+      const sp = document.createElement('span');
+      sp.className = 'chunk ' + ROLE[c.r].cls;
+      sp.textContent = c.t;
+      sp.setAttribute('role','button');
+      sp.tabIndex = 0;
+      sp.addEventListener('click', ()=>select(i));
+      sp.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(i); } });
+      sline.appendChild(sp);
+      chunkEls.push(sp);
+    });
+    sline.appendChild(document.createTextNode('.'));
+
+    skelBody.innerHTML = renderSkel(obj.chunks);
+    skelNote.innerHTML = `修飾（M）を外すと、幹はこれだけ。 → <b>${obj.no}　${obj.code}</b>`;
+    tipBox.innerHTML   = obj.tip;
+
+    applyMode('all');
+    const vIdx = obj.chunks.findIndex(c=>c.r==='v');
+    select(vIdx>=0 ? vIdx : 0);
+  }
+
+  patBtns.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{ cur.pat=b.dataset.pat; setActive(patBtns,cur.pat,'pat'); loadSentence(); });
+  });
+  diffBtns.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{ cur.diff=b.dataset.diff; setActive(diffBtns,cur.diff,'diff'); loadSentence(); });
+  });
+  bTrunk.addEventListener('click', ()=>applyMode('trunk'));
+  bAll.addEventListener('click',   ()=>applyMode('all'));
+
+  setActive(patBtns, cur.pat, 'pat');
+  setActive(diffBtns, cur.diff, 'diff');
+  loadSentence();
+</script>
+</body>
+</html>

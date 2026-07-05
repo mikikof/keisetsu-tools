@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>時制・完了形マスター — 時間軸のどこを・どの幅で見る？</title>
+<style>
+  :root{
+    --ink:#2b2f3a; --sub:#87909f; --line:#eceef5;
+    --indigo:#6d5efc; --indigo2:#9166ff; --indigo-ink:#5b4ae8; --indigo-bg:#f1eefe;
+    --rose:#f8577d; --rose-ink:#e23f6d; --rose-bg:#ffe6ee;
+    --teal:#12c7b0; --teal-ink:#0d9986; --teal-bg:#c9f2e9;
+    --amber:#fbbf24;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#edf4ff 0%,#ffffff 54%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(20px,3vw,30px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--indigo-ink);background:var(--indigo-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";font-size:13px;}
+  h1{font-size:clamp(24px,4.7vw,42px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--rose),#ff7aa0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:660px;}
+  .sub b{color:var(--ink);}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:392px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(93,74,232,.09);}
+
+  .base{font-size:clamp(13px,1.7vw,14.5px);color:var(--sub);margin:0 0 16px;padding-bottom:15px;
+    border-bottom:1px dashed #e7e3f6;}
+  .base b{color:var(--ink);font-weight:700;}
+  .legend{display:flex;flex-wrap:wrap;gap:9px 14px;margin-top:12px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;color:var(--ink);font-weight:700;font-size:12.5px;}
+  .legend i{display:inline-block;flex:none;}
+  .lg-now{width:11px;height:11px;border-radius:50%;background:var(--indigo-ink);}
+  .lg-band{width:22px;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--teal),#0ea896);}
+  .lg-ref{width:9px;height:9px;background:var(--rose-ink);transform:rotate(45deg);}
+  .lg-pt{width:11px;height:11px;border-radius:50%;background:var(--teal-ink);}
+
+  .groups{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px;}
+  .gtab{border:1.6px solid var(--line);background:#fff;color:var(--sub);font-family:inherit;
+    font-size:13px;font-weight:800;padding:7px 13px;border-radius:999px;cursor:pointer;
+    transition:border-color .14s,color .14s,background .14s;}
+  .gtab:hover{border-color:#d9d2fb;color:var(--ink);}
+  .gtab.on{background:var(--indigo-bg);border-color:transparent;color:var(--indigo-ink);}
+
+  .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px;}
+  @media(min-width:860px){ .btns{grid-template-columns:1fr;} }
+  @media(max-width:859px){ .btns{grid-template-columns:1fr 1fr;} }
+  .btns button{display:flex;flex-direction:column;justify-content:center;min-height:60px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:16px;font-weight:800;border-radius:15px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;padding:8px 8px;text-align:left;}
+  .btns button small{font-weight:600;color:var(--sub);font-size:11.5px;margin-top:3px;line-height:1.35;}
+  .btns button:hover{border-color:#d9d2fb;}
+  .btns button:active{transform:scale(.97);}
+  .btns button.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.34);}
+  .btns button.on small{color:#e9e4ff;}
+
+  .stage{display:flex;flex-direction:column;}
+  .sentence{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:600;
+    font-size:clamp(22px,4.1vw,46px);line-height:1.4;text-align:center;letter-spacing:.004em;
+    padding:clamp(22px,4vw,46px) clamp(14px,2.5vw,30px);
+    background:linear-gradient(160deg,#f2f8ff,#ebf3ff);border-radius:18px;color:#333846;
+    display:grid;place-items:center;gap:5px;flex:1;min-height:clamp(120px,19vw,220px);}
+  .sentence.pair{font-size:clamp(17px,3vw,30px);gap:7px;
+    padding:clamp(18px,3.4vw,34px) clamp(12px,2.2vw,26px);}
+  .sline{width:100%;overflow-wrap:break-word;}
+  .sentence .only{color:var(--rose-ink);background:var(--rose-bg);border-radius:10px;
+    padding:2px 11px;font-weight:700;}
+  .sentence .focus{color:var(--teal-ink);font-weight:700;
+    box-shadow:inset 0 -0.4em 0 var(--teal-bg);border-radius:3px;padding:0 2px;}
+  .sentence .refpt{color:var(--rose-ink);font-weight:700;
+    box-shadow:inset 0 -0.4em 0 var(--rose-bg);border-radius:3px;padding:0 2px;}
+  .plab{font-size:clamp(11px,1.7vw,13px);font-weight:800;letter-spacing:.02em;line-height:1.3;}
+  .plab.pa{color:var(--rose-ink);}
+  .plab.pb{color:var(--teal-ink);}
+  .pdiv{color:#b7bccb;font-size:clamp(15px,2.2vw,20px);font-weight:800;margin:1px 0;}
+
+  .answer{margin-top:clamp(16px,2.4vw,22px);}
+  .scopechip{display:inline-flex;align-items:center;gap:9px;background:var(--teal-bg);
+    color:var(--teal-ink);font-weight:800;font-size:clamp(13.5px,1.8vw,16px);
+    padding:9px 16px;border-radius:999px;margin:0 0 13px;}
+  .scopechip span{color:var(--sub);font-weight:600;flex:none;}
+  .gloss{font-size:clamp(15.5px,2.1vw,20px);line-height:1.72;font-weight:500;}
+  .gloss b{color:var(--rose-ink);font-weight:700;}
+  .note{font-size:clamp(12px,1.5vw,13.5px);color:var(--sub);margin-top:11px;line-height:1.64;}
+  .note b{color:var(--ink);font-weight:700;}
+  .note .chk{color:var(--rose-ink);font-weight:800;}
+
+  .insight{grid-column:1/-1;background:linear-gradient(135deg,#eef5ff,#f6faff);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.74;color:#4a4560;font-weight:500;}
+  .insight b{color:var(--indigo-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#a9afbe;text-align:center;line-height:1.6;}
+
+  .timeline{margin-top:clamp(16px,2.6vw,22px);
+    background:linear-gradient(160deg,#f6fbff,#edf5ff);border:1px solid #e7eefb;
+    border-radius:16px;padding:clamp(14px,2.5vw,22px) clamp(8px,1.8vw,18px) clamp(10px,1.8vw,16px);}
+  .timeline svg{width:100%;height:auto;display:block;overflow:visible;}
+  @keyframes tlflow{to{stroke-dashoffset:-24;}}
+  @keyframes tlpulse{0%,100%{opacity:.66;}50%{opacity:1;}}
+  .tl-flow{animation:tlflow 1.1s linear infinite;}
+  .tl-pulse{animation:tlpulse 1.6s ease-in-out infinite;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">時制・完了形マスター</span>
+    <h1>時制は、時間軸の<span class="em">どこを・どの幅で</span>見るか</h1>
+    <p class="sub">動詞のかたちは、<b>時間軸のどこを・どのくらいの幅で見るか</b>のスイッチです。左でグループと形を選び、下のタイムラインで“見ている範囲”を確かめてください。</p>
+  </header>
+
+  <div class="app">
+    <section class="panel">
+      <p class="base"><b>使い方</b>：グループ → 形 を選ぶと、下の帯が「見ている範囲」を示します。
+        <span class="legend">
+          <span><i class="lg-now"></i>今</span>
+          <span><i class="lg-band"></i>見ている範囲</span>
+          <span><i class="lg-ref"></i>基準点</span>
+          <span><i class="lg-pt"></i>出来事</span>
+        </span>
+      </p>
+      <div class="groups" id="groups"></div>
+      <div class="btns" id="btns"></div>
+    </section>
+
+    <section class="stage">
+      <div class="sentence" id="sentbox"></div>
+      <div class="timeline" id="timeline"></div>
+      <div class="answer">
+        <div class="scopechip"><span>見ている範囲 →</span> <b id="scope"></b></div>
+        <div class="gloss" id="gloss"></div>
+        <div class="note" id="note"></div>
+      </div>
+    </section>
+
+    <div class="insight">
+      <span class="h">気づき</span>
+      <div>時制は訳語で覚えるものではありません。<b>時間軸のどこを・どの幅で見るか</b>を選ぶ操作です。とくに<b>完了形</b>は、いつも<b>「今（または基準点）とのつながり」</b>を表します。だから「yesterday」のような過去の一点とは相性が悪いのです。</div>
+    </div>
+  </div>
+
+  <p class="foot">螢雪時代「Study Hack」試作 ／ 完成文を時間軸の上で“動かして”つかむ ／ 英文は英語科監修・公開前に最終確認</p>
+</div>
+
+<script>
+  const GEO={PAST:46,NOW:400,END:560,AX:118,TOP:102,BH:32,BOT:134,RX:15,LY:162};
+
+  function defs(){
+    return '<defs>'
+     +'<linearGradient id="tealg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#18cdb6"/><stop offset="1" stop-color="#0ea896"/></linearGradient>'
+     +'<linearGradient id="roseg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fb6f92"/><stop offset="1" stop-color="#ef4f79"/></linearGradient>'
+     +'<pattern id="hatch" width="10" height="10" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="10" stroke="#ffffff" stroke-width="3" opacity=".4"/></pattern>'
+     +'</defs>';
+  }
+  function baseline(){
+    const G=GEO;
+    return '<line x1="'+G.PAST+'" y1="'+G.AX+'" x2="'+G.END+'" y2="'+G.AX+'" stroke="#c3ccdb" stroke-width="2.4"/>'
+     +'<path d="M'+G.END+' '+(G.AX-6)+' L'+(G.END+12)+' '+G.AX+' L'+G.END+' '+(G.AX+6)+' Z" fill="#c3ccdb"/>'
+     +'<text x="'+(G.PAST+2)+'" y="'+G.LY+'" text-anchor="start" fill="#9aa2b2" font-size="14" font-weight="700">過去</text>'
+     +'<text x="500" y="'+G.LY+'" text-anchor="middle" fill="#bcc3d0" font-size="13" font-weight="700">未来</text>';
+  }
+  function bandRect(x1,x2,f){
+    const G=GEO; const fill=f==='rose'?'url(#roseg)':f==='light'?'#d3efe8':'url(#tealg)';
+    const op=f==='light'?' opacity=".7"':'';
+    return '<rect x="'+x1+'" y="'+G.TOP+'" width="'+(x2-x1)+'" height="'+G.BH+'" rx="'+G.RX+'" fill="'+fill+'"'+op+'/>';
+  }
+  function hatchOverlay(x1,x2){
+    const G=GEO;
+    return '<rect x="'+x1+'" y="'+G.TOP+'" width="'+(x2-x1)+'" height="'+G.BH+'" rx="'+G.RX+'" fill="url(#hatch)"/>'
+     +'<line x1="'+(x1+12)+'" y1="'+G.AX+'" x2="'+(x2-12)+'" y2="'+G.AX+'" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 11" opacity=".85" class="tl-flow"/>';
+  }
+  function durLabel(x1,x2,t,color,cx){
+    const G=GEO; const c=color||'#ffffff'; const x=(cx!=null)?cx:((x1+x2)/2);
+    return '<text x="'+x+'" y="'+(G.AX+5)+'" text-anchor="middle" fill="'+c+'" font-size="15" font-weight="800" letter-spacing=".03em">'+t+'</text>';
+  }
+  function capLine(x,color){
+    const G=GEO; const c=color==='rose'?'#e23f6d':'#0b9685';
+    return '<line x1="'+x+'" y1="'+(G.TOP-5)+'" x2="'+x+'" y2="'+(G.BOT+5)+'" stroke="'+c+'" stroke-width="3" stroke-linecap="round"/>';
+  }
+  function dashLine(x1,x2,label,color){
+    const G=GEO; const c=color||'#a7afbf';
+    let s='<line x1="'+x1+'" y1="'+G.AX+'" x2="'+x2+'" y2="'+G.AX+'" stroke="'+c+'" stroke-width="2" stroke-dasharray="2 6"/>';
+    if(label) s+='<text x="'+((x1+x2)/2)+'" y="'+(G.AX-12)+'" text-anchor="middle" fill="'+c+'" font-size="11.5" font-weight="700">'+label+'</text>';
+    return s;
+  }
+  function arrowLine(x1,x2,color,label){
+    const G=GEO; const c=color==='rose'?'#e23f6d':'#0d9986';
+    let s='<line x1="'+x1+'" y1="'+G.AX+'" x2="'+(x2-9)+'" y2="'+G.AX+'" stroke="'+c+'" stroke-width="2.4" stroke-dasharray="5 4"/>'
+     +'<path d="M'+(x2-9)+' '+(G.AX-5)+' L'+x2+' '+G.AX+' L'+(x2-9)+' '+(G.AX+5)+' Z" fill="'+c+'"/>';
+    if(label) s+='<text x="'+((x1+x2)/2)+'" y="'+(G.AX-12)+'" text-anchor="middle" fill="'+c+'" font-size="12" font-weight="800">'+label+'</text>';
+    return s;
+  }
+  function eventPoint(x,color,label,ly){
+    const G=GEO; const c=color==='rose'?'#e23f6d':'#0d9986'; ly=ly||60;
+    return '<line x1="'+x+'" y1="'+(ly+8)+'" x2="'+x+'" y2="'+G.AX+'" stroke="'+c+'" stroke-width="2.2"/>'
+     +'<circle cx="'+x+'" cy="'+G.AX+'" r="5" fill="'+c+'"/>'
+     +'<text x="'+x+'" y="'+ly+'" text-anchor="middle" fill="'+c+'" font-size="12.5" font-weight="800">'+label+'</text>';
+  }
+  function refMarker(x,label){
+    const G=GEO;
+    return '<line x1="'+x+'" y1="72" x2="'+x+'" y2="150" stroke="#e23f6d" stroke-width="2.2" stroke-dasharray="4 4"/>'
+     +'<rect x="'+(x-5)+'" y="'+(G.AX-5)+'" width="10" height="10" fill="#e23f6d" transform="rotate(45 '+x+' '+G.AX+')"/>'
+     +'<text x="'+x+'" y="62" text-anchor="middle" fill="#e23f6d" font-size="12.5" font-weight="800">'+label+'</text>';
+  }
+  function nowMarker(label,note){
+    const G=GEO; label=label||'今';
+    let s='<line x1="'+G.NOW+'" y1="64" x2="'+G.NOW+'" y2="148" stroke="#5b4ae8" stroke-width="2.6"/>'
+     +'<circle cx="'+G.NOW+'" cy="'+G.AX+'" r="4.6" fill="#5b4ae8"/>'
+     +'<text x="'+G.NOW+'" y="'+G.LY+'" text-anchor="middle" fill="#5b4ae8" font-size="15" font-weight="800">'+label+'</text>';
+    if(note) s+='<text x="'+(G.NOW+13)+'" y="'+(G.AX-8)+'" fill="#0d9986" font-size="12.5" font-weight="800">'+note+'</text>';
+    return s;
+  }
+  function progTag(x,text,color){
+    const c=color||'#fbbf24';
+    const w=Math.max(58,text.length*13+16), h=23, y=74;
+    return '<g class="tl-pulse"><rect x="'+(x-w/2)+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="11" fill="'+c+'"/>'
+     +'<path d="M'+(x-5)+' '+(y+h)+' L'+(x+5)+' '+(y+h)+' L'+x+' '+(y+h+6)+' Z" fill="'+c+'"/>'
+     +'<text x="'+x+'" y="'+(y+16)+'" text-anchor="middle" fill="#6b5200" font-size="12.5" font-weight="800">'+text+'</text></g>';
+  }
+  function futureShade(){
+    const G=GEO;
+    return '<rect x="'+G.NOW+'" y="82" width="'+(G.END-G.NOW)+'" height="74" fill="#e9eeff" opacity=".6"/>';
+  }
+  function svgWrap(inner,h){
+    return '<svg viewBox="0 0 600 '+(h||190)+'" role="img" aria-label="時制のタイムライン図">'+inner+'</svg>';
+  }
+
+  function buildSVG(tl){
+    let s=defs();
+    if(tl.future) s+=futureShade();
+    s+=baseline();
+    (tl.bands||[]).forEach(b=>{
+      s+=bandRect(b.x1,b.x2,b.fill||'teal');
+      if(b.hatch) s+=hatchOverlay(b.x1,b.x2);
+      if(b.dur) s+=durLabel(b.x1,b.x2,b.dur,b.durColor,b.durCx);
+    });
+    (tl.dashes||[]).forEach(d=>s+=dashLine(d.x1,d.x2,d.label,d.color));
+    (tl.arrows||[]).forEach(a=>s+=arrowLine(a.x1,a.x2,a.color,a.label));
+    (tl.caps||[]).forEach(c=>s+=capLine(c.x,c.color));
+    (tl.points||[]).forEach(p=>s+=eventPoint(p.x,p.color,p.label,p.ly));
+    if(tl.ref) s+=refMarker(tl.ref.x,tl.ref.label);
+    s+=nowMarker(tl.nowLabel,tl.nowNote);
+    (tl.tags||[]).forEach(t=>s+=progTag(t.x,t.text,t.color));
+    return svgWrap(s,190);
+  }
+
+  /* ---- contrast pair : two stacked lanes ---- */
+  function pairTagBox(cx,topY,text){
+    const w=Math.max(64,text.length*12+16),h=20;
+    return '<rect x="'+(cx-w/2)+'" y="'+(topY-h)+'" width="'+w+'" height="'+h+'" rx="10" fill="#fff5da" stroke="#f0c24e"/>'
+     +'<text x="'+cx+'" y="'+(topY-h/2+4)+'" text-anchor="middle" fill="#8a6a00" font-size="11.5" font-weight="800">'+text+'</text>';
+  }
+  function lane(y,sp){
+    const PAST=46,NOW=400,END=560,BH=30,RX=14; const top=y-BH/2;
+    const lc=sp.color==='rose'?'#e23f6d':'#0d9986';
+    let s='<line x1="'+PAST+'" y1="'+y+'" x2="'+END+'" y2="'+y+'" stroke="#c3ccdb" stroke-width="2"/>'
+     +'<path d="M'+END+' '+(y-5)+' L'+(END+11)+' '+y+' L'+END+' '+(y+5)+' Z" fill="#c3ccdb"/>'
+     +'<text x="'+PAST+'" y="'+(y-26)+'" fill="'+lc+'" font-size="13.5" font-weight="800">'+sp.label+'</text>';
+    if(sp.band){
+      const b=sp.band, fill=sp.color==='rose'?'url(#roseg)':'url(#tealg)';
+      s+='<rect x="'+b.x1+'" y="'+top+'" width="'+(b.x2-b.x1)+'" height="'+BH+'" rx="'+RX+'" fill="'+fill+'"/>';
+      if(b.hatch) s+='<rect x="'+b.x1+'" y="'+top+'" width="'+(b.x2-b.x1)+'" height="'+BH+'" rx="'+RX+'" fill="url(#hatch)"/>'
+        +'<line x1="'+(b.x1+10)+'" y1="'+y+'" x2="'+(b.x2-10)+'" y2="'+y+'" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 11" opacity=".85" class="tl-flow"/>';
+      if(b.dur) s+='<text x="'+((b.x1+b.x2)/2)+'" y="'+(y+5)+'" text-anchor="middle" fill="#fff" font-size="14.5" font-weight="800">'+b.dur+'</text>';
+    }
+    if(sp.notReach){
+      const fx=sp.point?sp.point.x:(sp.band?sp.band.x2:PAST);
+      s+='<line x1="'+fx+'" y1="'+y+'" x2="'+NOW+'" y2="'+y+'" stroke="#c0c6d2" stroke-width="1.8" stroke-dasharray="2 6"/>';
+      s+='<text x="'+((fx+NOW)/2)+'" y="'+(y-9)+'" text-anchor="middle" fill="#aeb5c2" font-size="11" font-weight="700">今のことは不問</text>';
+    }
+    if(sp.arrowToNow){
+      const fx=sp.point?sp.point.x:(sp.band?sp.band.x2:NOW);
+      s+='<line x1="'+fx+'" y1="'+y+'" x2="'+(NOW-9)+'" y2="'+y+'" stroke="'+lc+'" stroke-width="2.2" stroke-dasharray="5 4"/>';
+      s+='<path d="M'+(NOW-9)+' '+(y-5)+' L'+NOW+' '+y+' L'+(NOW-9)+' '+(y+5)+' Z" fill="'+lc+'"/>';
+    }
+    if(sp.point){
+      const p=sp.point;
+      s+='<line x1="'+p.x+'" y1="'+(y-24)+'" x2="'+p.x+'" y2="'+y+'" stroke="'+lc+'" stroke-width="2"/>';
+      s+='<circle cx="'+p.x+'" cy="'+y+'" r="5" fill="'+lc+'"/>';
+      s+='<text x="'+p.x+'" y="'+(y-28)+'" text-anchor="middle" fill="'+lc+'" font-size="12" font-weight="800">'+p.label+'</text>';
+    }
+    s+='<line x1="'+NOW+'" y1="'+(y-20)+'" x2="'+NOW+'" y2="'+(y+20)+'" stroke="#5b4ae8" stroke-width="2.2"/>';
+    s+='<circle cx="'+NOW+'" cy="'+y+'" r="4" fill="#5b4ae8"/>';
+    s+='<text x="'+NOW+'" y="'+(y+36)+'" text-anchor="middle" fill="#5b4ae8" font-size="12.5" font-weight="800">今</text>';
+    if(sp.endLabel) s+='<text x="'+(NOW+13)+'" y="'+(y+4)+'" fill="'+lc+'" font-size="12" font-weight="800">'+sp.endLabel+'</text>';
+    if(sp.tag) s+=pairTagBox(sp.tag.x, top-6, sp.tag.text);
+    return s;
+  }
+  function buildPairSVG(cfg){
+    return '<svg viewBox="0 0 600 250" role="img" aria-label="対比タイムライン図">'
+      +defs()+lane(84,cfg.a)+lane(196,cfg.b)+'</svg>';
+  }
+
+  /* ================= CONTENT ================= */
+  const GROUPS=[
+    { tab:'単純形', items:[
+      { btn:'現在形', hint:'今を含む習慣・状態',
+        sent:'I <span class="focus">live</span> in Tokyo.',
+        scope:'今を含む、幅のある“いつものこと”',
+        gloss:'東京に住んでいる。<b>習慣や状態</b>として、今を含めて広く成り立つ。「今この瞬間」に限定しない。',
+        note:'現在進行形（I am living…）と違い、現在形は「今この瞬間だけ」ではなく<b>いつも成り立つ</b>ことを表します。一般的な事実（The sun rises in the east.）にも使います。',
+        tl:{ bands:[{x1:120,x2:520,fill:'light',dur:'いつも成り立つ',durColor:'#0d9986',durCx:250}] } },
+      { btn:'過去形', hint:'過去で完結',
+        sent:'I <span class="focus">lived</span> in Tokyo for three years.',
+        scope:'過去で閉じた帯（今には届かない）',
+        gloss:'3年間、東京に住んでいた。その3年間は<b>過去に完結</b>していて、今の状態については何も述べていない。',
+        note:'<span class="chk">※要確認</span>：「今は住んでいない」は文脈から生まれる<b>含み</b>で、過去形そのものが必ず言い切るわけではありません。',
+        tl:{ bands:[{x1:150,x2:300,fill:'teal',dur:'3年間'}], dashes:[{x1:300,x2:400,label:'今には届かない'}], caps:[{x:300,color:'teal'}] } },
+      { btn:'未来形', hint:'これから先のこと',
+        sent:'I <span class="focus">will live</span> in Tokyo next year.',
+        scope:'「今」より先（未来）の一点',
+        gloss:'来年、東京に住む（つもりだ）。<b>今より先</b>のことを指す。',
+        note:'will は「予測・意志」。すでに決めている予定は be going to や現在進行形でも表せます。',
+        tl:{ future:true, dashes:[{x1:400,x2:472,color:'#b9c0cd'}], points:[{x:480,color:'teal',label:'来年'}] } }
+    ]},
+
+    { tab:'進行形', items:[
+      { btn:'現在進行', hint:'今まさに〜中',
+        sent:'I <span class="focus">am studying</span> English now.',
+        scope:'「今」に重なる、進行中のひと幅',
+        gloss:'今、英語を勉強している<b>最中</b>。始まって終わっていない、その途中を「今」として見ている。',
+        note:'<span class="chk">※要確認</span>：know・like・want などの<b>状態動詞は原則、進行形にしません</b>（×I am knowing）。「今まさに」を出せるのは動作動詞です。',
+        tl:{ bands:[{x1:342,x2:452,fill:'teal',hatch:true,dur:'進行中',durCx:372}] } },
+      { btn:'過去進行', hint:'あの時〜していた',
+        sent:'I <span class="focus">was studying</span> English at nine.',
+        scope:'過去の一点に重なる、進行中のひと幅',
+        gloss:'9時に、英語を勉強していた。過去のある時点で<b>進行の途中</b>だったことを表す。',
+        note:'「9時に始めた」ではなく「9時には<b>もう続いていた</b>」。過去のある瞬間の“途中”を切り取ります。',
+        tl:{ bands:[{x1:205,x2:315,fill:'teal',hatch:true}], tags:[{x:260,text:'9時に進行中'}] } },
+      { btn:'未来進行', hint:'その時〜している',
+        sent:'I <span class="focus">will be studying</span> at nine tonight.',
+        scope:'未来の一点に重なる、進行中のひと幅',
+        gloss:'今夜9時には、勉強している<b>最中</b>だろう。未来のある時点で進行中だと表す。',
+        note:'「これから〜する」ではなく、未来のある時点で<b>ちょうど途中</b>。自然な成り行きの予定にも使います。',
+        tl:{ future:true, dashes:[{x1:400,x2:432,color:'#b9c0cd'}], bands:[{x1:432,x2:522,fill:'teal',hatch:true}], tags:[{x:477,text:'今夜9時に進行中'}] } }
+    ]},
+
+    { tab:'完了形〔4用法〕', items:[
+      { btn:'経験', hint:'〜したことがある',
+        sent:'I <span class="focus">have been</span> to Kyoto twice.',
+        scope:'過去に点在する経験を、今から振り返る',
+        gloss:'京都に<b>2回行ったことがある</b>。過去に点在する2回を、<b>今の時点から</b>「経験」として数えている。',
+        note:'<b>have been to</b> は「行ったことがある／行ってきた」。<b>have gone to</b> は「行ってしまって今ここにいない」。',
+        tl:{ points:[{x:150,color:'teal',label:'1回目'},{x:250,color:'teal',label:'2回目'}], dashes:[{x1:250,x2:400,label:'今までに'}] } },
+      { btn:'継続', hint:'ずっと〜している',
+        sent:'I <span class="focus">have known</span> her for ten years.',
+        scope:'過去から「今」まで、途切れず続く帯',
+        gloss:'10年前から今も、彼女を<b>ずっと知っている</b>。過去のある時点から<b>今までつながって</b>いる。',
+        note:'know は状態動詞なので、継続を<b>進行形にせず</b>現在完了で表します。→「対比ペア②」参照。',
+        tl:{ bands:[{x1:180,x2:400,fill:'teal',dur:'10年間',durCx:280}], caps:[{x:400,color:'teal'}] } },
+      { btn:'完了', hint:'ちょうど〜した',
+        sent:'I <span class="focus">have just finished</span> my homework.',
+        scope:'「今」にぴったり接する、完了した点',
+        gloss:'<b>ちょうど今</b>、宿題を終えたところ。動作が<b>今の直前で完了</b>し、その結果が今に及ぶ。',
+        note:'<b>just / already / yet</b>（ちょうど・もう・まだ）は、この完了用法の目印です。',
+        tl:{ bands:[{x1:330,x2:400,fill:'teal'}], tags:[{x:352,text:'ちょうど完了'}], caps:[{x:400,color:'teal'}] } },
+      { btn:'結果', hint:'〜して、今もその状態',
+        sent:'I <span class="focus">have lost</span> my wallet.',
+        scope:'過去の出来事＋今への影響（矢印）',
+        gloss:'財布を<b>なくした</b>。だから<b>今も手元にない</b>。過去の出来事が<b>今の状況</b>を生んでいる。',
+        note:'過去形 <b>I lost my wallet.</b> との違いは「対比ペア①」で確認できます。',
+        tl:{ points:[{x:200,color:'teal',label:'なくした'}], arrows:[{x1:200,x2:400,color:'teal',label:'その結果'}], nowNote:'今もない' } }
+    ]},
+
+    { tab:'完了進行', items:[
+      { btn:'現在完了進行', hint:'ずっと〜し続けている',
+        sent:'I <span class="focus">have been studying</span> English for three hours.',
+        scope:'過去→今の帯＋「続く動作」を強調',
+        gloss:'3時間、英語を<b>ずっと勉強し続けている</b>。今も進行中で、その<b>継続そのもの</b>を前面に出す。',
+        note:'継続の完了形に<b>進行形</b>を重ね、動作が「続いている」感じを強めます。状態動詞は原則この形にしません。',
+        tl:{ bands:[{x1:180,x2:400,fill:'teal',hatch:true,dur:'3時間',durCx:315}], tags:[{x:250,text:'ずっと勉強中'}], caps:[{x:400,color:'teal'}] } }
+    ]},
+
+    { tab:'過去完了', items:[
+      { btn:'過去完了', hint:'過去の基準点より前',
+        sent:'The train <span class="focus">had already left</span> when I <span class="refpt">arrived</span>.',
+        scope:'過去の基準点より、さらに前で閉じる',
+        gloss:'私が着いた時には、電車は<b>すでに出ていた</b>。「着いた」という<b>過去の基準点より前</b>に、出発が完了している。',
+        note:'過去の一点（基準点）を決め、それより<b>前</b>を指すのが過去完了。いわゆる“大過去”です。',
+        tl:{ points:[{x:200,color:'teal',label:'出発'}], dashes:[{x1:200,x2:310,label:'もう出た後'}], ref:{x:310,label:'着いた'} } },
+      { btn:'過去完了進行', hint:'基準点まで〜し続けた',
+        sent:'She <span class="focus">had been waiting</span> for an hour before the bus <span class="refpt">came</span>.',
+        scope:'過去の基準点まで続いた帯',
+        gloss:'バスが来る前、彼女は<b>1時間ずっと待っていた</b>。過去の基準点<b>までの継続</b>を、進行として表す。',
+        note:'「基準点<b>までに</b>どれだけ続いたか」を、進行として強調します。',
+        tl:{ bands:[{x1:190,x2:330,fill:'teal',hatch:true,dur:'1時間',durCx:255}], tags:[{x:248,text:'ずっと待つ'}], ref:{x:330,label:'バス到着'} } }
+    ]},
+
+    { tab:'未来完了', items:[
+      { btn:'未来完了', hint:'基準点までに完了',
+        sent:'I <span class="focus">will have finished</span> the report <span class="refpt">by noon</span>.',
+        scope:'未来の基準点に接して完了',
+        gloss:'正午までには、レポートを<b>終えているだろう</b>。<b>未来のある時点までに</b>動作が完了していると表す。',
+        note:'<b>by</b>「〜までに（完了）」と相性がよい形。<b>till / until</b>「〜までずっと」とは役割が違います。',
+        tl:{ future:true, bands:[{x1:405,x2:500,fill:'teal'}], tags:[{x:440,text:'正午までに完了'}], caps:[{x:500,color:'teal'}], ref:{x:500,label:'正午'} } },
+      { btn:'未来完了進行', hint:'基準点までずっと',
+        sent:'<span class="refpt">By next year</span>, I <span class="focus">will have been living</span> here for ten years.',
+        scope:'過去〜今〜未来の基準点まで続く帯',
+        gloss:'来年で、ここに<b>10年間住み続けている</b>ことになる。過去から未来の基準点<b>まで</b>の長い継続を表す。',
+        note:'<span class="chk">※要確認</span>：使う場面は限られます。標準的なのは <b>by〜 / for〜</b> と一緒に“継続の長さ”を言うときです。',
+        tl:{ future:true, bands:[{x1:180,x2:500,fill:'teal',hatch:true,dur:'10年間',durCx:290}], tags:[{x:290,text:'ずっと住み続ける'}], caps:[{x:500,color:'teal'}], ref:{x:500,label:'来年'} } }
+    ]},
+
+    { tab:'対比ペア', items:[
+      { pair:true, btn:'過去 vs 完了', hint:'「した」と「してしまった」',
+        labA:'過去形（過去の事実だけ）', sentA:'I <span class="focus">lost</span> my wallet <span class="only">yesterday</span>.',
+        labB:'現在完了・結果（今もない）', sentB:'I <span class="focus">have lost</span> my wallet.',
+        scope:'同じ出来事、見ている“幅”が違う',
+        gloss:'<b>lost</b>（過去形）は<b>昨日の事実</b>だけを述べ、今のことは言っていません。<b>have lost</b>（現在完了・結果）は、なくした結果として<b>今も財布がない</b>ところまで含みます。',
+        note:'だから <b>yesterday</b> のような“過去の一点”を表す語は、現在完了と一緒に使えません（×I have lost it yesterday）。現在完了はいつも「今」とつながっているからです。',
+        pairTL:{ a:{label:'過去形',color:'rose',point:{x:200,label:'なくした（昨日）'},notReach:true},
+                 b:{label:'現在完了・結果',color:'teal',point:{x:200,label:'なくした'},arrowToNow:true,endLabel:'今もない'} } },
+      { pair:true, btn:'継続の言い分け', hint:'状態動詞と動作動詞',
+        labA:'know＝状態動詞 → 現在完了', sentA:'I <span class="focus">have known</span> her for ten years.',
+        labB:'study＝動作動詞 → 現在完了進行', sentB:'I <span class="focus">have been studying</span> English for three hours.',
+        scope:'どちらも“今まで継続”／形の選び方が違う',
+        gloss:'どちらも<b>今まで続いている</b>点は同じです。ただし<b>状態動詞</b>(know, like, want…)は継続を<b>現在完了</b>で、<b>動作動詞</b>(study, wait, run…)は継続を<b>現在完了進行</b>で表すのが基本です。',
+        note:'<span class="chk">※要確認</span>：状態動詞は原則、進行形にしません（×I have been knowing）。動作動詞は完了進行で「続いている動作」を前面に出せます。',
+        pairTL:{ a:{label:'状態動詞',color:'teal',band:{x1:170,x2:400,dur:'10年間'},tag:{x:268,text:'状態→現在完了'}},
+                 b:{label:'動作動詞',color:'teal',band:{x1:210,x2:400,hatch:true,dur:'3時間'},tag:{x:308,text:'動作→現在完了進行'}} } }
+    ]}
+  ];
+
+  /* ================= RENDER ================= */
+  const groupsEl=document.getElementById('groups');
+  const btnsEl=document.getElementById('btns');
+  const box=document.getElementById('sentbox');
+  const $sc=document.getElementById('scope'), $g=document.getElementById('gloss'),
+        $n=document.getElementById('note'), $t=document.getElementById('timeline');
+  let gi=0, ii=0;
+
+  function renderItem(i){
+    ii=i;
+    const it=GROUPS[gi].items[i];
+    if(it.pair){
+      box.classList.add('pair');
+      box.innerHTML='<div class="plab pa">'+it.labA+'</div><div class="sline">'+it.sentA+'</div>'
+        +'<div class="pdiv">⇔</div>'
+        +'<div class="plab pb">'+it.labB+'</div><div class="sline">'+it.sentB+'</div>';
+      $t.innerHTML=buildPairSVG(it.pairTL);
+    } else {
+      box.classList.remove('pair');
+      box.innerHTML='<div class="sline">'+it.sent+'</div>';
+      $t.innerHTML=buildSVG(it.tl);
+    }
+    $sc.textContent=it.scope;
+    $g.innerHTML=it.gloss;
+    $n.innerHTML=it.note||'';
+    $n.style.display=it.note?'block':'none';
+    [...btnsEl.children].forEach((b,j)=>b.classList.toggle('on',j===i));
+  }
+
+  function selectGroup(g){
+    gi=g;
+    btnsEl.innerHTML='';
+    GROUPS[g].items.forEach((it,i)=>{
+      const b=document.createElement('button');
+      b.innerHTML=it.btn+'<small>'+it.hint+'</small>';
+      b.onclick=()=>renderItem(i);
+      btnsEl.appendChild(b);
+    });
+    [...groupsEl.children].forEach((t,j)=>t.classList.toggle('on',j===g));
+    renderItem(0);
+  }
+
+  GROUPS.forEach((grp,g)=>{
+    const t=document.createElement('button');
+    t.className='gtab';
+    t.textContent=grp.tab;
+    t.onclick=()=>selectGroup(g);
+    groupsEl.appendChild(t);
+  });
+  selectGroup(0);
+</script>
+</body>
+</html>

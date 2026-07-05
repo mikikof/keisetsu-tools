@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>冠詞シミュレーター — a / the / 無冠詞</title>
+<style>
+  :root{
+    --ink:#2b2f3a; --sub:#87909f; --line:#eceef5;
+    --indigo:#6d5efc; --indigo2:#9166ff; --indigo-ink:#5b4ae8; --indigo-bg:#f1eefe;
+    --rose:#f8577d; --rose-ink:#e23f6d; --rose-bg:#ffe6ee;
+    --teal:#12c7b0; --teal-ink:#0d9986; --teal-bg:#c9f2e9;
+    --amber:#f0a91c; --amber-ink:#9a5a08; --amber-bg:#fdf3d6;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;overflow-x:hidden;}
+  body{color:var(--ink);font-weight:500;line-height:1.7;
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",system-ui,sans-serif;
+    background:linear-gradient(180deg,#edf4ff 0%,#ffffff 54%) no-repeat,#fff;
+    background-attachment:fixed;}
+  .shell{max-width:1140px;margin:0 auto;padding:clamp(22px,4vw,44px) clamp(16px,3.5vw,40px) 56px;}
+
+  header{margin:0 0 clamp(20px,3vw,30px);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;
+    color:var(--indigo-ink);background:var(--indigo-bg);padding:7px 15px;border-radius:999px;}
+  .eyebrow::before{content:"✨";font-size:13px;}
+  h1{font-size:clamp(25px,5vw,44px);line-height:1.28;margin:15px 0 8px;font-weight:800;letter-spacing:.01em;}
+  h1 .em{background:linear-gradient(120deg,var(--rose),#ff7aa0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--sub);font-size:clamp(14px,2.4vw,17px);margin:0;max-width:660px;}
+  .sub b{color:var(--ink);}
+
+  .app{display:grid;gap:clamp(16px,2.4vw,26px);align-items:start;}
+  @media(min-width:860px){ .app{grid-template-columns:390px 1fr;} }
+
+  .panel,.stage{background:#fff;border:1px solid var(--line);border-radius:22px;
+    padding:clamp(18px,2.6vw,26px);box-shadow:0 12px 34px rgba(93,74,232,.09);}
+
+  /* ---- category tabs ---- */
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 15px;}
+  .tab{border:1.5px solid var(--line);background:#fff;color:var(--sub);
+    font-family:inherit;font-size:12.5px;font-weight:800;padding:8px 12px;border-radius:999px;
+    cursor:pointer;white-space:nowrap;transition:transform .12s,border-color .14s,color .14s,box-shadow .14s;}
+  .tab:hover{border-color:#d9d2fb;color:var(--ink);}
+  .tab:active{transform:scale(.96);}
+  .tab.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));border-color:transparent;
+    color:#fff;box-shadow:0 6px 16px rgba(109,94,252,.3);}
+
+  .grouptag{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;
+    color:var(--indigo-ink);margin:0 0 14px;line-height:1.5;}
+  .grouptag::before{content:"▸";color:var(--indigo2);font-weight:900;}
+
+  .btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px;}
+  @media(min-width:860px){ .btns{grid-template-columns:1fr 1fr;} }
+  .btns button{display:flex;flex-direction:column;justify-content:center;min-height:58px;
+    border:1.7px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:15.5px;font-weight:800;border-radius:15px;cursor:pointer;
+    transition:transform .12s,box-shadow .14s,border-color .14s;padding:8px 8px;text-align:center;}
+  .btns button small{font-weight:600;color:var(--sub);font-size:11.5px;margin-top:2px;}
+  .btns button:hover{border-color:#d9d2fb;}
+  .btns button:active{transform:scale(.97);}
+  .btns button.on{background:linear-gradient(135deg,var(--indigo),var(--indigo2));
+    border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(109,94,252,.34);}
+  .btns button.on small{color:#e9e4ff;}
+
+  .base{font-size:clamp(12.5px,1.6vw,14px);color:var(--sub);margin:16px 0 0;padding-top:15px;
+    border-top:1px dashed #e7e3f6;line-height:1.66;}
+  .base b{font-weight:700;}
+
+  .stage{display:flex;flex-direction:column;}
+  .sentence{font-family:system-ui,-apple-system,"Helvetica Neue",sans-serif;font-weight:600;
+    font-size:clamp(23px,4.4vw,48px);line-height:1.4;text-align:center;letter-spacing:.004em;
+    padding:clamp(24px,4.5vw,52px) clamp(14px,2.5vw,30px);
+    background:linear-gradient(160deg,#f2f8ff,#ebf3ff);border-radius:18px;color:#333846;
+    display:grid;place-items:center;flex:1;min-height:clamp(120px,20vw,240px);}
+  .sline{width:100%;overflow-wrap:break-word;}
+  .sentence .only{color:var(--rose-ink);background:var(--rose-bg);border-radius:10px;
+    padding:2px 12px;font-weight:700;white-space:nowrap;}
+  .sentence .focus{color:var(--teal-ink);font-weight:700;white-space:nowrap;
+    box-shadow:inset 0 -0.4em 0 var(--teal-bg);border-radius:3px;padding:0 2px;}
+
+  .answer{margin-top:clamp(16px,2.4vw,22px);}
+  .scopechip{display:inline-flex;align-items:center;gap:9px;background:var(--teal-bg);
+    color:var(--teal-ink);font-weight:800;font-size:clamp(14px,1.8vw,16px);
+    padding:9px 16px;border-radius:999px;margin:0 0 13px;}
+  .scopechip span{color:var(--sub);font-weight:600;}
+  .gloss{font-size:clamp(16px,2.1vw,20px);line-height:1.72;font-weight:500;}
+  .gloss b{color:var(--rose-ink);font-weight:700;}
+
+  .warn{margin-top:14px;font-size:clamp(12.5px,1.6vw,14px);line-height:1.66;
+    color:var(--amber-ink);background:var(--amber-bg);border:1px solid #f4dd9c;
+    border-radius:13px;padding:11px 14px;font-weight:600;}
+  .warn b{color:var(--amber-ink);font-weight:800;}
+  .warn::before{content:"※要確認";display:inline-block;background:var(--amber-ink);color:#fff;
+    font-weight:800;font-size:11px;letter-spacing:.02em;padding:3px 9px;border-radius:999px;
+    margin-right:9px;vertical-align:1px;}
+
+  .note{font-size:clamp(12px,1.5vw,13.5px);color:var(--sub);margin-top:12px;line-height:1.64;
+    padding-top:12px;border-top:1px dashed #eef0f6;}
+
+  .insight{grid-column:1/-1;background:linear-gradient(135deg,#eef5ff,#f6faff);
+    border-radius:20px;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);
+    font-size:clamp(13.5px,1.9vw,16px);line-height:1.74;color:#4a4560;font-weight:500;}
+  .insight b{color:var(--indigo-ink);font-weight:700;}
+  .insight .h{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:var(--ink);
+    font-size:clamp(14px,1.9vw,17px);margin-bottom:6px;}
+  .insight .h::before{content:"💡";}
+
+  .foot{margin:26px 4px 0;font-size:12px;color:#a9afbe;text-align:center;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">冠詞シミュレーター</span>
+    <h1><span class="em">a・the・無冠詞</span>、どれを選ぶ？</h1>
+    <p class="sub">同じ名詞でも、<b>相手が「どれのこと」か分かっているか</b>、そして<b>数えるのか・種類なのか</b>で冠詞は変わります。上のタブで場面を選び、ボタンで英文を切り替えてみてください。</p>
+  </header>
+
+  <div class="app">
+    <section class="panel">
+      <div class="tabs" id="tabs"></div>
+      <p class="grouptag" id="grouptag"></p>
+      <div class="btns" id="btns"></div>
+      <p class="base">色の対応：<b style="color:var(--rose-ink)">ピンク＝冠詞</b>／<b style="color:var(--teal-ink)">緑＝名詞</b>。冠詞が無い場合はピンクは出ません。</p>
+    </section>
+
+    <section class="stage">
+      <div class="sentence"><div class="sline" id="sent"></div></div>
+      <div class="answer">
+        <div class="scopechip"><span>冠詞 →</span> <b id="scope"></b></div>
+        <div class="gloss" id="gloss"></div>
+        <div class="warn" id="warn" style="display:none"></div>
+        <div class="note">※冠詞は例外や英米差が多い分野です。本ツールは代表的な考え方を示すもので、最終判断は文脈と辞書で確認してください。（著者要監修）</div>
+      </div>
+    </section>
+
+    <div class="insight">
+      <span class="h">気づき</span>
+      <div>冠詞は「話し手と聞き手が<b>“どれのことか”を共有しているか</b>」「<b>数えるのか・種類なのか</b>」を毎回示す仕組み。だから <b>the ひとつで意味まで変わります</b>（in hospital=入院中 ／ in the hospital=その病院内）。日本語に無いから難しいのではなく、共有情報を毎回明示するから難しいのです。</div>
+    </div>
+  </div>
+
+  <p class="foot">『螢雪時代』連載 試作 ／ 参考書の「完成した文」を、動かせる実験装置にする</p>
+</div>
+
+<script>
+  const GROUPS = [
+    {
+      tab:'基本',
+      tag:'初めて出す a → もう共有した the',
+      items:[
+        { btn:'初出', hint:'a・不特定',
+          sent:'I saw <span class="only">a</span> <span class="focus">dog</span>.',
+          scope:'a',
+          gloss:'初めて出す1匹。相手はどの犬か知らない → <b>a</b>。' },
+        { btn:'既出', hint:'the・特定',
+          sent:'<span class="only">The</span> <span class="focus">dog</span> was barking.',
+          scope:'the',
+          gloss:'さっき出した「その犬」。話し手も聞き手も分かる → <b>the</b>。' },
+      ]
+    },
+    {
+      tab:'総称の3通り',
+      tag:'a／the／複数 — どれも「犬という種類」を表せる',
+      items:[
+        { btn:'A dog', hint:'a＋単数',
+          sent:'<span class="only">A</span> <span class="focus">dog</span> is loyal.',
+          scope:'a（総称）',
+          gloss:'どの1匹をとっても、という総称。<b>a</b>＋単数。',
+          warn:'総称の<b>代表的説明</b>です。a＋単数は「1匹の例で種を代表させる」言い方。' },
+        { btn:'The dog', hint:'the＋単数',
+          sent:'<span class="only">The</span> <span class="focus">dog</span> is loyal.',
+          scope:'the（総称）',
+          gloss:'犬という「種」を代表させる、やや硬い言い方。',
+          warn:'the＋単数の総称は学術的・硬め。名詞によっては不自然になります（<b>代表的説明</b>）。' },
+        { btn:'Dogs', hint:'無冠詞・複数',
+          sent:'<span class="focus">Dogs</span> are loyal.',
+          scope:'無冠詞（複数）',
+          gloss:'いちばん普通の総称。<b>無冠詞の複数</b>。',
+          warn:'3通りは同じ「種類」を表す<b>代表的説明</b>。日常では複数形の総称がもっとも自然です。' },
+      ]
+    },
+    {
+      tab:'可算・不可算',
+      tag:'a が付くかで「数える1個」か「材料・全体」かが変わる',
+      items:[
+        { btn:'a paper', hint:'新聞',
+          sent:'I bought <span class="only">a</span> <span class="focus">paper</span>.',
+          scope:'a（可算）',
+          gloss:'数えられる1部 → <b>新聞</b>を1部買った。' },
+        { btn:'paper', hint:'紙',
+          sent:'I bought <span class="focus">paper</span>.',
+          scope:'無冠詞（不可算）',
+          gloss:'数えない材料 → <b>紙</b>を買った。' },
+        { btn:'a hair', hint:'1本',
+          sent:'There is <span class="only">a</span> <span class="focus">hair</span> in my soup.',
+          scope:'a（可算）',
+          gloss:'数えられる → <b>髪の毛1本</b>がスープに。' },
+        { btn:'hair', hint:'髪全体',
+          sent:'She has beautiful <span class="focus">hair</span>.',
+          scope:'無冠詞（不可算）',
+          gloss:'ひとまとまりの → <b>髪全体</b>が美しい。' },
+        { btn:'a coffee', hint:'1杯',
+          sent:'I had <span class="only">a</span> <span class="focus">coffee</span>.',
+          scope:'a（可算）',
+          gloss:'1杯と数えて → コーヒーを<b>1杯</b>飲んだ。' },
+        { btn:'coffee', hint:'一般',
+          sent:'I like <span class="focus">coffee</span>.',
+          scope:'無冠詞（不可算）',
+          gloss:'飲み物一般として → コーヒーが<b>好き</b>。' },
+      ]
+    },
+    {
+      tab:'意味が変わる',
+      tag:'冠詞の有無で意味そのものが変わる（難関の山場）',
+      items:[
+        { btn:'hospital', hint:'入院中・英',
+          sent:'He is in <span class="focus">hospital</span>.',
+          scope:'無冠詞',
+          gloss:'施設を本来の目的で使う → <b>入院している</b>。',
+          warn:'この「入院中」の無冠詞は主に<b>英</b>。<b>米</b>では患者でも <b>in the hospital</b> が普通。' },
+        { btn:'the hospital', hint:'建物内',
+          sent:'He is in <span class="only">the</span> <span class="focus">hospital</span>.',
+          scope:'the',
+          gloss:'特定の建物の中 → <b>その病院にいる</b>（見舞いなども）。',
+          warn:'<b>米</b>では入院の意味でもこの形が一般的。<b>英</b>では「その病院の建物内」に寄る。' },
+        { btn:'school', hint:'通学',
+          sent:'She goes to <span class="focus">school</span>.',
+          scope:'無冠詞',
+          gloss:'本来の目的で → <b>通学している・勉強しに行く</b>。' },
+        { btn:'the school', hint:'その学校へ',
+          sent:'She goes to <span class="only">the</span> <span class="focus">school</span>.',
+          scope:'the',
+          gloss:'特定の建物へ → <b>その学校へ用事で行く</b>。' },
+        { btn:'prison', hint:'服役中',
+          sent:'He is in <span class="focus">prison</span>.',
+          scope:'無冠詞',
+          gloss:'本来の目的で → <b>服役している</b>。' },
+        { btn:'the prison', hint:'建物内',
+          sent:'He is in <span class="only">the</span> <span class="focus">prison</span>.',
+          scope:'the',
+          gloss:'特定の建物の中 → <b>その刑務所の中にいる</b>（囚人とは限らない）。' },
+      ]
+    },
+    {
+      tab:'固有・唯一・慣用',
+      tag:'唯一物・固有名・楽器・交通・最上級のきまり',
+      items:[
+        { btn:'the moon', hint:'唯一物',
+          sent:'<span class="only">The</span> <span class="focus">moon</span> is bright.',
+          scope:'the',
+          gloss:'空に1つだけ → 最初から共有済み → <b>the</b>。the sun も同じ。' },
+        { btn:'Japan', hint:'固有・無冠詞',
+          sent:'I visited <span class="focus">Japan</span>.',
+          scope:'無冠詞',
+          gloss:'国名・山名などの固有名は原則<b>無冠詞</b>。Japan / Mt. Fuji。' },
+        { btn:'the Nile', hint:'固有・the',
+          sent:'<span class="only">The</span> <span class="focus">Nile</span> is long.',
+          scope:'the',
+          gloss:'川・海や複数形の国名は <b>the</b>。the Nile / the United States。' },
+        { btn:'the piano', hint:'楽器',
+          sent:'I play <span class="only">the</span> <span class="focus">piano</span>.',
+          scope:'the',
+          gloss:'楽器を演奏する時は <b>play the ～</b>。the guitar も同じ。' },
+        { btn:'by bus', hint:'交通',
+          sent:'I travel by <span class="focus">bus</span>.',
+          scope:'無冠詞',
+          gloss:'交通手段の <b>by ～</b> は無冠詞。by train / by car も同じ。' },
+        { btn:'the tallest', hint:'最上級',
+          sent:'She is <span class="only">the</span> <span class="focus">tallest</span>.',
+          scope:'the',
+          gloss:'最上級・序数は1つに決まる → <b>the</b>。the first も同じ。' },
+      ]
+    },
+  ];
+
+  const tabs = document.getElementById('tabs');
+  const grouptag = document.getElementById('grouptag');
+  const btns = document.getElementById('btns');
+  const $s = document.getElementById('sent'), $sc = document.getElementById('scope'),
+        $g = document.getElementById('gloss'), $w = document.getElementById('warn');
+  let gi = 0;
+
+  function renderItem(i){
+    const d = GROUPS[gi].items[i];
+    $s.innerHTML = d.sent; $sc.textContent = d.scope; $g.innerHTML = d.gloss;
+    if(d.warn){ $w.innerHTML = d.warn; $w.style.display = ''; }
+    else { $w.style.display = 'none'; }
+    [...btns.children].forEach((b,j)=>b.classList.toggle('on', j===i));
+  }
+  function renderGroup(g){
+    gi = g;
+    const grp = GROUPS[g];
+    [...tabs.children].forEach((t,j)=>t.classList.toggle('on', j===g));
+    grouptag.textContent = grp.tag;
+    btns.innerHTML = '';
+    grp.items.forEach((d,i)=>{
+      const b = document.createElement('button');
+      b.innerHTML = d.btn + '<small>' + d.hint + '</small>';
+      b.onclick = ()=>renderItem(i);
+      btns.appendChild(b);
+    });
+    renderItem(0);
+  }
+  GROUPS.forEach((grp,g)=>{
+    const t = document.createElement('button');
+    t.className = 'tab';
+    t.textContent = grp.tab;
+    t.onclick = ()=>renderGroup(g);
+    tabs.appendChild(t);
+  });
+  renderGroup(0);
+</script>
+</body>
+</html>
