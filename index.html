@@ -11,6 +11,7 @@
     --eng:#6d5efc; --eng-ink:#5b4ae8; --eng-bg:#f1eefe;
     --math:#10b981; --math-ink:#059669; --math-bg:#e7f8f1;
     --phys:#f97316; --phys-ink:#ea580c; --phys-bg:#fff0e6;
+    --miss:#e5484d; --miss-ink:#d13a3f; --miss-bg:#fdecec;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;overflow-x:hidden;}
@@ -37,18 +38,22 @@
   .card.e::before{background:linear-gradient(90deg,#8074f2,#6f61ec);}
   .card.m::before{background:linear-gradient(90deg,#14c08a,#0ea371);}
   .card.p::before{background:linear-gradient(90deg,#fb8b3c,#f2711c);}
+  .card.d::before{background:linear-gradient(90deg,#f06a6f,#e5484d);}
   .card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(40,50,70,.14);}
   .icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
     font-size:26px;margin-bottom:14px;}
   .card.e .icon{background:var(--eng-bg);} .card.m .icon{background:var(--math-bg);} .card.p .icon{background:var(--phys-bg);}
+  .card.d .icon{background:var(--miss-bg);}
   .count{font-size:12px;font-weight:800;padding:4px 11px;border-radius:999px;position:absolute;top:22px;right:20px;}
   .card.e .count{color:var(--eng-ink);background:var(--eng-bg);}
   .card.m .count{color:var(--math-ink);background:var(--math-bg);}
   .card.p .count{color:var(--phys-ink);background:var(--phys-bg);}
+  .card.d .count{color:var(--miss-ink);background:var(--miss-bg);}
   h2{font-size:22px;font-weight:800;margin:0 0 7px;}
   .card p{font-size:13.5px;color:var(--sub);margin:0;line-height:1.6;flex:1;}
   .go{margin-top:16px;font-size:14px;font-weight:800;}
   .card.e .go{color:var(--eng-ink);} .card.m .go{color:var(--math-ink);} .card.p .go{color:var(--phys-ink);}
+  .card.d .go{color:var(--miss-ink);}
   .go::after{content:" →";}
   .foot{margin-top:34px;font-size:12.5px;color:var(--sub);line-height:1.7;}
   .foot b{color:var(--ink);}
@@ -78,6 +83,12 @@
       <h2>物理</h2>
       <p>斜方投射（45°で最大）・波の重ね合わせとうなり・電磁誘導（レンツの法則）。因果を動きで見る。</p>
       <span class="go">物理のツールを見る</span>
+    </a>
+    <a class="card d" href="machigai/">
+      <div class="icon">🔍</div><span class="count">3問</span>
+      <h2>誤り探し（地理・数学）</h2>
+      <p>誤りを3か所入れた雨温図・ずれ始めの行あて・自分であえて間違えてAIに見せる。答え合わせつき。</p>
+      <span class="go">誤り探しをやってみる</span>
     </a>
   </div>
 

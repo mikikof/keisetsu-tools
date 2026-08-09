@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>「間違え」は記憶のフックになる</title>
+<style>
+:root{
+  --bg:#F2F6FB; --card:#FFFFFF; --navy:#12395F; --blue:#2B7BD6; --blue-2:#5AA0EA;
+  --ink:#1B2733; --ink-2:#5F7180; --rule:#DCE6F1; --tint:#EDF4FC; --tint-2:#F7FAFE;
+  --found:#0E9F6E; --missed:#E5484D; --extra:#E0972B;
+  --bar:#BFD8F2; --bar-on:#2B7BD6; --line:#F2802E; --grid:#E4EDF6;
+  --dry:rgba(242,128,46,.09); --c1:#F2802E; --c2:#17A2A2; --c3:#2B5FA8;
+  --shadow:0 1px 2px rgba(18,57,95,.05), 0 8px 24px -12px rgba(18,57,95,.18);
+  --shadow-lift:0 2px 4px rgba(18,57,95,.08), 0 16px 32px -16px rgba(18,57,95,.28);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0D1219; --card:#161D26; --navy:#9FC4E8; --blue:#4A93E0; --blue-2:#2B5F94;
+    --ink:#E6EDF3; --ink-2:#93A4B4; --rule:#243040; --tint:#1A2430; --tint-2:#131A23;
+    --found:#3DBF92; --missed:#FF6B6B; --extra:#E8B554;
+    --bar:#2E4A66; --bar-on:#4A93E0; --line:#F79553; --grid:#1F2A36;
+    --dry:rgba(247,149,83,.11); --c1:#F79553; --c2:#3FC0C0; --c3:#6BA3E8;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    --shadow-lift:0 2px 4px rgba(0,0,0,.5), 0 16px 32px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F2F6FB; --card:#FFFFFF; --navy:#12395F; --blue:#2B7BD6; --blue-2:#5AA0EA;
+  --ink:#1B2733; --ink-2:#5F7180; --rule:#DCE6F1; --tint:#EDF4FC; --tint-2:#F7FAFE;
+  --found:#0E9F6E; --missed:#E5484D; --extra:#E0972B;
+  --bar:#BFD8F2; --bar-on:#2B7BD6; --line:#F2802E; --grid:#E4EDF6;
+  --dry:rgba(242,128,46,.09); --c1:#F2802E; --c2:#17A2A2; --c3:#2B5FA8;
+  --shadow:0 1px 2px rgba(18,57,95,.05), 0 8px 24px -12px rgba(18,57,95,.18);
+  --shadow-lift:0 2px 4px rgba(18,57,95,.08), 0 16px 32px -16px rgba(18,57,95,.28);
+}
+:root[data-theme="dark"]{
+  --bg:#0D1219; --card:#161D26; --navy:#9FC4E8; --blue:#4A93E0; --blue-2:#2B5F94;
+  --ink:#E6EDF3; --ink-2:#93A4B4; --rule:#243040; --tint:#1A2430; --tint-2:#131A23;
+  --found:#3DBF92; --missed:#FF6B6B; --extra:#E8B554;
+  --bar:#2E4A66; --bar-on:#4A93E0; --line:#F79553; --grid:#1F2A36;
+  --dry:rgba(247,149,83,.11); --c1:#F79553; --c2:#3FC0C0; --c3:#6BA3E8;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  --shadow-lift:0 2px 4px rgba(0,0,0,.5), 0 16px 32px -16px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Yu Gothic",
+    "Noto Sans JP",system-ui,sans-serif;
+  font-size:15.5px; line-height:1.85; letter-spacing:.015em;
+  word-break:keep-all; line-break:strict; overflow-wrap:anywhere;
+  -webkit-text-size-adjust:100%; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:43rem; margin:0 auto; padding:0 1rem 5rem}
+header{
+  margin:0 0 2rem; padding:2.2rem 1.5rem 2rem;
+  background:linear-gradient(160deg,var(--navy) 0%,#1B5490 60%,#2B7BD6 140%);
+  color:#fff; border-radius:0 0 22px 22px;
+}
+@media (prefers-color-scheme:dark){header{background:linear-gradient(160deg,#101C2A,#17334F 70%,#1D4A78)}}
+:root[data-theme="dark"] header{background:linear-gradient(160deg,#101C2A,#17334F 70%,#1D4A78)}
+.brand{display:inline-flex; align-items:center; gap:.5rem; font-size:.72rem; font-weight:800;
+  letter-spacing:.12em; background:rgba(255,255,255,.16); padding:.3rem .7rem; border-radius:999px; margin:0 0 1rem}
+header h1{font-size:clamp(2rem,8.5vw,2.9rem); font-weight:800; line-height:1.22; margin:0 0 .7rem; text-wrap:balance}
+header h1 em{font-style:normal; color:#FFC98A}
+header p{margin:0; font-size:.94rem; line-height:1.9; color:rgba(255,255,255,.86)}
+.rail{display:flex; gap:.45rem; margin:0 0 2.5rem}
+.rail div{flex:1; height:4px; border-radius:999px; background:var(--rule); transition:background .3s}
+.rail div.done{background:var(--blue)}
+section{margin:0 0 2.75rem}
+.head{display:flex; gap:.75rem; align-items:flex-start; margin:0 0 .6rem}
+.num{flex:none; width:2rem; height:2rem; border-radius:10px; background:var(--blue); color:#fff;
+  display:grid; place-items:center; font-weight:800; font-size:.95rem; font-variant-numeric:tabular-nums;
+  box-shadow:0 4px 10px -4px var(--blue)}
+.head h2{font-size:1.22rem; font-weight:800; margin:.15rem 0 0; color:var(--navy)}
+.task{color:var(--ink-2); font-size:.9rem; margin:0 0 1.1rem; padding-left:2.75rem}
+.task strong{color:var(--ink); font-weight:800}
+@media(max-width:26rem){.task{padding-left:0}}
+
+/* ---- math typesetting ---- */
+.m{font-family:"STIX Two Text","STIX Two Math","Cambria Math","Times New Roman",Georgia,serif;
+  font-size:1.06em; letter-spacing:.005em; white-space:nowrap}
+.m i{font-style:italic; font-family:inherit; padding:0 .015em}
+.m sup{font-size:.64em; line-height:0; vertical-align:.55em}
+.m sup i{padding:0}
+.m .op{font-family:"STIX Two Math","STIX Two Text","Cambria Math","Times New Roman",serif;
+  font-style:normal; font-size:1.5em; line-height:1; vertical-align:-.12em}
+.m .op.s{font-size:1.18em; vertical-align:-.08em}
+.m .lim{display:inline-flex; flex-direction:column; align-items:flex-start; justify-content:space-between;
+  height:1.95em; vertical-align:middle; font-size:.58em; line-height:1; margin:0 .22em 0 .04em;
+  transform:translateY(-.06em); font-style:normal}
+.m .lim.ev{height:1.55em; margin:0 .18em 0 .06em; transform:translateY(-.02em)}
+.m .lim sup,.m .lim sub{font-size:1em; line-height:1; vertical-align:baseline}
+
+/* ---- chart card ---- */
+.card{background:var(--card); border-radius:16px; padding:1rem .85rem 1.1rem; margin-bottom:.75rem; box-shadow:var(--shadow)}
+.labels{display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:.9rem}
+.chip{font:inherit; font-size:.87rem; font-weight:700; background:var(--tint); color:var(--navy);
+  border:1.5px solid transparent; border-radius:999px; padding:.34rem .78rem; cursor:pointer;
+  display:inline-flex; align-items:center; gap:.4rem; line-height:1.5;
+  transition:transform .12s, box-shadow .12s, background .12s, border-color .12s}
+.chip:hover{transform:translateY(-1px); box-shadow:0 4px 10px -4px rgba(18,57,95,.3)}
+.chip:focus-visible{outline:2.5px solid var(--blue); outline-offset:2px}
+.chip .k{font-size:.68rem; font-weight:700; color:var(--ink-2); letter-spacing:.05em}
+.chip[aria-pressed="true"]{background:var(--blue); color:#fff; border-color:var(--blue)}
+.chip[aria-pressed="true"] .k{color:rgba(255,255,255,.75)}
+.chip.found{background:color-mix(in srgb,var(--found) 15%,var(--card)); border-color:var(--found); color:var(--found)}
+.chip.missed{background:color-mix(in srgb,var(--missed) 15%,var(--card)); border-color:var(--missed); color:var(--missed)}
+.chip.wrong{background:color-mix(in srgb,var(--extra) 16%,var(--card)); border-color:var(--extra); color:var(--extra)}
+.chip.found .k,.chip.missed .k,.chip.wrong .k{color:currentColor; opacity:.7}
+.chip.locked{cursor:default; transform:none!important; box-shadow:none!important}
+
+/* readout */
+.readout{display:flex; align-items:flex-end; gap:1.1rem; padding:0 .3rem .55rem; flex-wrap:wrap}
+.ro-m{font-size:1.05rem; font-weight:800; color:var(--navy); font-variant-numeric:tabular-nums;
+  background:var(--tint); border-radius:8px; padding:.15rem .6rem; line-height:1.6}
+.ro{display:flex; align-items:baseline; gap:.28rem}
+.ro b{font-size:1.85rem; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+.ro .u{font-size:.8rem; font-weight:700; color:var(--ink-2)}
+.ro.t b{color:var(--line)} .ro.p b{color:var(--blue)}
+svg{display:block; width:100%; height:auto}
+.ax{font-size:7.5px; fill:var(--ink-2); font-family:ui-monospace,monospace; font-variant-numeric:tabular-nums}
+.axl{font-size:7px; font-weight:700; letter-spacing:.04em}
+
+/* slider */
+.slide{padding:.5rem .3rem .2rem}
+input[type=range]{
+  -webkit-appearance:none; appearance:none; width:100%; height:26px; background:transparent; cursor:pointer; margin:0;
+}
+input[type=range]:focus-visible{outline:2.5px solid var(--blue); outline-offset:2px; border-radius:999px}
+input[type=range]::-webkit-slider-runnable-track{height:6px; border-radius:999px; background:var(--tint); border:1px solid var(--rule)}
+input[type=range]::-moz-range-track{height:6px; border-radius:999px; background:var(--tint); border:1px solid var(--rule)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:22px; height:22px; margin-top:-9px; border-radius:50%;
+  background:var(--blue); border:3px solid var(--card); box-shadow:0 2px 8px -2px var(--blue);
+}
+input[type=range]::-moz-range-thumb{
+  width:16px; height:16px; border-radius:50%; background:var(--blue); border:3px solid var(--card);
+  box-shadow:0 2px 8px -2px var(--blue);
+}
+.months{display:flex; justify-content:space-between; font-size:.68rem; color:var(--ink-2);
+  font-variant-numeric:tabular-nums; padding:0 .1rem; margin-top:-.15rem}
+
+/* stats */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(4.6rem,1fr)); gap:.4rem; margin-top:.75rem}
+.st.dry .vl{color:var(--line)}
+.cmp{background:var(--card); border-radius:16px; padding:1rem .85rem 1.1rem; margin:.75rem 0 0; box-shadow:var(--shadow)}
+.cmp[hidden]{display:none}
+.cmp h3{font-size:.95rem; font-weight:800; color:var(--navy); margin:0 0 .7rem}
+.cmpbar{display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:.8rem; align-items:center}
+.seg{display:inline-flex; background:var(--tint); border-radius:999px; padding:.18rem; gap:.15rem}
+.seg button{font:inherit; font-size:.82rem; font-weight:800; border:none; background:transparent; color:var(--ink-2);
+  border-radius:999px; padding:.3rem .85rem; cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--card); color:var(--navy); box-shadow:0 1px 4px rgba(18,57,95,.14)}
+.seg button:focus-visible{outline:2.5px solid var(--blue); outline-offset:2px}
+.cty{font:inherit; font-size:.82rem; font-weight:800; border:1.5px solid var(--rule); background:var(--card);
+  border-radius:999px; padding:.28rem .7rem; cursor:pointer; display:inline-flex; align-items:center; gap:.35rem; color:var(--ink-2)}
+.cty:focus-visible{outline:2.5px solid var(--blue); outline-offset:2px}
+.cty .dot{width:.6rem; height:.6rem; border-radius:50%; background:currentColor; opacity:.35}
+.cty[aria-pressed="true"]{color:var(--ink); border-color:currentColor}
+.cty[aria-pressed="true"] .dot{opacity:1}
+.cmp .note{font-size:.8rem; color:var(--ink-2); margin:.65rem 0 0; line-height:1.75}
+.st{background:var(--tint-2); border:1px solid var(--rule); border-radius:10px; padding:.45rem .35rem; text-align:center}
+.st .lb{font-size:.63rem; font-weight:700; color:var(--ink-2); letter-spacing:.03em; display:block; line-height:1.5}
+.st .vl{font-size:.98rem; font-weight:800; color:var(--navy); font-variant-numeric:tabular-nums; line-height:1.5}
+.st .vl small{font-size:.68rem; font-weight:700; color:var(--ink-2)}
+.legend{display:flex; gap:.9rem; margin-top:.55rem; font-size:.74rem; color:var(--ink-2); padding:0 .3rem; flex-wrap:wrap}
+.legend span{display:inline-flex; align-items:center; gap:.3rem}
+.sw{width:.75rem; height:.5rem; border-radius:2px; flex:none}
+.sw.l{height:2.5px; border-radius:2px}
+
+/* controls / result */
+.bar{display:flex; gap:.55rem; flex-wrap:wrap; align-items:center; margin-top:1rem; padding-left:2.75rem}
+@media(max-width:26rem){.bar{padding-left:0}}
+button.go{font:inherit; font-weight:800; font-size:.94rem; background:var(--blue); color:#fff; border:none;
+  border-radius:999px; padding:.62rem 1.4rem; cursor:pointer; box-shadow:0 6px 14px -6px var(--blue);
+  transition:transform .12s, box-shadow .12s}
+button.go:hover:not(:disabled){transform:translateY(-1px); box-shadow:0 10px 20px -8px var(--blue)}
+button.go:disabled{opacity:.32; cursor:default; box-shadow:none}
+button.go:focus-visible{outline:2.5px solid var(--navy); outline-offset:3px}
+button.ghost{font:inherit; font-weight:700; font-size:.88rem; background:var(--card); color:var(--navy);
+  border:1.5px solid var(--rule); border-radius:999px; padding:.55rem 1.05rem; cursor:pointer; transition:.12s}
+button.ghost:hover{border-color:var(--blue); color:var(--blue)}
+button.ghost:focus-visible{outline:2.5px solid var(--blue); outline-offset:2px}
+button.ghost[aria-pressed="true"]{border-color:var(--blue); color:#fff; background:var(--blue)}
+.hint{font-size:.83rem; color:var(--ink-2); font-variant-numeric:tabular-nums}
+.result{margin:1rem 0 0 2.75rem; background:var(--card); border-radius:16px; padding:1.1rem;
+  box-shadow:var(--shadow-lift); animation:pop .32s cubic-bezier(.2,.8,.3,1)}
+@media(max-width:26rem){.result{margin-left:0}}
+@keyframes pop{from{opacity:0; transform:translateY(10px) scale(.985)} to{opacity:1; transform:none}}
+.result[hidden]{display:none}
+.score{display:flex; align-items:baseline; gap:.5rem; margin:0 0 .9rem}
+.score b{font-size:2.9rem; font-weight:800; line-height:1; color:var(--blue); font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+.score span{font-size:.9rem; color:var(--ink-2); font-weight:700}
+.rows{display:flex; flex-direction:column; gap:.6rem}
+.row{display:flex; gap:.65rem; align-items:flex-start; font-size:.87rem; line-height:1.75}
+.pill{flex:none; font-size:.72rem; font-weight:800; padding:.2rem .6rem; border-radius:999px; color:#fff; margin-top:.25rem}
+.pill.ok{background:var(--found)} .pill.ng{background:var(--missed)} .pill.mid{background:var(--extra)}
+.fix{font-weight:800; color:var(--navy)}
+.result p{margin:.9rem 0 0; font-size:.87rem; color:var(--ink-2); line-height:1.8}
+.result p.lead{color:var(--ink); font-size:.93rem; font-weight:700; margin-top:.7rem}
+code{font-family:ui-monospace,"SFMono-Regular",Menlo,monospace; font-size:.9em; background:var(--tint);
+  color:var(--navy); padding:.1rem .35rem; border-radius:5px}
+ol.steps{list-style:none; margin:0; padding:0; font-variant-numeric:tabular-nums}
+ol.steps li + li{border-top:1px solid var(--rule)}
+ol.steps button{font:inherit; font-size:.98rem;
+  width:100%; text-align:left; background:transparent; color:var(--ink); border:none; padding:.72rem .7rem;
+  cursor:pointer; display:flex; gap:.85rem; align-items:baseline; border-radius:10px; transition:background .12s}
+ol.steps button:hover{background:var(--tint)}
+ol.steps button:focus-visible{outline:2.5px solid var(--blue); outline-offset:-2px}
+ol.steps button[aria-pressed="true"]{background:var(--blue); color:#fff; font-weight:700}
+ol.steps .no{flex:none; font-size:.84rem; color:var(--ink-2); font-weight:700}
+ol.steps button[aria-pressed="true"] .no{color:rgba(255,255,255,.8)}
+ol.steps li.is-answer button{background:color-mix(in srgb,var(--found) 14%,var(--card)); color:var(--found); font-weight:700}
+ol.steps li.is-answer .no{color:var(--found)}
+
+/* ---- 3. exchange ---- */
+.note{background:var(--card); border-radius:16px; padding:1rem 1.05rem 1.1rem; box-shadow:var(--shadow)}
+.note .ttl{display:flex; justify-content:space-between; align-items:baseline; gap:.8rem; flex-wrap:wrap;
+  font-size:.74rem; font-weight:800; color:var(--ink-2); letter-spacing:.04em; margin:0 0 .75rem}
+.note .ttl em{font-style:normal; font-weight:700; color:var(--blue)}
+.eq{display:flex; flex-direction:column; gap:.6rem; overflow-x:auto; padding:.1rem .05rem .15rem}
+.eq .ln{display:flex; gap:.75rem; align-items:baseline; white-space:nowrap}
+.eq .no{flex:none; font-size:.8rem; color:var(--ink-2); font-weight:700}
+.tgt{font:inherit; background:none; border:none; border-bottom:2px dashed var(--blue-2);
+  border-radius:5px 5px 0 0; padding:.05em .22em .08em; margin:0 .02em; cursor:pointer; color:inherit;
+  transition:background .12s, border-color .12s}
+.tgt:hover{background:var(--tint)}
+.tgt:focus-visible{outline:2.5px solid var(--blue); outline-offset:2px}
+.tgt[aria-pressed="true"]{border-bottom-style:solid; border-bottom-color:var(--missed);
+  background:color-mix(in srgb,var(--missed) 8%,transparent)}
+.tgt.tried{border-bottom:2px solid var(--found)}
+.tgt[aria-pressed="true"].tried{border-bottom-color:var(--missed)}
+.ink{color:var(--missed); font-weight:700}
+.hit{background:color-mix(in srgb,var(--missed) 14%,transparent); color:var(--missed);
+  border-radius:5px; padding:0 .14em; font-weight:700}
+.thread{display:flex; flex-direction:column; gap:.85rem; margin-top:.85rem}
+.bub{max-width:94%; border-radius:16px; padding:.95rem 1.05rem; box-shadow:var(--shadow); animation:pop .32s cubic-bezier(.2,.8,.3,1)}
+.bub.me{align-self:flex-end; background:var(--tint); border-bottom-right-radius:6px}
+.bub.ai{align-self:flex-start; background:var(--card); border-bottom-left-radius:6px}
+.who{font-size:.72rem; font-weight:800; letter-spacing:.04em; margin:0 0 .5rem; color:var(--ink-2)}
+.bub.me .who{color:var(--navy); text-align:right}
+.bub.ai .who{color:var(--found)}
+.pmt{font-size:.84rem; color:var(--ink); line-height:1.85; margin:0 0 .75rem; padding:0 0 .65rem;
+  border-bottom:1px dashed var(--rule)}
+.airows{display:flex; flex-direction:column; gap:.65rem}
+.airow{display:flex; gap:.6rem; align-items:flex-start; font-size:.87rem; line-height:1.8}
+.airow .k{flex:none; font-size:.7rem; font-weight:800; color:#fff; background:var(--blue);
+  border-radius:999px; padding:.22rem .62rem; margin-top:.28rem; letter-spacing:.02em}
+.airow .k.ok{background:var(--found)} .airow .k.mid{background:var(--extra)}
+.airow .k.ng{background:var(--missed)} .airow .k.star{background:var(--extra)}
+.airow>span:not(.k){min-width:0; overflow-x:auto}
+.anim .airow{opacity:0; animation:rise .45s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes rise{from{opacity:0; transform:translateY(7px)} to{opacity:1; transform:none}}
+.typing{display:inline-flex; gap:.32rem; align-items:center; padding:1.05rem 1.1rem}
+.typing span{width:.45rem; height:.45rem; border-radius:50%; background:var(--ink-2); opacity:.4; animation:blink 1.1s infinite}
+.typing span:nth-child(2){animation-delay:.18s}
+.typing span:nth-child(3){animation-delay:.36s}
+@keyframes blink{0%,60%,100%{opacity:.25; transform:none} 30%{opacity:.9; transform:translateY(-.18rem)}}
+
+.close{margin-top:3rem; background:var(--card); border-radius:18px; padding:1.4rem 1.2rem; box-shadow:var(--shadow); border-top:4px solid var(--blue)}
+.close h2{font-size:1.15rem; font-weight:800; color:var(--navy); margin:0 0 .6rem}
+.close p{margin:0 0 .7rem; font-size:.92rem}
+.close strong{color:var(--blue); font-weight:800}
+.src{margin-top:1.6rem; padding-top:1rem; border-top:1px solid var(--rule); font-size:.76rem; color:var(--ink-2); line-height:1.8; word-break:normal}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+
+<header>
+  <h1>「<em>間違え</em>」は記憶のフックになる</h1>
+</header>
+
+<div class="wrap">
+<div class="rail"><div id="r1"></div><div id="r2"></div><div id="r3"></div></div>
+
+<section>
+  <div class="head"><div class="num">1</div><h2>誤りを探す</h2></div>
+  <p class="task">AIに雨温図を2つ作ってもらいました。正しい版と、そこから<strong>3か所だけ変えた版</strong>です。
+  下に出ているのは変えたほうです。スライダーで月を動かし、下の数値も手がかりにして、変えられたラベルを3つ選んでください。</p>
+
+  <div id="charts"></div>
+
+  <div class="bar">
+    <button class="go" id="check1">答え合わせ</button>
+    <button class="ghost" id="compare" aria-pressed="false">正しい版と見比べる</button>
+    <span class="hint" id="count1">0 / 3 選択中</span>
+  </div>
+  <div class="result" id="res1" hidden></div>
+</section>
+
+<section>
+  <div class="head"><div class="num">2</div><h2>ずれ始めの行をあてる</h2></div>
+  <p class="task">解き終えた解答を、<strong>1行だけわざと変えて</strong>書き写しました。
+  直前の行から正しく導けない、最初の1行はどれでしょうか。</p>
+  <div class="card"><ol class="steps" id="steps"></ol></div>
+  <div class="bar"><button class="go" id="check2" disabled>答え合わせ</button><span class="hint">行をタップして選びます</span></div>
+  <div class="result" id="res2" hidden></div>
+</section>
+
+<section>
+  <div class="head"><div class="num">3</div><h2>作る側に回る</h2></div>
+  <p class="task">今度は自分があえて間違える番です。下は正しく解けた解答です。<strong>点線の1か所</strong>をタップして
+  間違いに変え、AIに見せてください。変えたところから先は、その間違いのまま計算が続きます。</p>
+  <div class="note" id="compose">
+    <div class="ttl"><span>自分の解答（正しい版）</span><em id="pickmsg">点線をタップすると、そこだけ間違いに変わります</em></div>
+    <div class="eq" id="eq3"></div>
+  </div>
+  <div class="thread" id="thread" aria-live="polite"></div>
+  <div class="bar">
+    <button class="go" id="send3" disabled>AIに見せる</button>
+    <button class="ghost" id="retry3" hidden>別の場所で試す</button>
+    <span class="hint" id="tries3">試した場所 0 / 3</span>
+  </div>
+  <div class="result" id="les3" hidden></div>
+</section>
+
+<div class="close">
+  <h2>手が止まったところが、いちばんの収穫です</h2>
+  <p>ありそうな間違いは、正しい筋道が見えていないと作れません。
+  <strong>間違えられなかった単元</strong>が、そのまま次にやり直す単元です。</p>
+  <p>一度やった単元で、週に一度くらい試してみてください。</p>
+  <p class="src">雨温図の数値は各都市の平年値をもとにしています。気候区分は高校地理の大分類（ケッペン）に合わせました。<br>
+  参考: Wong, S. S. H., &amp; Lim, S. W. H. (2021) ほか。</p>
+</div>
+</div>
+
+<script>
+"use strict";
+const $=(s,r)=>(r||document).querySelector(s);
+const done={1:false,2:false,3:false};
+const mark=n=>{done[n]=true; $("#r"+n).classList.add("done");};
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ===== 数式の部品 ===== */
+const INT=`<span class="op">∫</span><span class="lim"><sup>1</sup><sub>0</sub></span>`;
+const OPS=`<span class="op s">∫</span>`;
+const EX=`<i>e</i><sup><i>x</i></sup>`;
+const E2X=`<i>e</i><sup>2<i>x</i></sup>`;
+const XEX=`<i>x</i> ${EX}`;
+const EV=b=>`[${b}]<span class="lim ev"><sup>1</sup><sub>0</sub></span>`;
+const DX=` <i>dx</i>`;
+const m=s=>`<span class="m">${s}</span>`;
+
+/* ===== 1. 雨温図 ===== */
+const CITIES=[
+ {city:"シンガポール",code:"Af",name:"熱帯雨林気候",unit:"℃",
+  t:[26.6,27.2,27.6,27.8,28.0,28.0,27.6,27.6,27.5,27.3,26.9,26.6],
+  p:[243,159,171,141,158,140,145,143,177,207,252,304],
+  bad:{unit:"℉"}, why:"目盛りの数値が26〜28です。これは摂氏の値で、華氏なら80前後になります。"},
+ {city:"ローマ",code:"Csa",name:"地中海性気候",unit:"℃",
+  t:[8.0,8.8,11.1,13.6,17.9,21.9,24.7,24.8,21.2,17.0,12.5,9.1],
+  p:[67,73,58,81,53,34,19,33,68,93,111,97],
+  bad:{code:"Cfa"}, why:"7月の降水が19mmまで落ち、冬に多い形です。年中湿潤のCfaではなく、夏に乾くCsaです。"},
+ {city:"ハルビン",code:"Dwa",name:"亜寒帯冬季少雨気候",unit:"℃",
+  t:[-18.4,-13.8,-3.2,6.6,14.8,20.2,22.8,21.4,14.8,5.6,-5.6,-15.3],
+  p:[4,5,11,23,44,92,157,119,53,25,9,6],
+  bad:{name:"亜寒帯湿潤気候"}, why:"記号 Dwa の w は、冬が乾くことを表します。1月の降水は4mmで、湿潤ではありません。"}
+];
+const FIELDS=[["city","都市"],["code","記号"],["name","区分"],["unit","気温"]];
+const picked=new Set(); let revealed1=false, comparing=false;
+const sel=[6,6,6];                       // 選択中の月(0-11)
+const val=(c,k)=> (!comparing && c.bad[k]!==undefined) ? c.bad[k] : c[k];
+const f1=v=>v.toFixed(1);
+
+function scales(c){
+  const pmax=Math.max(...c.p), tmin=Math.min(...c.t), tmax=Math.max(...c.t);
+  const tlo=Math.floor((tmin-5)/10)*10, thi=Math.ceil((tmax+5)/10)*10;
+  const phi=Math.ceil(pmax/50)*50;
+  return {tlo,thi,phi};
+}
+function chartSVG(c,ci){
+  const W=320,H=176,L=32,R=34,T=16,B=28, iw=W-L-R, ih=H-T-B, bw=iw/12;
+  const {tlo,thi,phi}=scales(c);
+  const ty=v=>T+ih-((v-tlo)/(thi-tlo))*ih;
+  const py=v=>T+ih-(v/phi)*ih;
+  let grid="",ticksL="",ticksR="",bars="",line="",dots="",zero="";
+  for(let v=tlo;v<=thi;v+=10){
+    grid+=`<line x1="${L}" y1="${ty(v).toFixed(1)}" x2="${W-R}" y2="${ty(v).toFixed(1)}" stroke="var(--grid)" stroke-width="1"/>`;
+    ticksL+=`<text class="ax" x="${L-5}" y="${(ty(v)+2.6).toFixed(1)}" text-anchor="end">${v}</text>`;
+  }
+  if(tlo<0&&thi>0) zero=`<line x1="${L}" y1="${ty(0).toFixed(1)}" x2="${W-R}" y2="${ty(0).toFixed(1)}" stroke="var(--ink-2)" stroke-width="1" stroke-dasharray="3 2" opacity=".55"/>`;
+  [0,phi/2,phi].forEach(v=>{ticksR+=`<text class="ax" x="${W-R+5}" y="${(py(v)+2.6).toFixed(1)}" text-anchor="start">${v}</text>`;});
+  c.p.forEach((v,i)=>{
+    const h=ih-(py(v)-T), x=L+i*bw+bw*.17, w=bw*.66, on=i===sel[ci];
+    bars+=`<rect x="${x.toFixed(1)}" y="${py(v).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(h,0).toFixed(1)}"
+      rx="2" fill="${on?"var(--bar-on)":"var(--bar)"}"/>`;
+  });
+  c.t.forEach((v,i)=>{const x=L+i*bw+bw/2,y=ty(v);
+    line+=(i?"L":"M")+x.toFixed(1)+","+y.toFixed(1)+" ";
+    const on=i===sel[ci];
+    dots+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${on?3.6:2.1}" fill="${on?"var(--line)":"var(--card)"}" stroke="var(--line)" stroke-width="1.6"/>`;
+  });
+  const gx=L+sel[ci]*bw+bw/2;
+  const guide=`<line x1="${gx.toFixed(1)}" y1="${T}" x2="${gx.toFixed(1)}" y2="${T+ih}" stroke="var(--blue)" stroke-width="1" opacity=".35"/>`;
+  let ml="";
+  [0,2,5,8,11].forEach(i=>{ml+=`<text class="ax" x="${(L+i*bw+bw/2).toFixed(1)}" y="${H-11}" text-anchor="middle">${i+1}</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${c.city}の雨温図">
+    ${grid}${guide}${bars}${zero}
+    <path d="${line}" fill="none" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>${dots}
+    ${ticksL}${ticksR}${ml}
+    <text class="ax axl" x="${L-5}" y="${T-5}" text-anchor="end" fill="var(--line)">${val(c,"unit")}</text>
+    <text class="ax axl" x="${W-R+5}" y="${T-5}" text-anchor="start" fill="var(--blue)">mm</text>
+    <text class="ax" x="${W-R+5}" y="${H-11}" text-anchor="start">月</text></svg>`;
+}
+function statsHTML(c){
+  const tmin=Math.min(...c.t), tmax=Math.max(...c.t);
+  const u=val(c,"unit");
+  return `<div class="stats">
+    <div class="st"><span class="lb">最寒月</span><span class="vl">${f1(tmin)}<small>${u}</small></span></div>
+    <div class="st"><span class="lb">最暖月</span><span class="vl">${f1(tmax)}<small>${u}</small></span></div>
+    <div class="st"><span class="lb">年較差</span><span class="vl">${f1(tmax-tmin)}<small>${u}</small></span></div>
+    <div class="st"><span class="lb">年降水量</span><span class="vl">${c.p.reduce((a,b)=>a+b,0)}<small>mm</small></span></div>
+  </div>`;
+}
+function readoutHTML(c,ci){
+  const mth=sel[ci];
+  return `<div class="readout">
+    <span class="ro-m">${mth+1}月</span>
+    <span class="ro t"><b>${f1(c.t[mth])}</b><span class="u">${val(c,"unit")}</span></span>
+    <span class="ro p"><b>${c.p[mth]}</b><span class="u">mm</span></span>
+  </div>`;
+}
+function chipsHTML(c,ci){
+  return `<div class="labels">${FIELDS.map(([k,label])=>{
+    const id=ci+":"+k, isBad=c.bad[k]!==undefined; let cls="chip";
+    if(revealed1){cls+=" locked";
+      if(isBad&&picked.has(id))cls+=" found"; else if(isBad)cls+=" missed"; else if(picked.has(id))cls+=" wrong";}
+    return `<button class="${cls}" data-id="${id}" aria-pressed="${picked.has(id)}"><span class="k">${label}</span>${val(c,k)}</button>`;
+  }).join("")}</div>`;
+}
+function cardHTML(c,ci){
+  return `<div class="card" data-ci="${ci}">
+    ${chipsHTML(c,ci)}
+    <div class="chartslot">${readoutHTML(c,ci)}${chartSVG(c,ci)}</div>
+    <div class="slide">
+      <input type="range" min="0" max="11" step="1" value="${sel[ci]}" data-ci="${ci}"
+        aria-label="${c.city}の月を選ぶ">
+      <div class="months"><span>1月</span><span>4月</span><span>7月</span><span>10月</span><span>12月</span></div>
+    </div>
+    <div class="statslot">${statsHTML(c)}</div>
+    <div class="legend">
+      <span><i class="sw l" style="background:var(--line)"></i>気温（左目盛り）</span>
+      <span><i class="sw" style="background:var(--bar)"></i>降水量（右目盛り）</span>
+    </div></div>`;
+}
+function renderAll(){
+  $("#charts").innerHTML=CITIES.map(cardHTML).join("");
+  $("#charts").querySelectorAll('input[type=range]').forEach(r=>{
+    r.addEventListener("input",e=>{
+      const ci=+e.target.dataset.ci; sel[ci]=+e.target.value;
+      const card=$(`.card[data-ci="${ci}"]`);
+      $(".chartslot",card).innerHTML=readoutHTML(CITIES[ci],ci)+chartSVG(CITIES[ci],ci);
+    });
+  });
+  if(revealed1) return;
+  $("#charts").querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{
+    const id=b.dataset.id; picked.has(id)?picked.delete(id):picked.add(id);
+    b.setAttribute("aria-pressed",picked.has(id));
+    $("#count1").textContent=picked.size+" / 3 選択中";
+  }));
+}
+renderAll();
+
+$("#compare").addEventListener("click",()=>{
+  comparing=!comparing;
+  $("#compare").setAttribute("aria-pressed",comparing);
+  $("#compare").textContent=comparing?"変えた版に戻す":"正しい版と見比べる";
+  renderAll();
+});
+$("#check1").addEventListener("click",()=>{
+  revealed1=true; comparing=false;
+  $("#compare").setAttribute("aria-pressed","false"); $("#compare").textContent="正しい版と見比べる";
+  renderAll();
+  let hit=0;
+  const rows=CITIES.map((c,ci)=>{
+    const k=Object.keys(c.bad)[0], got=picked.has(ci+":"+k); if(got)hit++;
+    const label=FIELDS.find(f=>f[0]===k)[1];
+    return `<div class="row"><span class="pill ${got?"ok":"ng"}">${got?"発見":"見逃し"}</span>
+      <span>${c.city}の${label}　${c.bad[k]} → <span class="fix">${c[k]}</span><br>${c.why}</span></div>`;
+  }).join("");
+  const extra=[...picked].filter(id=>{const[ci,k]=id.split(":");return CITIES[+ci].bad[k]===undefined;}).length;
+  $("#res1").innerHTML=`<div class="score"><b>${hit}</b><span>／ 3 か所</span></div>
+    <div class="rows">${rows}
+    ${extra?`<div class="row"><span class="pill mid">選びすぎ</span>
+      <span>正しいラベルを ${extra} か所疑いました。どこを根拠に変だと思ったかを言葉にすると、次は迷いません。</span></div>`:""}</div>
+    <p class="lead">見逃した箇所があれば、そこが今日やり直す単元です。</p>`;
+  $("#res1").hidden=false; $("#check1").disabled=true; mark(1);
+});
+
+/* ===== 2. ずれ始めの行 ===== */
+const LINES=[
+ `${INT}${XEX}${DX}`,
+ `= ${EV(XEX)} + ${INT}${EX}${DX}`,
+ `= (<i>e</i> − 0) + ${EV(EX)}`,
+ `= <i>e</i> + (<i>e</i> − 1)`,
+ `= 2<i>e</i> − 1`
+];
+const ANSWER2=1; let pick2=null;
+$("#steps").innerHTML=LINES.map((s,i)=>`<li><button data-i="${i}" aria-pressed="false"><span class="no">${"①②③④⑤"[i]}</span>${m(s)}</button></li>`).join("");
+$("#steps").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+  if(done[2])return; pick2=+b.dataset.i;
+  $("#steps").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  $("#check2").disabled=false;
+}));
+$("#check2").addEventListener("click",()=>{
+  const ok=pick2===ANSWER2;
+  $("#steps").children[ANSWER2].classList.add("is-answer");
+  $("#steps").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed","false"));
+  $("#res2").innerHTML=`<div class="score"><b>②</b><span>${ok?"／ 正解です":"／ が答えです"}</span></div>
+    <p class="lead">部分積分は ${m(`${OPS}<i>f</i><i>g</i>′ = <i>f</i><i>g</i> − ${OPS}<i>f</i>′<i>g</i>`)}。第2項の符号は <span class="fix">−</span> になります。</p>
+    <p>正しくは ${m(`= ${EV(XEX)} − ${INT}${EX}${DX} = <i>e</i> − (<i>e</i> − 1) = 1`)}。
+    ③④⑤は、②の間違いをそのまま引き継いで計算しています。
+    式が合わないときは、答えの近くではなく<span class="fix">ずれ始めた行</span>を探すと早く見つかります。</p>`;
+  $("#res2").hidden=false; $("#check2").disabled=true; mark(2);
+});
+
+/* ===== 3. 作る側に回る（AIとのやりとり） ===== */
+const T3={
+ A:{aria:"②の符号 − を + に変える",
+    rows:[
+     ["もっともらしいか","ok","ありそうな間違いです。公式を覚えていても、第2項の符号は手が滑ります。以降の計算もそのまま通ってしまい、答えを見るまで気づけません。"],
+     ["どこが違うか","","②行目です。部分積分は "+m(`${OPS}<i>f</i><i>g</i>′ = <i>f</i><i>g</i> − ${OPS}<i>f</i>′<i>g</i>`)+" なので、第2項の符号は − になります。"],
+     ["正しい形","",m(`= ${EV(XEX)} − ${INT}${EX}${DX} = <i>e</i> − (<i>e</i> − 1) = 1`)],
+     ["他にありそうな間違い","star","部分積分を2回続けるとき、2回目の符号を戻し忘れる間違いです。これも答えだけ見ると気づきにくいところです。"]
+    ]},
+ B:{aria:"①の式を x e²ˣ に変える",
+    rows:[
+     ["もっともらしいか","mid","写し間違いに見えますが、間違いというより①が別の問題になっています。これだと、この単元の理解は試せません。"],
+     ["どこが違うか","","②からは元の "+m(`${INT}${XEX}${DX}`)+" を計算しています。①と②がつながっていません。"],
+     ["正しい形","",m(`<i>x</i> ${E2X}`)+" を部分積分するなら、②は "+m(`= [<i>x</i> · ${E2X}/2]<span class="lim ev"><sup>1</sup><sub>0</sub></span> − ${INT}${E2X}/2${DX}`)+" になります。"],
+     ["他にありそうな間違い","star","問題を変えずに間違えるなら、②の符号の向きです。途中の計算が最後まで通ってしまいます。"]
+    ]},
+ C:{aria:"④の答え 1 を 2 に変える",
+    rows:[
+     ["もっともらしいか","ng","すぐ気づかれます。④の中で、"+m(`<i>e</i> − (<i>e</i> − 1)`)+" と答えの 2 が食い違っているからです。"],
+     ["どこが違うか","","最後の数字だけです。途中の式は全部正しいままなので、③まで読めば分かります。"],
+     ["正しい形","",m(`= <i>e</i> − (<i>e</i> − 1) = 1`)],
+     ["他にありそうな間違い","star","もっともらしくするなら、②の符号の向きです。途中の計算が通ってしまうぶん、見破りにくくなります。"]
+    ]}
+};
+const PROMPT=`数学Ⅲの部分積分です。この解答は、わざと一行だけ間違えて書きました。
+①この間違いはもっともらしいか　②どこがどう違うか　③正しい形　を教えて。
+そのうえで、同じ単元で他にありそうな間違い方も一つ挙げて。`;
+let sel3=null; const tried=new Set(); let busy3=false;
+
+function tgt(key, normal, ink){
+  const on=sel3===key;
+  const cls="tgt"+(tried.has(key)?" tried":"");
+  return `<button class="${cls}" data-t="${key}" aria-pressed="${on}" aria-label="${T3[key].aria}">`
+    +(on?`<span class="ink">${ink}</span>`:normal)+`</button>`;
+}
+function composeEq(){
+  return [
+   `${INT}${tgt("B",XEX,`<i>x</i> ${E2X}`)}${DX}`,
+   `= ${EV(XEX)} ${tgt("A","−","+")} ${INT}${EX}${DX}`,
+   `= (<i>e</i> − 0) − ${EV(EX)}`,
+   `= <i>e</i> − (<i>e</i> − 1) = ${tgt("C","1","2")}`
+  ].map((s,i)=>`<span class="ln"><span class="no">${"①②③④"[i]}</span>${m(s)}</span>`).join("");
+}
+function sentEq(key){
+  const H=s=>`<span class="hit">${s}</span>`;
+  const lines={
+   A:[`${INT}${XEX}${DX}`,
+      `= ${EV(XEX)} ${H("+")} ${INT}${EX}${DX}`,
+      `= (<i>e</i> − 0) + ${EV(EX)}`,
+      `= <i>e</i> + (<i>e</i> − 1) = 2<i>e</i> − 1`],
+   B:[`${INT}${H(`<i>x</i> ${E2X}`)}${DX}`,
+      `= ${EV(XEX)} − ${INT}${EX}${DX}`,
+      `= (<i>e</i> − 0) − ${EV(EX)}`,
+      `= <i>e</i> − (<i>e</i> − 1) = 1`],
+   C:[`${INT}${XEX}${DX}`,
+      `= ${EV(XEX)} − ${INT}${EX}${DX}`,
+      `= (<i>e</i> − 0) − ${EV(EX)}`,
+      `= <i>e</i> − (<i>e</i> − 1) = ${H("2")}`]
+  }[key];
+  return lines.map((s,i)=>`<span class="ln"><span class="no">${"①②③④"[i]}</span>${m(s)}</span>`).join("");
+}
+function renderCompose(){
+  $("#eq3").innerHTML=composeEq();
+  $("#pickmsg").textContent=sel3
+    ? "この1か所を間違えました"
+    : (tried.size?"まだ試していない点線をタップしてみてください":"点線をタップすると、そこだけ間違いに変わります");
+  $("#send3").disabled=!sel3||busy3;
+}
+$("#compose").addEventListener("click",e=>{
+  const b=e.target.closest(".tgt"); if(!b||busy3)return;
+  sel3 = (sel3===b.dataset.t) ? null : b.dataset.t;
+  renderCompose();
+});
+$("#send3").addEventListener("click",()=>{
+  if(!sel3||busy3)return;
+  const key=sel3; busy3=true; sel3=null;
+  tried.add(key);
+  $("#compose").hidden=true; renderCompose();
+  $("#send3").disabled=true; $("#send3").hidden=true;
+  const th=$("#thread");
+  th.innerHTML=`<div class="bub me"><div class="who">自分が書いたもの</div>
+      <p class="pmt">${PROMPT.replace(/\n/g,"<br>")}</p>
+      <div class="eq">${sentEq(key)}</div></div>
+    <div class="bub ai" id="tp"><span class="typing"><span></span><span></span><span></span></span></div>`;
+  th.lastElementChild.scrollIntoView({behavior:RM?"auto":"smooth", block:"nearest"});
+  setTimeout(()=>{
+    const rows=T3[key].rows.map(([k,cls,txt],i)=>
+      `<div class="airow"${RM?"":` style="animation-delay:${(i*.38).toFixed(2)}s"`}>
+        <span class="k${cls?" "+cls:""}">${k}</span><span>${txt}</span></div>`).join("");
+    $("#tp").outerHTML=`<div class="bub ai${RM?"":" anim"}"><div class="who">AIの返答</div>
+      <div class="airows">${rows}</div></div>`;
+    th.lastElementChild.scrollIntoView({behavior:RM?"auto":"smooth", block:"nearest"});
+    $("#tries3").textContent=`試した場所 ${tried.size} / 3`;
+    if(!done[3])mark(3);
+    setTimeout(()=>{
+      busy3=false;
+      $("#retry3").hidden=false;
+      $("#retry3").textContent = tried.size<3 ? "別の場所で試す" : "もう一度試す";
+      if($("#les3").hidden){
+        $("#les3").innerHTML=`<p class="lead" style="margin-top:0">ありそうな間違いは、途中の計算が最後まで通ります。</p>
+          <p>どこを変えれば通るかを考えるだけで、その単元の筋道を一度たどり直せます。
+          残りの場所も試して、通る間違いと通らない間違いの差を見比べてみてください。</p>`;
+        $("#les3").hidden=false;
+      }
+    }, RM?0:1400);
+  }, RM?0:950);
+});
+$("#retry3").addEventListener("click",()=>{
+  if(busy3)return;
+  $("#thread").innerHTML=""; $("#retry3").hidden=true;
+  $("#compose").hidden=false; $("#send3").hidden=false; renderCompose();
+  $("#compose").scrollIntoView({behavior:RM?"auto":"smooth", block:"nearest"});
+});
+renderCompose();
+</script>
