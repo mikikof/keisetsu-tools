@@ -1,0 +1,43 @@
+@charset "UTF-8";
+
+.is-card .page-width { width:min(1060px,calc(100% - 56px)); }
+.is-card .intro h1 { font-size:32px; }
+.is-card .example-tabs a { min-height:62px; }
+.display-controls { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:12px 20px; padding-block:22px; }
+.control-actions .button { min-height:48px; }
+.control-actions .button.is-on { color:var(--green-dark); border-color:var(--green); background:var(--green-soft); }
+.capture-panel { margin-bottom:48px; padding:34px 44px 30px; border:2px solid var(--ink); background:#fff; color:var(--ink); box-shadow:7px 8px 0 var(--shadow); }
+.capture-header { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:26px; padding-bottom:16px; border-bottom:2px solid var(--ink); }
+.capture-title { margin:0; font-size:28px; font-weight:800; line-height:1.4; }
+.capture-subtitle { color:var(--ink-2); font-size:15px; font-weight:750; }
+.capture-body { font-size:20px; line-height:1.9; }
+.capture-body p { margin:0 0 14px; }
+.capture-body .md-heading { margin:24px 0 6px; font-size:19px; }
+.capture-body .md-heading:first-child { margin-top:0; }
+.capture-body .md-rule { margin:22px 0; border:0; border-top:1px solid var(--line); }
+.capture-body .md-table { font-size:16px; }
+.card-check { margin-top:28px; padding:20px 0 0; border-top:1.5px solid var(--shu); }
+.card-check h2 { display:flex; align-items:center; gap:10px; margin:0 0 12px; color:var(--shu-text); font-size:21px; line-height:1.5; }
+.card-check h2 .icon { width:22px; height:22px; }
+.card-check-item { padding:10px 0; border-top:1px solid var(--line); }
+.card-check-item:first-of-type { border-top:0; padding-top:0; }
+.card-check-item p { margin:0; font-size:18px; line-height:1.8; overflow-wrap:anywhere; }
+.card-check-head { font-weight:800; }
+span.card-check-head { margin-right:.35em; color:var(--ink); }
+.card-check-item .is-answer { font-weight:800; }
+.card-check-item .is-trap { color:var(--shu-text); font-weight:750; }
+.capture-footer { margin-top:22px; padding-top:14px; border-top:1px solid var(--line); color:var(--ink-2); font-size:15px; line-height:1.7; }
+@media(max-width:700px) {
+  .is-card .page-width { width:calc(100% - 32px); }
+  .is-card .intro h1 { font-size:26px; }
+  .capture-panel { margin-right:6px; padding:22px 16px; box-shadow:5px 6px 0 var(--shadow); }
+  .capture-title { font-size:23px; }
+  .capture-body { font-size:17px; }
+  .card-check-item p { font-size:16px; }
+  .capture-body .md-table { font-size:15px; }
+  .control-actions,.control-actions .button { width:100%; }
+}
+@media(max-width:360px) {
+  .capture-panel { padding-inline:14px; }
+  .capture-body .md-table { font-size:14px; }
+}

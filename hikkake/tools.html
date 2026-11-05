@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="自分のミスや、選択肢を選んだ理由から、Gemini に送る指示文を作ります。答え合わせのあとに書く確認の1行も、書きためて保存できます。">
+  <title>指示文を作る｜ひっかけ問題を、AIで作る</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <a class="skip-link" href="#kit">指示文を作る欄へ進む</a>
+  <header class="site-header page-width">
+    <a class="wordmark" href="./index.html"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 4h14l6 6v18H6zM20 4v6h6M11 15h10M11 20h6"/><path d="M19 22l2.5 2.5L26 19" stroke-linecap="round" stroke-linejoin="round"/></svg></span><strong>ひっかけ問題を、AIで作る</strong></a>
+    <a class="button header-link" href="./index.html#examples">作問例を見る</a>
+  </header>
+
+  <main class="page-width">
+    <section class="tools-intro" aria-labelledby="kit-title">
+      <p class="eyebrow">道具</p>
+      <h1 id="kit-title">自分のミスや選んだ理由から、指示文を作る</h1>
+      <p>入れた内容は、このページの中で指示文の形にするだけで、どこにも送られません。できた指示文を Gemini のチャットに貼り付けて送ります。</p>
+      <nav class="jump-links" aria-label="このページの中">
+        <a href="#kit">指示文を作る</a>
+        <a href="#notes">確認の1行</a>
+      </nav>
+    </section>
+
+    <section class="kit-wrap" id="kit" aria-labelledby="kit-title">
+      <div id="kit-root"></div>
+    </section>
+
+    <section class="notes-section" id="notes" aria-labelledby="notes-title">
+      <p class="eyebrow">確認の1行</p>
+      <h2 class="notes-title" id="notes-title">ひっかかった場面を、確認の1行に書きためる</h2>
+      <div class="notes-layout">
+        <p class="notes-desc">答え合わせのあとで、本番でする確認を動作の形で1行に書きます。同じ確認は1行にまとめ、試験の休み時間に読み返します。</p>
+        <div class="notes-main" id="notes-root"></div>
+        <span class="notes-art" data-notes-art></span>
+        <p class="notes-local"><svg class="icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6" y="14" width="20" height="15" rx="3"/><path d="M10 14V9a6 6 0 0 1 12 0v5M16 20v4"/></svg><span>書いた行は、この端末のブラウザに保存されます。サーバーには送りません。別の端末で見るときは、コピーするかテキストで保存します。</span></p>
+      </div>
+    </section>
+    <noscript><p class="insight">指示文と確認の1行の道具にはJavaScriptを使います。ブラウザで有効にしてください。</p></noscript>
+  </main>
+
+  <footer class="site-footer page-width"><span>1月号「ひっかけ問題を、AIで作る」</span><a href="./index.html#examples">作問例を見る</a></footer>
+  <p id="live" class="sr-only" role="status" aria-live="polite"></p>
+  <script type="module" src="./page-tools.js"></script>
+</body>
+</html>

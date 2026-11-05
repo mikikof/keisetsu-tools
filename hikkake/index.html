@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="自分のミスを1文でAIに伝え、そのミスを誘う仕掛けの入った問題を作ってもらう方法を、数学・英語・化学・地理の作問例で紹介します。AIに送る指示文と、確認の1行の一覧も作れます。">
+  <title>ひっかけ問題を、AIで作る｜自分のミスから問題を作る</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <a class="skip-link" href="#examples">作問例へ進む</a>
+  <header class="site-header page-width">
+    <a class="wordmark" href="./index.html"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 4h14l6 6v18H6zM20 4v6h6M11 15h10M11 20h6"/><path d="M19 22l2.5 2.5L26 19" stroke-linecap="round" stroke-linejoin="round"/></svg></span><strong>ひっかけ問題を、AIで作る</strong></a>
+    <a class="button header-link" href="./tools.html#kit"><svg class="icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 26l3-9L22 4l6 6-13 13zM18 8l6 6M6 26l9-3"/></svg>指示文を作る</a>
+  </header>
+
+  <main class="page-width">
+    <section class="editorial-hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">1月号「ひっかけ問題を、AIで作る」</p>
+        <h1 class="hero-title" id="hero-title">自分のミスから、<br>ひっかけ問題を作る。</h1>
+        <p class="hero-lead">自分のミスを1文でAIに伝えると、そのミスを誘う仕掛けの入った問題を作ってくれます。仕掛けの場所は伏せたまま解き、「答え合わせ」で確かめます。ひっかかった場面は、本番でする確認を1行に書きためます。</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#examples">作問例を見る<svg class="icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3v25M8 20l8 8 8-8"/></svg></a>
+          <a class="button quiet" href="./tools.html#kit">指示文を作る</a>
+          <a class="button quiet" href="./tools.html#notes">確認の1行を書きためる</a>
+        </div>
+      </div>
+      <figure class="hero-visual" aria-label="ミスの1文をAIに渡し、仕掛けの入った問題を解いて、確認の1行に書く流れ">
+        <div class="hero-flow" id="hero-flow">
+          <div class="flow-art flow-art--1" data-stage="memo"></div>
+          <div class="flow-arrow flow-arrow--1" data-arrow="right"></div>
+          <div class="flow-art flow-art--2" data-stage="chat"></div>
+          <div class="flow-arrow flow-arrow--2" data-arrow="right"></div>
+          <div class="flow-art flow-art--3" data-stage="paper"></div>
+          <p class="flow-cap flow-cap--1"><strong>ミスを1文で渡す</strong><span class="sub"><span class="seg">科目・単元／</span><span class="seg">どの場面で／</span><span class="seg">何を確かめなかったか</span></span></p>
+          <p class="flow-cap flow-cap--2"><strong><span class="seg">AIが仕掛けを</span><span class="seg">入れて作る</span></strong><span class="sub"><span class="seg">仕掛けの場所は</span><span class="seg">伏せる／</span><span class="seg">仕掛けのない1題も</span></span></p>
+          <p class="flow-cap flow-cap--3"><strong>解いて答え合わせ</strong><span class="sub"><span class="seg">ひっかかった場面は</span><span class="seg">確認の1行に</span></span></p>
+        </div>
+      </figure>
+    </section>
+
+    <section class="case-section" id="examples" aria-labelledby="examples-title">
+      <div class="section-heading">
+        <span>作問例</span>
+        <h2 id="examples-title">数学・英語・化学・地理で、どんな問題ができる？</h2>
+        <p>どれも、Gemini に指示文を送って返ってきた文面です。科目を選ぶと、指示文・問題・答え合わせの順に見られます。</p>
+      </div>
+      <div class="case-grid" id="case-grid"></div>
+    </section>
+
+    <section class="tool-entry" aria-labelledby="tools-title">
+      <h2 class="section-label" id="tools-title">道具</h2>
+      <div class="tool-grid">
+        <a class="tool-card" href="./tools.html#kit">
+          <span class="tool-art" data-tool="kit"></span>
+          <span class="tool-copy"><strong>指示文を作る</strong><span>自分のミスや選んだ理由を書くと、Gemini に送る指示文ができます。</span></span>
+          <svg class="icon tool-go" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 16h25M20 8l8 8-8 8"/></svg>
+        </a>
+        <a class="tool-card" href="./tools.html#notes">
+          <span class="tool-art" data-tool="notes"></span>
+          <span class="tool-copy"><strong>確認の1行を書きためる</strong><span>答え合わせのあとで、本番でする確認を動作の形で1行に書きます。</span></span>
+          <svg class="icon tool-go" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 16h25M20 8l8 8-8 8"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <section class="caution" aria-labelledby="caution-title">
+      <h2 id="caution-title">使う前に</h2>
+      <ul>
+        <li><strong>道具は Gemini の通常のチャットです。</strong>無料版でも使えます。学校から配られたアカウントでは使えないことがあります。</li>
+        <li><strong>AIの答えや説明は、教科書や参考書でも確かめます。</strong>条件が足りない問題や、答えが1つに決まらない問題が返ってくることもあります。</li>
+        <li><strong>このページは指示文を作るだけで、AIとは通信しません。</strong>作問例は、2026年11月に Gemini（<span data-model-version>3.8 Flash</span>）に送って返ってきた文面です。無料版のチャットでは版が違うことがあり、返ってくる文面も変わります。</li>
+      </ul>
+    </section>
+    <noscript><p class="insight">作問例と挿絵の表示にはJavaScriptを使います。ブラウザで有効にしてください。</p></noscript>
+  </main>
+
+  <footer class="site-footer page-width"><span>1月号「ひっかけ問題を、AIで作る」</span><a href="./card.html">作問例を大きく表示</a></footer>
+  <script type="module" src="./page-index.js"></script>
+</body>
+</html>
